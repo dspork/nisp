@@ -1,0 +1,27 @@
+{
+  "nino": "<NINO>",
+  "npsLcdo022d": [
+    {
+      "date_of_election": null,
+      "scheme_end_date": "1979-06-30",
+      "scheme_mem_start_date": "1978-04-06",
+      "scheme_memb_occ_no": 1,
+      "scheme_membership_seq_no": 1
+    },
+    {
+      "date_of_election": null,
+      "scheme_end_date": null,
+      "scheme_mem_start_date": "2005-04-06",
+      "scheme_memb_occ_no": 1,
+      "scheme_membership_seq_no": 2
+    }
+  ],
+  "npsErrlist": {
+    "count": 0,
+    "mgt_check": 0,
+    "commit_status": 2,
+    "data_not_found": 0,
+    "bfm_return_code": 0,
+    "npsErritem": []
+  }
+}

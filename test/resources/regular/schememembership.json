@@ -1,0 +1,12 @@
+{
+  "nino": "<NINO>",
+  "npsLcdo022d": [],
+  "npsErrlist": {
+    "count": 0,
+    "mgt_check": 0,
+    "commit_status": 2,
+    "data_not_found": 0,
+    "bfm_return_code": 0,
+    "npsErritem": []
+  }
+}
