@@ -1,7 +1,7 @@
 National Insurance and State Pension
 ====================================
 
-[![Apache-2.0 license](http://img.shields.io/badge/license-Apache-brightgreen.svg)](http://www.apache.org/licenses/LICENSE-2.0.html) [![Build Status](https://travis-ci.org/hmrc/nisp.svg)](https://travis-ci.org/hmrc/nisp) [ ![Download](https://api.bintray.com/packages/hmrc/releases/nisp/images/download.svg) ](https://bintray.com/hmrc/releases/nisp/_latestVersion)
+[![Build Status](https://travis-ci.org/hmrc/nisp.svg)](https://travis-ci.org/hmrc/nisp) [ ![Download](https://api.bintray.com/packages/hmrc/releases/nisp/images/download.svg) ](https://bintray.com/hmrc/releases/nisp/_latestVersion)
 
 
 This microservice retrieves data from the NPS HoD for calculating State Pension Age and Amount.
@@ -247,7 +247,6 @@ This service requires configuration for other services, for example NPS requires
 | `microservice.services.nps-hod.host`     | The host of the NPS service     |
 | `microservice.services.nps-hod.port`     | The port of the NPS service     |
 
-NPS HoD Stub
-------------
+### License
 
-All end points that require the NPS HoD connection can be tested using the NPS HoD Stub (nisp-stub)
+This code is open source software licensed under the [Apache 2.0 License]("http://www.apache.org/licenses/LICENSE-2.0.html").
