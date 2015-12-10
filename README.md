@@ -3,8 +3,7 @@ National Insurance and State Pension
 
 [![Build Status](https://travis-ci.org/hmrc/nisp.svg)](https://travis-ci.org/hmrc/nisp) [ ![Download](https://api.bintray.com/packages/hmrc/releases/nisp/images/download.svg) ](https://bintray.com/hmrc/releases/nisp/_latestVersion)
 
-
-This microservice retrieves data from the NPS HoD for calculating State Pension Age and Amount.
+This microservice retrieves data from a [HoD](http://webarchive.nationalarchives.gov.uk/+/http://www.hmrc.gov.uk/manuals/sam/samglossary/samgloss249.htm) system called "NPS", for calculating State Pension Age and Amount.
 
 Requirements
 ------------
@@ -14,11 +13,13 @@ This service is written in [Scala](http://www.scala-lang.org/) and [Play](http:/
 API
 ---
 
+####   State Pension Summary
+
 Fetches the SPResponseModel object for the frontend service.
 
 * **URL**
 
-  `citizen/:nino/spsummary`
+  `nisp/:nino/spsummary`
 
 * **Method:**
 
@@ -40,7 +41,7 @@ Fetches the SPResponseModel object for the frontend service.
 ```json
 {
     "spSummary":{
-        "nino":"AB123456C",
+        "nino":"QQ000000A",
         "lastProcessedDate":"05/04/2014",
         "statePensionAmount":{
             "week":154.94,
@@ -64,7 +65,14 @@ Fetches the SPResponseModel object for the frontend service.
             "month":694.06,
             "year":8328.74
         },
-        "fullNewStatePensionAmount":151.25
+        "fullNewStatePensionAmount":151.25,
+        "contractedOutFlag": false,
+        "customerAge": 61,
+        "copeAmount":{
+            "week": 0.00,
+            "month": 0.00,
+            "year": 0.00
+        }
     }
 }
 ```
@@ -89,11 +97,13 @@ Fetches the SPResponseModel object for the frontend service.
 }
 ```
 
+####   National Insurance Record
+
 Fetches the NIResponseModel object for the frontend service.
 
 * **URL**
 
-  `citizen/:nino/nirecord`
+  `nisp/:nino/nirecord`
 
 * **Method:**
 
@@ -122,7 +132,10 @@ Fetches the NIResponseModel object for the frontend service.
         "classOneContributions": 70.67,
         "classTwoCredits": 0,
         "classThreeCredits": 0,
-        "otherCredits": 26
+        "otherCredits": 26,
+        "classThreePayable" : null,
+        "classThreePayableBy": null,
+        "payable": false
       },
       {
         "taxYear": 1976,
@@ -130,7 +143,10 @@ Fetches the NIResponseModel object for the frontend service.
         "classOneContributions": 53.5,
         "classTwoCredits": 0,
         "classThreeCredits": 0,
-        "otherCredits": 34
+        "otherCredits": 34,
+        "classThreePayable" : null,
+        "classThreePayableBy": null,
+        "payable": false
       },
       {
         "taxYear": 1977,
@@ -138,7 +154,10 @@ Fetches the NIResponseModel object for the frontend service.
         "classOneContributions": 82.13,
         "classTwoCredits": 0,
         "classThreeCredits": 0,
-        "otherCredits": 28
+        "otherCredits": 28,
+        "classThreePayable" : null,
+        "classThreePayableBy": null,
+        "payable": false
       },
       {
         "taxYear": 1978,
@@ -146,7 +165,10 @@ Fetches the NIResponseModel object for the frontend service.
         "classOneContributions": 69.35,
         "classTwoCredits": 0,
         "classThreeCredits": 0,
-        "otherCredits": 41
+        "otherCredits": 41,
+        "classThreePayable" : null,
+        "classThreePayableBy": null,
+        "payable": false
       },
       {
         "taxYear": 1979,
@@ -154,7 +176,10 @@ Fetches the NIResponseModel object for the frontend service.
         "classOneContributions": 24.9,
         "classTwoCredits": 0,
         "classThreeCredits": 0,
-        "otherCredits": 42
+        "otherCredits": 42,
+        "classThreePayable" : null,
+        "classThreePayableBy": null,
+        "payable": false
       },
       {
         "taxYear": 1980,
@@ -162,7 +187,10 @@ Fetches the NIResponseModel object for the frontend service.
         "classOneContributions": 114.19,
         "classTwoCredits": 0,
         "classThreeCredits": 0,
-        "otherCredits": 35
+        "otherCredits": 35,
+        "classThreePayable" : null,
+        "classThreePayableBy": null,
+        "payable": false
       },
 ...
       {
@@ -171,7 +199,10 @@ Fetches the NIResponseModel object for the frontend service.
         "classOneContributions": 0,
         "classTwoCredits": 0,
         "classThreeCredits": 0,
-        "otherCredits": 4
+        "otherCredits": 4,
+        "classThreePayable" : null,
+        "classThreePayableBy": null,
+        "payable": false
       },
       {
         "taxYear": 2011,
@@ -179,7 +210,10 @@ Fetches the NIResponseModel object for the frontend service.
         "classOneContributions": 0,
         "classTwoCredits": 0,
         "classThreeCredits": 0,
-        "otherCredits": 0
+        "otherCredits": 0,
+        "classThreePayable" : null,
+        "classThreePayableBy": null,
+        "payable": false
       },
       {
         "taxYear": 2012,
@@ -187,7 +221,10 @@ Fetches the NIResponseModel object for the frontend service.
         "classOneContributions": 0,
         "classTwoCredits": 0,
         "classThreeCredits": 0,
-        "otherCredits": 12
+        "otherCredits": 12,
+        "classThreePayable" : 638.00,
+        "classThreePayableBy": 01/01/2022,
+        "payable": true
       },
       {
         "taxYear": 2013,
@@ -195,7 +232,10 @@ Fetches the NIResponseModel object for the frontend service.
         "classOneContributions": 2430.24,
         "classTwoCredits": 0,
         "classThreeCredits": 0,
-        "otherCredits": 0
+        "otherCredits": 0,
+        "classThreePayable" : null,
+        "classThreePayableBy": null,
+        "payable": false
       }
     ]
   },
@@ -235,7 +275,7 @@ Fetches the NIResponseModel object for the frontend service.
 ```
 
 Configuration
--------------
+---
 
 All configuration is namespaced by the `run.mode` key, which can be set to `Dev` or `Prod` - note this is independent of Play's concept of mode.
 
@@ -247,6 +287,8 @@ This service requires configuration for other services, for example NPS requires
 | `microservice.services.nps-hod.host`     | The host of the NPS service     |
 | `microservice.services.nps-hod.port`     | The port of the NPS service     |
 
-### License
+License
+---
 
 This code is open source software licensed under the [Apache 2.0 License]("http://www.apache.org/licenses/LICENSE-2.0.html").
+
