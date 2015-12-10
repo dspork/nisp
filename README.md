@@ -71,7 +71,7 @@ Fetches the SPResponseModel object for the frontend service.
         "copeAmount":{
             "week": 0.00,
             "month": 0.00,
-            "year": 0.00
+            "year": 0.00 
         }
     }
 }
