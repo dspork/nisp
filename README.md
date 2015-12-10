@@ -277,8 +277,6 @@ Fetches the NIResponseModel object for the frontend service.
 Configuration
 ---
 
-All configuration is namespaced by the `run.mode` key, which can be set to `Dev` or `Prod` - note this is independent of Play's concept of mode.
-
 This service requires configuration for other services, for example NPS requires:
 
 | *Key*                                    | *Description*                   |
