@@ -223,7 +223,7 @@ Fetches the NIResponseModel object for the frontend service.
         "classThreeCredits": 0,
         "otherCredits": 12,
         "classThreePayable" : 638.00,
-        "classThreePayableBy": 01/01/2022,
+        "classThreePayableBy": "01/01/2022",
         "payable": true
       },
       {
