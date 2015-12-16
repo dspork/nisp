@@ -269,7 +269,7 @@ Fetches the NIResponseModel object for the frontend service.
 ```json
 {
     "spExclusions":{
-        "spExclusions":["NorthernIreland"]
+        "spExclusions":["Abroad"]
     }
 }
 ```
