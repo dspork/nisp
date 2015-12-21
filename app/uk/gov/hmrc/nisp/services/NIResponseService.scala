@@ -19,6 +19,7 @@ package uk.gov.hmrc.nisp.services
 import java.util.TimeZone
 
 import org.joda.time.{DateTimeZone, LocalDate}
+import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.nisp.connectors.NpsConnector
 import uk.gov.hmrc.nisp.models.nps.{NpsDate, NpsNITaxYear}
 import uk.gov.hmrc.nisp.models.{NIRecord, NIRecordTaxYear, NIResponse, NISummary}
@@ -32,7 +33,7 @@ import scala.concurrent.Future
 trait NIResponseService extends WithCurrentDate {
   val nps: NpsConnector
 
-  def getNIResponse(nino: String)(implicit hc: HeaderCarrier): Future[NIResponse] = {
+  def getNIResponse(nino: Nino)(implicit hc: HeaderCarrier): Future[NIResponse] = {
     val npsNIRecordFuture = nps.connectToNIRecord(nino)
     val npsSummaryFuture = nps.connectToSummary(nino)
 

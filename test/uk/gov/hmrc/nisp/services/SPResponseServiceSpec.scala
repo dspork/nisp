@@ -60,7 +60,7 @@ class SPResponseServiceSpec extends UnitSpec with MockitoSugar with OneAppPerSui
 
   "return an SPSummaryModel object with the correct NINO" in {
     val spResponse = testSPServiceWithMockHttp().getSPResponse(nino)
-    spResponse.spSummary.get.nino shouldBe nino
+    spResponse.spSummary.get.nino shouldBe nino.value
   }
 
   "return an SPSummaryModel object with the correct last processed date" in {

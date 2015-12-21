@@ -19,6 +19,7 @@ package uk.gov.hmrc.nisp.controllers
 import play.api.Logger
 import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent}
+import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.nisp.config.ApplicationConfig
 import uk.gov.hmrc.nisp.metrics.Metrics
 import uk.gov.hmrc.nisp.services.SPResponseService
@@ -34,7 +35,7 @@ trait SPSummaryController extends BaseController {
   def spService: SPResponseService
   def applicationConfig: ApplicationConfig
 
-  def getSPSummary(nino: String): Action[AnyContent] =
+  def getSPSummary(nino: Nino): Action[AnyContent] =
     Action.async {
       implicit request => {
         Metrics.spSummaryCounter.inc()

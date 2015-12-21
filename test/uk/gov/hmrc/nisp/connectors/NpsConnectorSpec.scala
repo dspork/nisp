@@ -30,7 +30,7 @@ class NpsConnectorSpec extends UnitSpec with ScalaFutures {
 
   "return SUMMARY object on request with correct NINO" in {
     val summaryResult = MockNpsConnector.connectToSummary(nino)(HeaderCarrier())
-    summaryResult.nino shouldBe nino
+    summaryResult.nino shouldBe nino.value
   }
 
   "return NOT_FOUND from SUMMARY feed for unknown NINO" in {
@@ -42,7 +42,7 @@ class NpsConnectorSpec extends UnitSpec with ScalaFutures {
 
   "return NI Record object on request with correct NINO" in {
     val niRecordResult = MockNpsConnector.connectToNIRecord(nino)(HeaderCarrier())
-    niRecordResult.nino shouldBe nino
+    niRecordResult.nino shouldBe nino.value
   }
 
   "return NOT_FOUND from NI Record feed for unknown NINO" in {

@@ -16,23 +16,24 @@
 
 package uk.gov.hmrc.nisp.events
 
+import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.nisp.models.nps.{NpsAmountB2016, NpsAmountA2016, NpsDate}
 import uk.gov.hmrc.play.http.HeaderCarrier
 
 object ForecastingEvent {
-  def apply(nino: String, earningsIncludedUpTo: NpsDate, currentQualifyingYears: Int, amountA: NpsAmountA2016, amountB: NpsAmountB2016,
+  def apply(nino: Nino, earningsIncludedUpTo: NpsDate, currentQualifyingYears: Int, amountA: NpsAmountA2016, amountB: NpsAmountB2016,
             lastYearEarnings: BigDecimal, finalRelevantYear: Int, forecastAmount: BigDecimal, forecastAmount2016: BigDecimal, lastYearQualifying: Boolean,
             contractedOutInfo: String)(implicit hc: HeaderCarrier): ForecastingEvent =
     new ForecastingEvent(nino, earningsIncludedUpTo, currentQualifyingYears, amountA, amountB, lastYearEarnings, finalRelevantYear, forecastAmount,
       forecastAmount2016, lastYearQualifying, contractedOutInfo)
 }
 
-class ForecastingEvent(nino: String, earningsIncludedUpTo: NpsDate, currentQualifyingYears: Int, amountA: NpsAmountA2016,
+class ForecastingEvent(nino: Nino, earningsIncludedUpTo: NpsDate, currentQualifyingYears: Int, amountA: NpsAmountA2016,
                        amountB: NpsAmountB2016, lastYearEarnings: BigDecimal, finalRelevantYear: Int,
                        forecastAmount: BigDecimal, forecastAmount2016: BigDecimal, lastYearQualifying: Boolean, contractedOutInfo: String)
                       (implicit hc: HeaderCarrier)
   extends BusinessEvent("Forecasting", Map(
-     "nino" -> nino,
+     "nino" -> nino.value,
      "earningsIncludedUpTo" -> earningsIncludedUpTo.toString,
      "currentQualifyingYears" -> currentQualifyingYears.toString,
      "amountAtotal" -> amountA.total.toString(),

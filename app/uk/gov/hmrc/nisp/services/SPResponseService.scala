@@ -19,6 +19,7 @@ package uk.gov.hmrc.nisp.services
 import java.util.TimeZone
 
 import org.joda.time.{DateTimeZone, LocalDate, Period, PeriodType}
+import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.nisp.config.ApplicationConfig
 import uk.gov.hmrc.nisp.connectors.NpsConnector
 import uk.gov.hmrc.nisp.models.nps.NpsDate
@@ -34,7 +35,7 @@ trait SPResponseService extends WithCurrentDate {
   def nps: NpsConnector
   val applicationConfig: ApplicationConfig
 
-  def getSPResponse(nino: String)(implicit hc: HeaderCarrier): Future[SPResponseModel] = {
+  def getSPResponse(nino: Nino)(implicit hc: HeaderCarrier): Future[SPResponseModel] = {
     val futureNpsSummary = nps.connectToSummary(nino)
     val futureNpsNIRecord = nps.connectToNIRecord(nino)
     val futureNpsLiabilities = nps.connectToLiabilities(nino)

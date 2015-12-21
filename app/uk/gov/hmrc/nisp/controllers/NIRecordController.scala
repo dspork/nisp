@@ -19,6 +19,7 @@ package uk.gov.hmrc.nisp.controllers
 import play.api.Logger
 import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent}
+import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.nisp.config.ApplicationConfig
 import uk.gov.hmrc.nisp.metrics.Metrics
 import uk.gov.hmrc.nisp.services.NIResponseService
@@ -34,7 +35,7 @@ trait NIRecordController extends BaseController {
   def niService: NIResponseService
   def applicationConfig: ApplicationConfig
 
-  def getNIRecord(nino: String) : Action[AnyContent] =
+  def getNIRecord(nino: Nino) : Action[AnyContent] =
     Action.async { implicit request => {
         Metrics.niRecordCounter.inc()
 

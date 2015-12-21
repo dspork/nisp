@@ -169,7 +169,7 @@ class SPExclusionsServiceSpec extends UnitSpec with OneAppPerSuite  {
 
       "return no exclusion for nino starting with 'MA'" in{
         SPExclusionsService(30,  countryIsleOfMan, false, "M", NpsDate(1959,1,1), List(), None,
-          iomNino, List(), fakeApplicationConfig).getSPExclusions shouldBe None
+          iomNino.value, List(), fakeApplicationConfig).getSPExclusions shouldBe None
       }
     }
   }

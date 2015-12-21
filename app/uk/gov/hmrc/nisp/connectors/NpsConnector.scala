@@ -19,6 +19,7 @@ package uk.gov.hmrc.nisp.connectors
 import play.Logger
 import play.api.data.validation.ValidationError
 import play.api.libs.json._
+import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.nisp.config.wiring.WSHttp
 import uk.gov.hmrc.nisp.metrics.Metrics
 import uk.gov.hmrc.nisp.models.enums.APITypes
@@ -53,24 +54,24 @@ trait NpsConnector {
 
   def url(path: String): String = s"$serviceUrl$path"
 
-  private def ninoWithoutSuffix(nino: String): String = nino.substring(0, NISPConstants.ninoLengthWithoutSuffix)
+  private def ninoWithoutSuffix(nino: Nino): String = nino.value.substring(0, NISPConstants.ninoLengthWithoutSuffix)
 
-  def connectToSummary(nino: String)(implicit hc: HeaderCarrier): Future[NpsSummaryModel] = {
+  def connectToSummary(nino: Nino)(implicit hc: HeaderCarrier): Future[NpsSummaryModel] = {
     val urlToRead = url(s"/nps-rest-service/services/nps/pensions/${ninoWithoutSuffix(nino)}/sp_summary")
     connectToNps(urlToRead, APITypes.Summary, requestHeaderCarrier)(hc, NpsSummaryModel.formats)
   }
 
-  def connectToNIRecord(nino: String)(implicit hc: HeaderCarrier): Future[NpsNIRecordModel] = {
+  def connectToNIRecord(nino: Nino)(implicit hc: HeaderCarrier): Future[NpsNIRecordModel] = {
     val urlToRead = url(s"/nps-rest-service/services/nps/pensions/${ninoWithoutSuffix(nino)}/ni_record")
     connectToNps(urlToRead, APITypes.NIRecord, requestHeaderCarrier)(hc, NpsNIRecordModel.formats)
   }
 
-  def connectToLiabilities(nino: String)(implicit hc: HeaderCarrier): Future[List[NpsLiability]] = {
+  def connectToLiabilities(nino: Nino)(implicit hc: HeaderCarrier): Future[List[NpsLiability]] = {
     val urlToRead = url(s"/nps-rest-service/services/nps/pensions/${ninoWithoutSuffix(nino)}/liabilities")
     connectToNps[NpsLiabilityContainer](urlToRead, APITypes.Liabilities, requestHeaderCarrier).map(_.npsLcdo004d)
   }
 
-  def connectToSchemeMembership(nino: String)(implicit hc: HeaderCarrier): Future[List[NpsSchemeMembership]] = {
+  def connectToSchemeMembership(nino: Nino)(implicit hc: HeaderCarrier): Future[List[NpsSchemeMembership]] = {
     val urlToRead = url(s"/nps-rest-service/services/nps/pensions/${ninoWithoutSuffix(nino)}/scheme")
     connectToNps[NpsSchemeMembershipContainer](urlToRead, APITypes.SchemeMembership, requestHeaderCarrier).map(_.npsLcdo022d)
   }

@@ -1,4 +1,4 @@
 # microservice app routes
 
-GET             /:nino/spsummary                     uk.gov.hmrc.nisp.controllers.SPSummaryController.getSPSummary(nino: String)
-GET             /:nino/nirecord                      uk.gov.hmrc.nisp.controllers.NIRecordController.getNIRecord(nino: String)
+GET             /:nino/spsummary                     uk.gov.hmrc.nisp.controllers.SPSummaryController.getSPSummary(nino: Nino)
+GET             /:nino/nirecord                      uk.gov.hmrc.nisp.controllers.NIRecordController.getNIRecord(nino: Nino)
