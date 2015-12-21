@@ -17,9 +17,12 @@
 import sbt._
 
 object MicroServiceBuild extends Build with MicroService {
+  import play.PlayImport.PlayKeys._
+
   val appName = "nisp"
 
   override lazy val appDependencies: Seq[ModuleID] = AppDependencies()
+  override lazy val playSettings = Seq(routesImport += "uk.gov.hmrc.domain.Nino")
 }
 
 private object AppDependencies {
@@ -32,7 +35,8 @@ private object AppDependencies {
     "uk.gov.hmrc" %% "play-health" % "1.1.0",
     "com.kenshoo" %% "metrics-play" % "2.3.0_0.1.6",
     "uk.gov.hmrc" %% "play-json-logger" % "2.1.1",
-    "uk.gov.hmrc" %% "domain" % "3.2.0"
+    "uk.gov.hmrc" %% "domain" % "3.2.0",
+    "uk.gov.hmrc" %% "play-url-binders" % "1.0.0"
   )
 
   trait TestDependencies {

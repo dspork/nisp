@@ -21,6 +21,7 @@ import org.mockito.Mockito._
 import org.scalatest.mock.MockitoSugar
 import play.api.http.Status
 import play.api.libs.json.Json
+import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.play.http.{NotFoundException, HttpResponse, HttpGet}
 import uk.gov.hmrc.play.test.UnitSpec
 
@@ -37,8 +38,8 @@ object MockNPSHttp extends UnitSpec with MockitoSugar {
   def createFailedMockedURL(urlEndsWith: String): Unit =
     when(mockHttp.GET[HttpResponse](Matchers.endsWith(urlEndsWith))(Matchers.any(), Matchers.any())).thenReturn(Future.failed(new NotFoundException("")))
 
-  def setupNinoEndpoints(nino: String): Unit = {
-    val ninoWithoutSuffix = nino.substring(0,8)
+  def setupNinoEndpoints(nino: Nino): Unit = {
+    val ninoWithoutSuffix = nino.value.substring(0,8)
 
     createMockedURL(s"/pensions/$ninoWithoutSuffix/sp_summary", TestAccountBuilder.jsonResponse(nino, "summary"))
     createMockedURL(s"/pensions/$ninoWithoutSuffix/ni_record", TestAccountBuilder.jsonResponse(nino, "nirecord"))
@@ -48,7 +49,7 @@ object MockNPSHttp extends UnitSpec with MockitoSugar {
 
   ninos.foreach(setupNinoEndpoints)
 
-  val nonExistentNino = TestAccountBuilder.nonExistentNino
+  val nonExistentNino = TestAccountBuilder.nonExistentNino.value.substring(0,8)
   createFailedMockedURL(s"/pensions/$nonExistentNino/sp_summary")
   createFailedMockedURL(s"/pensions/$nonExistentNino/ni_record")
   createFailedMockedURL(s"/pensions/$nonExistentNino/scheme")

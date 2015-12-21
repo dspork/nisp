@@ -55,7 +55,7 @@ class SPSummaryControllerSpec extends UnitSpec with OneAppPerSuite {
     "return JSON containing nino" in {
       val result = Future.successful(testSPSummaryController.getSPSummary(nino)(FakeRequest()))
       val rawJson = Json.parse(contentAsString(result))
-      (rawJson \ "spSummary" \ "nino").as[String] shouldBe nino
+      (rawJson \ "spSummary" \ "nino").as[String] shouldBe nino.value
     }
 
     "return 404 if missing user" in {

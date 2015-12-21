@@ -19,28 +19,28 @@ package uk.gov.hmrc.nisp.helpers
 import play.api.http.Status
 import play.api.libs.json.Json
 import uk.gov.hmrc.play.http.HttpResponse
-import uk.gov.hmrc.domain.Generator
+import uk.gov.hmrc.domain.{Nino, Generator}
 
 import scala.io.Source
 import scala.util.Random
 
 object TestAccountBuilder {
 
-  val randomNino = () => new Generator(new Random()).nextNino.nino.replaceFirst("MA", "QQ").substring(0, 8)
+  val randomNino = () => Nino(new Generator(new Random()).nextNino.value.replaceFirst("MA", "QQ"))
 
-  val nonExistentNino: String = randomNino()
-  val excludedNino: String = randomNino()
-  val regularNino: String = randomNino()
-  val isleOfManNino: String = randomNino().replaceFirst("[A-Z]{2}", "MA")
+  val nonExistentNino: Nino = randomNino()
+  val excludedNino: Nino = randomNino()
+  val regularNino: Nino = randomNino()
+  val isleOfManNino: Nino = Nino(randomNino().value.replaceFirst("[A-Z]{2}", "MA"))
 
   val mappedTestAccounts = Map(
     excludedNino -> "excluded",
     regularNino -> "regular"
   )
 
-  def jsonResponse(nino: String, api: String): HttpResponse = {
+  def jsonResponse(nino: Nino, api: String): HttpResponse = {
     val jsonFile = fileContents(s"test/resources/${mappedTestAccounts(nino)}/$api.json")
-    HttpResponse(Status.OK, Some(Json.parse(jsonFile.replace("<NINO>", nino))))
+    HttpResponse(Status.OK, Some(Json.parse(jsonFile.replace("<NINO>", nino.value))))
   }
 
   private def fileContents(filename: String): String = Source.fromFile(filename).mkString

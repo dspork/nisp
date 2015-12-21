@@ -23,9 +23,9 @@ import uk.gov.hmrc.versioning.SbtGitVersioning
 
 trait MicroService {
 
+  import play.PlayImport.PlayKeys._
   import uk.gov.hmrc._
   import DefaultBuildSettings._
-
   import TestPhases._
 
   val appName: String
@@ -73,6 +73,7 @@ trait MicroService {
       )
     )
     .enablePlugins(SbtDistributablesPlugin, SbtAutoBuildPlugin, SbtGitVersioning)
+    .settings(routesImport += "uk.gov.hmrc.nisp.config.Binders._")
 }
 
 private object TestPhases {

@@ -16,6 +16,7 @@
 
 package uk.gov.hmrc.nisp.services
 
+import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.nisp.connectors.CustomAuditConnector
 import uk.gov.hmrc.nisp.events.ForecastingEvent
 import uk.gov.hmrc.nisp.models.SPAmountModel
@@ -36,7 +37,7 @@ trait ForecastingService {
 
   def getForecastAmount(npsSchemeMembership: List[NpsSchemeMembership], earningsIncludedUpTo: NpsDate, currentQualifyingYears: Int, amountA: NpsAmountA2016,
                         amountB: NpsAmountB2016, lastYearEarnings: BigDecimal, finalRelevantYear: Int,
-                        forecastAmount: BigDecimal, forecastAmount2016: BigDecimal, lastYearQualifying: Boolean, nino: String)
+                        forecastAmount: BigDecimal, forecastAmount2016: BigDecimal, lastYearQualifying: Boolean, nino: Nino)
                        (implicit hc: HeaderCarrier): SPAmountModel = {
 
     if (npsSchemeMembership.exists(_.contains(earningsIncludedUpTo))) {
