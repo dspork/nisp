@@ -17,16 +17,11 @@
 package uk.gov.hmrc.nisp.helpers
 
 import org.joda.time.LocalDate
-import uk.gov.hmrc.nisp.config.ApplicationConfig
 import uk.gov.hmrc.nisp.connectors.NpsConnector
 import uk.gov.hmrc.nisp.services.SPResponseService
 
 object MockSPResponseService extends SPResponseService {
   override val nps: NpsConnector = MockNpsConnector
-
-  override val applicationConfig: ApplicationConfig = new ApplicationConfig {
-    override val excludeContractedOut: Boolean = true
-  }
 
   override def now: LocalDate = new LocalDate()
 }

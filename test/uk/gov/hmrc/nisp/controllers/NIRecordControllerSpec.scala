@@ -21,7 +21,6 @@ import play.api.http.Status
 import play.api.libs.json.{JsValue, Json}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import uk.gov.hmrc.nisp.config.ApplicationConfig
 import uk.gov.hmrc.nisp.helpers.{TestAccountBuilder, MockNIService}
 import uk.gov.hmrc.nisp.models.nps.NpsDate
 import uk.gov.hmrc.nisp.services.NIResponseService
@@ -34,10 +33,6 @@ class NIRecordControllerSpec extends UnitSpec with OneAppPerSuite {
 
   def testNIRecordControllerWithMockHttp(newAPIConfig: Boolean = false): NIRecordController = new NIRecordController {
     override def niService: NIResponseService = MockNIService
-
-    override def applicationConfig: ApplicationConfig = new ApplicationConfig {
-      override val excludeContractedOut: Boolean = false
-    }
   }
 
   "return 200 for existing NINO" in {

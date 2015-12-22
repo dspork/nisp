@@ -20,7 +20,6 @@ import play.api.Logger
 import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent}
 import uk.gov.hmrc.domain.Nino
-import uk.gov.hmrc.nisp.config.ApplicationConfig
 import uk.gov.hmrc.nisp.metrics.Metrics
 import uk.gov.hmrc.nisp.services.NIResponseService
 import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
@@ -28,12 +27,10 @@ import uk.gov.hmrc.play.microservice.controller.BaseController
 
 object NIRecordController extends NIRecordController {
   override val niService = NIResponseService
-  override def applicationConfig: ApplicationConfig = ApplicationConfig
 }
 
 trait NIRecordController extends BaseController {
   def niService: NIResponseService
-  def applicationConfig: ApplicationConfig
 
   def getNIRecord(nino: Nino) : Action[AnyContent] =
     Action.async { implicit request => {

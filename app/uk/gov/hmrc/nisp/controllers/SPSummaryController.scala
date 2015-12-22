@@ -20,7 +20,6 @@ import play.api.Logger
 import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent}
 import uk.gov.hmrc.domain.Nino
-import uk.gov.hmrc.nisp.config.ApplicationConfig
 import uk.gov.hmrc.nisp.metrics.Metrics
 import uk.gov.hmrc.nisp.services.SPResponseService
 import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
@@ -28,12 +27,10 @@ import uk.gov.hmrc.play.microservice.controller.BaseController
 
 object SPSummaryController extends SPSummaryController {
   override val spService = SPResponseService
-  override def applicationConfig: ApplicationConfig = ApplicationConfig
 }
 
 trait SPSummaryController extends BaseController {
   def spService: SPResponseService
-  def applicationConfig: ApplicationConfig
 
   def getSPSummary(nino: Nino): Action[AnyContent] =
     Action.async {

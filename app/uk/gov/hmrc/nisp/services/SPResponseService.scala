@@ -20,7 +20,6 @@ import java.util.TimeZone
 
 import org.joda.time.{DateTimeZone, LocalDate, Period, PeriodType}
 import uk.gov.hmrc.domain.Nino
-import uk.gov.hmrc.nisp.config.ApplicationConfig
 import uk.gov.hmrc.nisp.connectors.NpsConnector
 import uk.gov.hmrc.nisp.models.nps.NpsDate
 import uk.gov.hmrc.nisp.models.{SPAgeModel, SPAmountModel, SPResponseModel, SPSummaryModel}
@@ -33,7 +32,6 @@ import scala.concurrent.Future
 
 trait SPResponseService extends WithCurrentDate {
   def nps: NpsConnector
-  val applicationConfig: ApplicationConfig
 
   def getSPResponse(nino: Nino)(implicit hc: HeaderCarrier): Future[SPResponseModel] = {
     val futureNpsSummary = nps.connectToSummary(nino)
@@ -55,8 +53,7 @@ trait SPResponseService extends WithCurrentDate {
         npsSchemeMembership,
         npsSummary.dateOfDeath,
         npsSummary.nino,
-        npsLiabilities,
-        applicationConfig
+        npsLiabilities
       ).getSPExclusions
 
       spExclusionsOption match {
@@ -110,5 +107,4 @@ trait SPResponseService extends WithCurrentDate {
 object SPResponseService extends SPResponseService {
   override val nps: NpsConnector = NpsConnector
   override val now: LocalDate = LocalDate.now(DateTimeZone.forTimeZone(TimeZone.getTimeZone("Europe/London")))
-  override val applicationConfig: ApplicationConfig = ApplicationConfig
 }
