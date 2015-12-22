@@ -16,24 +16,23 @@
 
 package uk.gov.hmrc.nisp.services
 
-import uk.gov.hmrc.nisp.config.ApplicationConfig
-import uk.gov.hmrc.nisp.models.SPExclusionsModel
 import play.Logger
+import uk.gov.hmrc.nisp.models.SPExclusionsModel
 import uk.gov.hmrc.nisp.models.enums.SPExclusion
 import uk.gov.hmrc.nisp.models.enums.SPExclusion.SPExclusion
-import uk.gov.hmrc.nisp.models.nps.{NpsSchemeMembership, NpsLiability, NpsDate}
+import uk.gov.hmrc.nisp.models.nps.{NpsDate, NpsLiability, NpsSchemeMembership}
 import uk.gov.hmrc.nisp.utils.{FunctionHelper, NISPConstants}
 
 object SPExclusionsService {
   def apply(numberOfQualifyingYears: Int, countryCode: Int, mwrre: Boolean, sex: String, dateOfBirth: NpsDate,
             schemeMemberships: List[NpsSchemeMembership], dateOfDeath: Option[NpsDate],
-            nino: String, liabilities: List[NpsLiability], applicationConfig: ApplicationConfig): SPExclusionsService =
-    new SPExclusionsService(numberOfQualifyingYears, countryCode, mwrre, sex, dateOfBirth, schemeMemberships, dateOfDeath, nino, liabilities, applicationConfig)
+            nino: String, liabilities: List[NpsLiability]): SPExclusionsService =
+    new SPExclusionsService(numberOfQualifyingYears, countryCode, mwrre, sex, dateOfBirth, schemeMemberships, dateOfDeath, nino, liabilities)
 }
 
 class SPExclusionsService(numberOfQualifyingYears: Int, countryCode: Int, mwrre: Boolean, sex: String, dateOfBirth: NpsDate,
                            schemeMemberships: List[NpsSchemeMembership], dateOfDeath: Option[NpsDate],
-                          nino: String, liabilities: List[NpsLiability], applicationConfig: ApplicationConfig) {
+                          nino: String, liabilities: List[NpsLiability]) {
   def getSPExclusions: Option[SPExclusionsModel] = {
 
     val allExclusions = FunctionHelper.composeAll(allRules)
@@ -91,14 +90,6 @@ class SPExclusionsService(numberOfQualifyingYears: Int, countryCode: Int, mwrre:
     }
   }
 
-  val checkContractedOut = (exclusionList: List[SPExclusion]) => {
-    (schemeMemberships.length, applicationConfig.excludeContractedOut) match {
-      case (0, _) => exclusionList
-      case (_, false) => exclusionList
-      case _ => SPExclusion.ContractedOut :: exclusionList
-    }
-  }
-
   val checkDead = (exclusionList: List[SPExclusion]) => {
     dateOfDeath match {
       case Some(_) => SPExclusion.Dead :: exclusionList
@@ -106,5 +97,5 @@ class SPExclusionsService(numberOfQualifyingYears: Int, countryCode: Int, mwrre:
     }
   }
 
-  val allRules = List(checkDateOfBirth, checkAbroad, checkMWRRE, checkContractedOut, checkDead, checkIOMLiabilities)
+  val allRules = List(checkDateOfBirth, checkAbroad, checkMWRRE, checkDead, checkIOMLiabilities)
 }

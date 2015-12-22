@@ -21,7 +21,6 @@ import play.api.http._
 import play.api.libs.json.Json
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import uk.gov.hmrc.nisp.config.ApplicationConfig
 import uk.gov.hmrc.nisp.helpers.{TestAccountBuilder, MockSPResponseService}
 import uk.gov.hmrc.nisp.services.SPResponseService
 import uk.gov.hmrc.play.test.UnitSpec
@@ -34,10 +33,6 @@ class SPSummaryControllerSpec extends UnitSpec with OneAppPerSuite {
   
   val testSPSummaryController = new SPSummaryController {
     override def spService: SPResponseService = MockSPResponseService
-
-    override def applicationConfig: ApplicationConfig = new ApplicationConfig {
-      override val excludeContractedOut: Boolean = false
-    }
   }
 
   "SPSummaryController" should {

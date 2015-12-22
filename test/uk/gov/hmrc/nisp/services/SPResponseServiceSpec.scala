@@ -20,7 +20,6 @@ import org.joda.time.LocalDate
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mock.MockitoSugar
 import org.scalatestplus.play.OneAppPerSuite
-import uk.gov.hmrc.nisp.config.ApplicationConfig
 import uk.gov.hmrc.nisp.connectors.NpsConnector
 import uk.gov.hmrc.nisp.helpers.{TestAccountBuilder, MockNpsConnector}
 import uk.gov.hmrc.nisp.models.enums.SPExclusion
@@ -36,14 +35,9 @@ class SPResponseServiceSpec extends UnitSpec with MockitoSugar with OneAppPerSui
 
   implicit val hc: HeaderCarrier = HeaderCarrier()
 
-  def testSPServiceWithMockHttp(applicationConfigLocal: Boolean =false, excludeContractedOutLocal: Boolean = true,
-                                 localDate: LocalDate= new LocalDate()): SPResponseService = new SPResponseService {
+  def testSPServiceWithMockHttp(localDate: LocalDate = new LocalDate()): SPResponseService = new SPResponseService {
     override def nps: NpsConnector = MockNpsConnector
     override def now: LocalDate = localDate
-
-    override val applicationConfig: ApplicationConfig = new ApplicationConfig {
-      override val excludeContractedOut: Boolean = excludeContractedOutLocal
-    }
   }
 
   "return an SPSummaryModel object for present NINO" in {
@@ -86,7 +80,7 @@ class SPResponseServiceSpec extends UnitSpec with MockitoSugar with OneAppPerSui
 
   "return an SPExclusionModel with correct exclusion" in {
     val spResponse = testSPServiceWithMockHttp().getSPResponse(exclusionNino)
-    spResponse.spExclusions.get.spExclusions shouldBe List(SPExclusion.ContractedOut)
+    spResponse.spExclusions.get.spExclusions shouldBe List(SPExclusion.Abroad)
   }
 
   "age Calculation" should {
