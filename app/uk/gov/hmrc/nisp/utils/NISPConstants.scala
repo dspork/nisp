@@ -56,7 +56,7 @@ object NISPConstants {
 
   val ninoLengthWithoutSuffix = 8
 
-  val maxBasicStatePensionAmount = 115.95
+  val maxBasicStatePensionAmount = 119.30
   val maxBasicStatePensionYears = 30
 
   val upperAccrualPoint = 40040
