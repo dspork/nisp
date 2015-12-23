@@ -85,16 +85,16 @@ class ForecastingServiceSpec extends UnitSpec with OneAppPerSuite {
       mockForecastingService.forecastAmountAAt2016(0, 0, 0) shouldBe 0
     }
 
-    "return 115.95 for BP of 115.95, existing AP 0, forecasted AP 0" in {
-      mockForecastingService.forecastAmountAAt2016(115.95, 0, 0) shouldBe 115.95
+    "return 119.30 for BP of 119.30, existing AP 0, forecasted AP 0" in {
+      mockForecastingService.forecastAmountAAt2016(119.30, 0, 0) shouldBe 119.30
     }
 
-    "return 125.95 for BP of 115.95, existing AP 10, forecasted AP 0" in {
-      mockForecastingService.forecastAmountAAt2016(115.95, 10, 0) shouldBe 125.95
+    "return 129.30 for BP of 119.30, existing AP 10, forecasted AP 0" in {
+      mockForecastingService.forecastAmountAAt2016(119.30, 10, 0) shouldBe 129.30
     }
 
-    "return 127.75 for BP of 115.95, existing AP 10, forecasted AP 1.8" in {
-      mockForecastingService.forecastAmountAAt2016(115.95, 10, 1.8) shouldBe 127.75
+    "return 131.10 for BP of 119.30, existing AP 10, forecasted AP 1.8" in {
+      mockForecastingService.forecastAmountAAt2016(119.30, 10, 1.8) shouldBe 131.1
     }
   }
 
@@ -267,37 +267,37 @@ class ForecastingServiceSpec extends UnitSpec with OneAppPerSuite {
   }
 
   "Forecast Post 2016 New State Pension" should {
-    "return 151.26 for starting amount 151.26, fry 2018, qys 30" in {
-      mockForecastingService.forecastPost2016StatePension(2018, 151.26, 30) shouldBe 151.26
+    "return 155.66 for starting amount 151.26, fry 2018, qys 30" in {
+      mockForecastingService.forecastPost2016StatePension(2018, 155.66, 30) shouldBe 155.66
     }
 
-    "return 151.26 for starting amount 151.24, fry 2015, qys 10" in {
-      mockForecastingService.forecastPost2016StatePension(2015, 151.24, 10) shouldBe 151.24
+    "return 155.64 for starting amount 155.64, fry 2015, qys 10" in {
+      mockForecastingService.forecastPost2016StatePension(2015, 155.64, 10) shouldBe 155.64
     }
 
-    "return 0 for starting amount 151.24, fry 2015, qys 9" in {
-      mockForecastingService.forecastPost2016StatePension(2015, 151.24, 9) shouldBe 0
+    "return 0 for starting amount 155.64, fry 2015, qys 9" in {
+      mockForecastingService.forecastPost2016StatePension(2015, 155.64, 9) shouldBe 0
     }
 
-    "return non-zero for starting amount 151.24, fry 2016, qys 9" in {
-      mockForecastingService.forecastPost2016StatePension(2016, 151.24, 9) should not be 0
+    "return non-zero for starting amount 155.64, fry 2016, qys 9" in {
+      mockForecastingService.forecastPost2016StatePension(2016, 155.64, 9) should not be 0
     }
 
-    "return 151.25 for starting amount 151.24, fry 2016, qys 30" in {
-      mockForecastingService.forecastPost2016StatePension(2016, 151.24, 30) shouldBe 151.25
+    "return 155.65 for starting amount 155.64, fry 2016, qys 30" in {
+      mockForecastingService.forecastPost2016StatePension(2016, 155.64, 30) shouldBe 155.65
     }
 
-    "return 151.24 for starting amount 146.92, fry 2016, qys 30" in {
-      mockForecastingService.forecastPost2016StatePension(2016, 146.92, 30) shouldBe 151.24
+    "return 155.64 for starting amount 151.19, fry 2016, qys 30" in {
+      mockForecastingService.forecastPost2016StatePension(2016, 151.19, 30) shouldBe 155.64
     }
 
-    "return 151.24 for starting amount 142.60, fry 2017, qys 30" in {
-      mockForecastingService.forecastPost2016StatePension(2017, 142.60, 30) shouldBe 151.24
+    "return 155.64 for starting amount 146.75, fry 2017, qys 30" in {
+      mockForecastingService.forecastPost2016StatePension(2017, 146.75, 30) shouldBe 155.64
     }
   }
 
   "Forecast Contracted Out" should {
-    "return 150.47 for 10000 last year earnings, 2013/14 last year, 35QYs, 2015 FRY" in {
+    "return 154.87 for 10000 last year earnings, 2013/14 last year, 35QYs, 2015 FRY" in {
       mockForecastingService.forecast(
         earningsIncludedUpTo = NpsDate(2014,4,5),
         currentQualifyingYears = 35,
@@ -306,10 +306,10 @@ class ForecastingServiceSpec extends UnitSpec with OneAppPerSuite {
         lastYearEarnings = 10000,
         finalRelevantYear = 2015,
         contractedOutLastYear = true
-      ) shouldBe 150.47
+      ) shouldBe 154.87
     }
 
-    "return 151.25 for 10000 last year earnings, 2013/14 last year, 35QYs, 2016 FRY" in {
+    "return 155.65 for 10000 last year earnings, 2013/14 last year, 35QYs, 2016 FRY" in {
       mockForecastingService.forecast(
         earningsIncludedUpTo = NpsDate(2014,4,5),
         currentQualifyingYears = 35,
@@ -318,10 +318,10 @@ class ForecastingServiceSpec extends UnitSpec with OneAppPerSuite {
         lastYearEarnings = 10000,
         finalRelevantYear = 2016,
         contractedOutLastYear = true
-      ) shouldBe 151.25
+      ) shouldBe 155.65
     }
 
-    "return 218.71 for 10000 last year earnings, 2013/14 last year, 35QYs, 2016 FRY, existing AP 100" in {
+    "return 222.06 for 10000 last year earnings, 2013/14 last year, 35QYs, 2016 FRY, existing AP 100" in {
       mockForecastingService.forecast(
         earningsIncludedUpTo = NpsDate(2014,4,5),
         currentQualifyingYears = 35,
@@ -330,10 +330,10 @@ class ForecastingServiceSpec extends UnitSpec with OneAppPerSuite {
         lastYearEarnings = 10000,
         finalRelevantYear = 2016,
         contractedOutLastYear = true
-      ) shouldBe 218.71
+      ) shouldBe 222.06
     }
 
-    "return 141.83 for 10000 last year earnings, 2013/14 last year, 30QYs, 2016 FRY" in {
+    "return 145.98 for 10000 last year earnings, 2013/14 last year, 30QYs, 2016 FRY" in {
       mockForecastingService.forecast(
         earningsIncludedUpTo = NpsDate(2014,4,5),
         currentQualifyingYears = 30,
@@ -342,11 +342,11 @@ class ForecastingServiceSpec extends UnitSpec with OneAppPerSuite {
         lastYearEarnings = 10000,
         finalRelevantYear = 2016,
         contractedOutLastYear = true
-      ) shouldBe 141.83
+      ) shouldBe 145.98
     }
   }
 
-  def npsAmountA2016(ap: BigDecimal = 0.0): NpsAmountA2016 = NpsAmountA2016(115.95, Some(ap), None, None, None, None, None, None, 0.00)
+  def npsAmountA2016(ap: BigDecimal = 0.0): NpsAmountA2016 = NpsAmountA2016(119.30, Some(ap), None, None, None, None, None, None, 0.00)
   def npsAmountB2016: NpsAmountB2016 = NpsAmountB2016(Some(151.25), None)
   "getForecastAmount" should {
 
@@ -383,31 +383,31 @@ class ForecastingServiceSpec extends UnitSpec with OneAppPerSuite {
       ), NpsDate(2013,4,5), 0, npsAmountA2016(), npsAmountB2016, 0, 0, 1234, 0, lastYearQualifying = true, testNino)(hc) should not be SPAmountModel(1234)
     }
 
-    "return 52.19 for scheme membership in last tax year (not at end), 8 QYs" in {
+    "return 53.31 for scheme membership in last tax year (not at end), 8 QYs" in {
       mockForecastingService.getForecastAmount(List(
         NpsSchemeMembership(Some(NpsDate(2013,5,5)), Some(NpsDate(2013,8,8)))
-      ), NpsDate(2014,4,5), 8, npsAmountA2016(10), npsAmountB2016, 0, 2015, 0, 0, lastYearQualifying = true, testNino)(hc) shouldBe SPAmountModel(52.19)
+      ), NpsDate(2014,4,5), 8, npsAmountA2016(10), npsAmountB2016, 0, 2015, 0, 0, lastYearQualifying = true, testNino)(hc) shouldBe SPAmountModel(53.31)
     }
 
-    "return 218.71 for 10000 last year earnings, 2013/14 last year, 35QYs, 2016 FRY, existing AP 100" in {
+    "return 222.06 for 10000 last year earnings, 2013/14 last year, 35QYs, 2016 FRY, existing AP 100" in {
       mockForecastingService.getForecastAmount(
         List(NpsSchemeMembership(Some(NpsDate(2012,5,5)),Some(NpsDate(2014,8,8)))),
         NpsDate(2014,4,5), 35, npsAmountA2016(100), npsAmountB2016, 10000, 2016, 0, 0, lastYearQualifying = true, testNino
-      )(hc) shouldBe SPAmountModel(218.71)
+      )(hc) shouldBe SPAmountModel(222.06)
     }
   }
 
   "adjustForecast" should {
-    "return 151.25 for forecast 2016 of 149.48" in {
-      mockForecastingService.adjustForecast(0, 149.48, 0, 0) shouldBe 151.25
+    "return 155.65 for forecast 2016 of 153.88" in {
+      mockForecastingService.adjustForecast(0, 153.88, 0, 0) shouldBe 155.65
     }
 
-    "not return 151.24 for forecast 2016 of 149.47" in {
-      mockForecastingService.adjustForecast(0, 149.47, 0, 0) should not be 151.24
+    "not return 155.64 for forecast 2016 of 153.87" in {
+      mockForecastingService.adjustForecast(0, 153.87, 0, 0) should not be 155.64
     }
 
-    "return 1.77 for forecast 2016 of 149.47 and amountB 1.77" in {
-      mockForecastingService.adjustForecast(0, 149.47, 0.01, 1.77) shouldBe 1.77
+    "return 1.77 for forecast 2016 of 153.87 and amountB 1.77" in {
+      mockForecastingService.adjustForecast(0, 153.87, 0.01, 1.77) shouldBe 1.77
     }
 
     "return 10 for forecast amount 10, amountA 0.99, amountB 2.77" in {
@@ -418,8 +418,8 @@ class ForecastingServiceSpec extends UnitSpec with OneAppPerSuite {
       mockForecastingService.adjustForecast(10, 0, 1, 2.77) shouldBe 11.77
     }
 
-    "return 151.25 for forecast amount 150.25, amountA 150.25, amountB 120" in {
-      mockForecastingService.adjustForecast(150.25, 0, 150.25, 120) shouldBe 151.25
+    "return 155.65 for forecast amount 154.65, amountA 154.65, amountB 120" in {
+      mockForecastingService.adjustForecast(154.65, 0, 154.65, 120) shouldBe 155.65
     }
   }
 }

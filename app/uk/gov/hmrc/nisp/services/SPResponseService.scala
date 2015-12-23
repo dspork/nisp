@@ -92,7 +92,8 @@ trait SPResponseService extends WithCurrentDate {
             QualifyingYearsAmountService.maxAmount,
             npsSchemeMembership.nonEmpty,
             getAge(npsSummary.dateOfBirth),
-            SPAmountModel(npsSummary.npsStatePensionAmount.npsAmountB2016.rebateDerivedAmount)
+            SPAmountModel(npsSummary.npsStatePensionAmount.npsAmountB2016.rebateDerivedAmount),
+            SPAmountModel(npsSummary.pensionForecast.nspMax)
           ))
         )
       }
