@@ -42,8 +42,10 @@ class NIResponseServiceSpec  extends UnitSpec with MockitoSugar with BeforeAndAf
   "customer with NINO regular has date of entry of 01/04/1972" should {
     "returns NIResponse" in {
       val niResponse = testNIServiceWithMockHttp.getNIResponse(nino)
-      niResponse.niRecord.get.taxYears.head shouldBe NIRecordTaxYear(1975, qualifying = true, 109.08, 0, 0, 0, None, None, payable = false)
-      niResponse.niRecord.get.taxYears.last shouldBe NIRecordTaxYear(2013, qualifying = true, 0, 52, 0, 0, None, None, payable = false)
+      niResponse.niRecord.get.taxYears.head shouldBe
+        NIRecordTaxYear(1975, qualifying = true, 109.08, 0, 0, 0, None, None, payable = false, underInvestigation = false)
+      niResponse.niRecord.get.taxYears.last shouldBe
+        NIRecordTaxYear(2013, qualifying = true, 0, 52, 0, 0, None, None, payable = false, underInvestigation = false)
       niResponse.niRecord.get.taxYears.size shouldBe 39
     }
   }

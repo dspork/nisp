@@ -21,7 +21,7 @@ import uk.gov.hmrc.nisp.models.nps.NpsDate
 
 case class NIRecordTaxYear(taxYear: Int, qualifying: Boolean, classOneContributions: BigDecimal,
                            classTwoCredits: BigDecimal, classThreeCredits: BigDecimal, otherCredits: BigDecimal,
-                           classThreePayable: Option[BigDecimal], classThreePayableBy: Option[NpsDate], payable: Boolean)
+                           classThreePayable: Option[BigDecimal], classThreePayableBy: Option[NpsDate], payable: Boolean, underInvestigation: Boolean)
 
 
 object NIRecordTaxYear {
