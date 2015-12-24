@@ -21,7 +21,8 @@ import play.api.libs.json._
 
 
 case class NpsNITaxYear(taxYear:Int,
-                        qualifyingInt:Int,
+                        qualifyingInt: Int,
+                        underInvestigationInt: Int,
                         payable: Int,
                         amountNeeded: Option[BigDecimal],
                         classThreePayable: Option[BigDecimal],
@@ -41,6 +42,7 @@ case class NpsNITaxYear(taxYear:Int,
                         otherCreditsOption: Option[List[NpsOtherCredits]]) {
 
   val qualifying = qualifyingInt == 1
+  val underInvestigation = underInvestigationInt == 1
   val niEarningsEmployed: BigDecimal = niEarningsEmployedOption.map(BigDecimal(_)) getOrElse 0
   val niEarnings: BigDecimal = niEarningsOption.getOrElse(0)
   val contractedOutClassOnePaid: BigDecimal = contractedOutClassOnePaidOption.getOrElse(0)
@@ -55,6 +57,7 @@ object NpsNITaxYear {
   implicit val formats: Format[NpsNITaxYear] = (
     (__ \ "rattd_tax_year").format[Int] and
       (__ \ "qualifying").format[Int] and
+      (__ \ "under_investigation_flag").format[Int] and
       (__ \ "payable").format[Int] and
       (__ \ "amount_needed").format[Option[BigDecimal]] and
       (__ \ "class_three_payable").format[Option[BigDecimal]] and
