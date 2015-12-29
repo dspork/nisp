@@ -42,7 +42,7 @@ case class NpsNITaxYear(taxYear:Int,
                         otherCreditsOption: Option[List[NpsOtherCredits]]) {
 
   val qualifying = qualifyingInt == 1
-  val underInvestigation = underInvestigationInt == 1
+  val underInvestigation: Boolean = underInvestigationInt == 1
   val niEarningsEmployed: BigDecimal = niEarningsEmployedOption.map(BigDecimal(_)) getOrElse 0
   val niEarnings: BigDecimal = niEarningsOption.getOrElse(0)
   val contractedOutClassOnePaid: BigDecimal = contractedOutClassOnePaidOption.getOrElse(0)
