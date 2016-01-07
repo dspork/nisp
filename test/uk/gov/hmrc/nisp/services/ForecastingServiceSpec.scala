@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 HM Revenue & Customs
+ * Copyright 2016 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -352,12 +352,6 @@ class ForecastingServiceSpec extends UnitSpec with OneAppPerSuite {
 
     val testNino = TestAccountBuilder.regularNino
     val hc = HeaderCarrier()
-
-    "return forecast amount 1234 with no scheme membership" in {
-      mockForecastingService.getForecastAmount(
-        List(), NpsDate(2013,4,5), 0, npsAmountA2016(), npsAmountB2016, 0, 0, 1234, 0, lastYearQualifying = true, testNino
-      )(hc) shouldBe SPAmountModel(1234)
-    }
 
     "not return forecast amount 1234 with scheme membership that has ended" in {
       mockForecastingService.getForecastAmount(List(
