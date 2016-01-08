@@ -37,7 +37,8 @@ case class SPSummaryModel( nino: String,
                            fullNewStatePensionAmount: BigDecimal,
                            contractedOutFlag: Boolean,
                            customerAge: Int,
-                           copeAmount: SPAmountModel)
+                           copeAmount: SPAmountModel,
+                           nspMax: SPAmountModel)
 
 object SPSummaryModel {
   implicit val formats = Json.format[SPSummaryModel]
