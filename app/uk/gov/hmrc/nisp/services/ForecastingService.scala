@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 HM Revenue & Customs
+ * Copyright 2016 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,16 +45,12 @@ trait ForecastingService {
         forecastAmount, forecastAmount2016, lastYearQualifying, "Contracted out at the end of the last posted tax year"))
       SPAmountModel(ForecastingService.forecast(earningsIncludedUpTo, currentQualifyingYears, amountB.rebateDerivedAmount,
         amountA.totalAP, lastYearEarnings, finalRelevantYear, contractedOutLastYear = true))
-    } else if (npsSchemeMembership.nonEmpty) {
+    } else {
       customAuditConnector.sendEvent(ForecastingEvent(nino, earningsIncludedUpTo, currentQualifyingYears, amountA, amountB, lastYearEarnings, finalRelevantYear,
         forecastAmount, forecastAmount2016, lastYearQualifying,
         "Customer has been contracted out in the past, but ended the last posted tax year contracted in"))
       SPAmountModel(ForecastingService.forecast(earningsIncludedUpTo, currentQualifyingYears, amountB.rebateDerivedAmount,
         amountA.totalAP, lastYearEarnings, finalRelevantYear, contractedOutLastYear = false))
-    } else {
-      customAuditConnector.sendEvent(ForecastingEvent(nino, earningsIncludedUpTo, currentQualifyingYears, amountA, amountB, lastYearEarnings, finalRelevantYear,
-        forecastAmount, forecastAmount2016, lastYearQualifying, "Customer has never been contracted out"))
-      SPAmountModel(if (lastYearQualifying) forecastAmount else adjustForecast(forecastAmount, forecastAmount2016, amountA.total, amountB.mainComponent))
     }
   }
 
