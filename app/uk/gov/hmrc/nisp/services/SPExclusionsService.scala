@@ -17,7 +17,7 @@
 package uk.gov.hmrc.nisp.services
 
 import play.Logger
-import uk.gov.hmrc.nisp.models.SPExclusionsModel
+import uk.gov.hmrc.nisp.models.{SPAmountModel, SPExclusionsModel}
 import uk.gov.hmrc.nisp.models.enums.SPExclusion
 import uk.gov.hmrc.nisp.models.enums.SPExclusion.SPExclusion
 import uk.gov.hmrc.nisp.models.nps.{NpsDate, NpsLiability, NpsSchemeMembership}
@@ -26,13 +26,14 @@ import uk.gov.hmrc.nisp.utils.{FunctionHelper, NISPConstants}
 object SPExclusionsService {
   def apply(numberOfQualifyingYears: Int, countryCode: Int, mwrre: Boolean, sex: String, dateOfBirth: NpsDate,
             schemeMemberships: List[NpsSchemeMembership], dateOfDeath: Option[NpsDate],
-            nino: String, liabilities: List[NpsLiability]): SPExclusionsService =
-    new SPExclusionsService(numberOfQualifyingYears, countryCode, mwrre, sex, dateOfBirth, schemeMemberships, dateOfDeath, nino, liabilities)
+            nino: String, liabilities: List[NpsLiability], currentAmountReceived: BigDecimal, currentAmountCalculated: BigDecimal): SPExclusionsService =
+    new SPExclusionsService(numberOfQualifyingYears, countryCode, mwrre, sex, dateOfBirth, schemeMemberships, dateOfDeath, nino, liabilities,
+      currentAmountReceived, currentAmountCalculated)
 }
 
 class SPExclusionsService(numberOfQualifyingYears: Int, countryCode: Int, mwrre: Boolean, sex: String, dateOfBirth: NpsDate,
                            schemeMemberships: List[NpsSchemeMembership], dateOfDeath: Option[NpsDate],
-                          nino: String, liabilities: List[NpsLiability]) {
+                          nino: String, liabilities: List[NpsLiability], currentAmountReceived: BigDecimal, currentAmountCalculated: BigDecimal) {
   def getSPExclusions: Option[SPExclusionsModel] = {
 
     val allExclusions = FunctionHelper.composeAll(allRules)
@@ -97,5 +98,14 @@ class SPExclusionsService(numberOfQualifyingYears: Int, countryCode: Int, mwrre:
     }
   }
 
-  val allRules = List(checkDateOfBirth, checkAbroad, checkMWRRE, checkDead, checkIOMLiabilities)
+  val checkAmountDissonance = (exclusionList: List[SPExclusion]) => {
+    if(currentAmountCalculated != currentAmountReceived) {
+      Logger.warn(s"Dissonance Found!: nSP Calc - $currentAmountCalculated Breakdown - $currentAmountReceived")
+      SPExclusion.AmountDissonance :: exclusionList
+    } else {
+      exclusionList
+    }
+  }
+
+  val allRules = List(checkDateOfBirth, checkAbroad, checkMWRRE, checkDead, checkIOMLiabilities, checkAmountDissonance)
 }
