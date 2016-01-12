@@ -44,6 +44,7 @@ trait SPResponseService extends WithCurrentDate {
          npsLiabilities <- futureNpsLiabilities;
          npsSchemeMembership <- futureNpsSchemeMembership) yield {
       val spAmountModel = SPAmountModel(npsSummary.npsStatePensionAmount.nspEntitlement)
+
       val spExclusionsOption = SPExclusionsService(
         npsSummary.nspQualifyingYears,
         npsSummary.countryCode,
@@ -53,7 +54,9 @@ trait SPResponseService extends WithCurrentDate {
         npsSchemeMembership,
         npsSummary.dateOfDeath,
         npsSummary.nino,
-        npsLiabilities
+        npsLiabilities,
+        spAmountModel.week,
+        SPCurrentAmountService.calculate(npsSummary.npsStatePensionAmount.npsAmountA2016, npsSummary.npsStatePensionAmount.npsAmountB2016)
       ).getSPExclusions
 
       spExclusionsOption match {

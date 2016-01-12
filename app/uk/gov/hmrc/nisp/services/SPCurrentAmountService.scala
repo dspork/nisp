@@ -14,22 +14,10 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.nisp.models.enums
+package uk.gov.hmrc.nisp.services
 
-import play.api.libs.json._
+import uk.gov.hmrc.nisp.models.nps.{NpsAmountA2016, NpsAmountB2016, NpsSummaryModel}
 
-object SPExclusion extends Enumeration {
-  type SPExclusion = Value
-  val Abroad = Value
-  val IOM = Value
-  val MWRRE = Value
-  val CustomerTooOld = Value
-  val ContractedOut = Value
-  val Dead = Value
-  val AmountDissonance = Value
-
-  implicit val formats = new Format[SPExclusion] {
-    def reads(json: JsValue): JsResult[SPExclusion] = JsSuccess(SPExclusion.withName(json.as[String]) )
-    def writes(spExclusion: SPExclusion): JsValue = JsString(spExclusion.toString)
-  }
+object SPCurrentAmountService {
+  def calculate(amountA: NpsAmountA2016, amountB: NpsAmountB2016): BigDecimal = amountA.total.max(amountB.mainComponent)
 }
