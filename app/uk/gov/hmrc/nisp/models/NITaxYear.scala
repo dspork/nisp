@@ -23,7 +23,7 @@ case class NITaxYear(taxYear: Int, totalEarningsFactorPostMarkup: BigDecimal, cl
   val shortfall: BigDecimal = (EarningLevelService.qualifyingLevel(taxYear) - totalEarningsFactorPostMarkup).max(0)
 
   val shortfallCanBeFilledWithUnpaidClassTwoCredits: Boolean = {
-    classTwoLiabilityCreditShortfall * EarningLevelService.lowerEarningsLimit(taxYear) > shortfall
+    classTwoLiabilityCreditShortfall * EarningLevelService.lowerEarningsLimit(taxYear) >= shortfall
   }
 
   val isQualifying: Boolean = shortfall <= 0
