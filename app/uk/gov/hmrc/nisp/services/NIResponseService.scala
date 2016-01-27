@@ -70,6 +70,7 @@ trait NIResponseService extends WithCurrentDate {
         npsNITaxYear.otherCredits.foldRight(0)(_.numberOfCredits + _),
         npsNITaxYear.classThreePayable,
         npsNITaxYear.classThreePayableBy,
+        npsNITaxYear.classThreePayableByPenalty,
         npsNITaxYear.payable == 1,
         npsNITaxYear.underInvestigation
       )
