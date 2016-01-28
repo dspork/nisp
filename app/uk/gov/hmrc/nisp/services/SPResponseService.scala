@@ -92,11 +92,10 @@ trait SPResponseService extends WithCurrentDate {
               npsNIRecord.niTaxYears.find(_.taxYear == npsSummary.earningsIncludedUpTo.taxYear).exists(_.qualifying),
               nino
             ),
-            QualifyingYearsAmountService.maxAmount,
+            npsSummary.pensionForecast.fullNewStatePensionAmount,
             npsSchemeMembership.nonEmpty,
             getAge(npsSummary.dateOfBirth),
-            SPAmountModel(npsSummary.npsStatePensionAmount.npsAmountB2016.rebateDerivedAmount),
-            SPAmountModel(npsSummary.pensionForecast.nspMax)
+            SPAmountModel(npsSummary.npsStatePensionAmount.npsAmountB2016.rebateDerivedAmount)
           ))
         )
       }
