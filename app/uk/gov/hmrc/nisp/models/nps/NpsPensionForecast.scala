@@ -19,7 +19,7 @@ package uk.gov.hmrc.nisp.models.nps
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
 
-case class NpsPensionForecast(forecastAmount: BigDecimal, qualifyingYearsAtSPA: Int, nspMax: BigDecimal, forecastAmount2016: BigDecimal)
+case class NpsPensionForecast(forecastAmount: BigDecimal, qualifyingYearsAtSPA: Int, fullNewStatePensionAmount: BigDecimal, forecastAmount2016: BigDecimal)
 
 object NpsPensionForecast {
   implicit val formats: Format[NpsPensionForecast] = (
