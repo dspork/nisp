@@ -45,7 +45,7 @@ trait SPResponseService extends WithCurrentDate {
          npsSchemeMembership <- futureNpsSchemeMembership) yield {
       val spAmountModel = SPAmountModel(npsSummary.npsStatePensionAmount.nspEntitlement)
 
-      val spExclusionsOption = SPExclusionsService(
+      val spExclusions = SPExclusionsService(
         npsSummary.nspQualifyingYears,
         npsSummary.countryCode,
         npsSummary.rreToConsider == 1,
@@ -59,9 +59,10 @@ trait SPResponseService extends WithCurrentDate {
         SPCurrentAmountService.calculate(npsSummary.npsStatePensionAmount.npsAmountA2016, npsSummary.npsStatePensionAmount.npsAmountB2016)
       ).getSPExclusions
 
-      spExclusionsOption match {
-        case Some(spExclusions) => SPResponseModel(None, Some(spExclusions))
-        case _ => SPResponseModel(
+      if (spExclusions.spExclusions.nonEmpty) {
+        SPResponseModel(None, Some(spExclusions))
+      } else {
+        SPResponseModel(
           Some(SPSummaryModel(
             npsSummary.nino,
             npsSummary.earningsIncludedUpTo,
