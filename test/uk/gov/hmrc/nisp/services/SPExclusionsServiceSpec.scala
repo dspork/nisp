@@ -27,7 +27,7 @@ import uk.gov.hmrc.play.test.UnitSpec
 
 class SPExclusionsServiceSpec extends UnitSpec with OneAppPerSuite  {
 
-  def createModelWithListItems(spExclusions: SPExclusion *): Option[SPExclusionsModel] = Some(SPExclusionsModel(spExclusions.toList))
+  def createModelWithListItems(spExclusions: SPExclusion *): SPExclusionsModel = SPExclusionsModel(spExclusions.toList)
 
   "SPExclusions" when {
     val nino = "regular"
@@ -40,19 +40,21 @@ class SPExclusionsServiceSpec extends UnitSpec with OneAppPerSuite  {
     val countryWales = 116
     val countryIsleOfMan = 7
 
+    val noExclusions = SPExclusionsModel(List())
+
     "customer has no exclusions" should {
       "return None" in {
-        SPExclusionsService(30, countryGB, false, "M", NpsDate(1959,1,1), List(), None, nino, List(), 100, 100).getSPExclusions shouldBe None
+        SPExclusionsService(30, countryGB, false, "M", NpsDate(1959,1,1), List(), None, nino, List(), 100, 100).getSPExclusions shouldBe noExclusions
       }
     }
 
     "checking for qualifying years" should {
       "return no exclusions in list for a customer with 9" in {
-        SPExclusionsService(9,  countryGB, false, "M", NpsDate(1959,1,1), List(), None, nino, List(), 100, 100).getSPExclusions shouldBe None
+        SPExclusionsService(9,  countryGB, false, "M", NpsDate(1959,1,1), List(), None, nino, List(), 100, 100).getSPExclusions shouldBe noExclusions
       }
 
       "return no exclusions in list for a customer with 10" in {
-        SPExclusionsService(10,  countryGB, false, "M", NpsDate(1959,1,1), List(), None, nino, List(), 100, 100).getSPExclusions shouldBe None
+        SPExclusionsService(10,  countryGB, false, "M", NpsDate(1959,1,1), List(), None, nino, List(), 100, 100).getSPExclusions shouldBe noExclusions
 
       }
     }
@@ -67,33 +69,33 @@ class SPExclusionsServiceSpec extends UnitSpec with OneAppPerSuite  {
       }
 
       "return no exclusions for customer in GREAT BRITAIN" in {
-        SPExclusionsService(30,  countryGB, false, "M", NpsDate(1959,1,1), List(), None, nino, List(), 100, 100).getSPExclusions shouldBe None
+        SPExclusionsService(30,  countryGB, false, "M", NpsDate(1959,1,1), List(), None, nino, List(), 100, 100).getSPExclusions shouldBe noExclusions
       }
 
       "return no exclusions for customer in ENGLAND" in {
-        SPExclusionsService(30, countryEngland, false, "M", NpsDate(1959,1,1), List(), None, nino, List(), 100, 100).getSPExclusions shouldBe None
+        SPExclusionsService(30, countryEngland, false, "M", NpsDate(1959,1,1), List(), None, nino, List(), 100, 100).getSPExclusions shouldBe noExclusions
       }
 
       "return no exclusions for customer in SCOTLAND" in {
-        SPExclusionsService(30, countryScotland, false, "M", NpsDate(1959,1,1), List(), None, nino, List(), 100, 100).getSPExclusions shouldBe None
+        SPExclusionsService(30, countryScotland, false, "M", NpsDate(1959,1,1), List(), None, nino, List(), 100, 100).getSPExclusions shouldBe noExclusions
       }
 
       "return no exclusions for customer in WALES" in {
-        SPExclusionsService(30, countryWales, false, "M", NpsDate(1959,1,1), List(), None, nino, List(), 100, 100).getSPExclusions shouldBe None
+        SPExclusionsService(30, countryWales, false, "M", NpsDate(1959,1,1), List(), None, nino, List(), 100, 100).getSPExclusions shouldBe noExclusions
       }
 
       "return no exclusions for customer in NORTHERN IRELAND" in {
-        SPExclusionsService(30, countryNI, false, "M", NpsDate(1959,1,1), List(), None, nino, List(), 100, 100).getSPExclusions shouldBe None
+        SPExclusionsService(30, countryNI, false, "M", NpsDate(1959,1,1), List(), None, nino, List(), 100, 100).getSPExclusions shouldBe noExclusions
       }
 
       "return no exclusions for customer with not specified" in {
-        SPExclusionsService(30, countryNotSpecified, false, "M", NpsDate(1959,1,1), List(), None, nino, List(), 100, 100).getSPExclusions shouldBe None
+        SPExclusionsService(30, countryNotSpecified, false, "M", NpsDate(1959,1,1), List(), None, nino, List(), 100, 100).getSPExclusions shouldBe noExclusions
       }
     }
 
     "checking for customer MWRRE" should {
       "return no exclusions for non-mwrre customer" in {
-        SPExclusionsService(30,  countryGB, false, "M", NpsDate(1959,1,1), List(), None, nino, List(), 100, 100).getSPExclusions shouldBe None
+        SPExclusionsService(30,  countryGB, false, "M", NpsDate(1959,1,1), List(), None, nino, List(), 100, 100).getSPExclusions shouldBe noExclusions
       }
 
       "return MWRRE exclusion for customer with MWRRE start date" in {
@@ -107,11 +109,11 @@ class SPExclusionsServiceSpec extends UnitSpec with OneAppPerSuite  {
 
     "checking for customer DOB" should {
       "return no exclusions for female born on 6/4/1953" in {
-        SPExclusionsService(30,  countryGB, false, "F", NpsDate(1953,4,6), List(), None, nino, List(), 100, 100).getSPExclusions shouldBe None
+        SPExclusionsService(30,  countryGB, false, "F", NpsDate(1953,4,6), List(), None, nino, List(), 100, 100).getSPExclusions shouldBe noExclusions
       }
 
       "return no exclusions for male born on 6/4/1951" in {
-        SPExclusionsService(30,  countryGB, false, "M", NpsDate(1951,4,6), List(), None, nino, List(), 100, 100).getSPExclusions shouldBe None
+        SPExclusionsService(30,  countryGB, false, "M", NpsDate(1951,4,6), List(), None, nino, List(), 100, 100).getSPExclusions shouldBe noExclusions
       }
 
       "return CustomerTooOld for male born on 5/4/1951" in {
@@ -126,7 +128,7 @@ class SPExclusionsServiceSpec extends UnitSpec with OneAppPerSuite  {
 
     "checking for customer that is deceased" should {
       "return no exclusions for alive customer" in {
-        SPExclusionsService(30,  countryGB, false, "M", NpsDate(1959,1,1), List(), None, nino, List(), 100, 100).getSPExclusions shouldBe None
+        SPExclusionsService(30,  countryGB, false, "M", NpsDate(1959,1,1), List(), None, nino, List(), 100, 100).getSPExclusions shouldBe noExclusions
       }
 
       "return Dead exclusion for dead customer" in {
@@ -137,7 +139,7 @@ class SPExclusionsServiceSpec extends UnitSpec with OneAppPerSuite  {
     "checking for customer ever stayed in Isle of Man" should {
       "return no exclusion having country code of Isle of Man('ISLE OF MAN')" in {
         SPExclusionsService(30,  countryIsleOfMan, false, "M", NpsDate(1959,1,1), List(), None,
-          nino, List(), 100, 100).getSPExclusions shouldBe None
+          nino, List(), 100, 100).getSPExclusions shouldBe noExclusions
       }
 
       "return IOM exclusion for liability type 5 with country code 'ISLE OF MAN'" in {
@@ -147,13 +149,13 @@ class SPExclusionsServiceSpec extends UnitSpec with OneAppPerSuite  {
 
       "return no exclusion for nino starting with 'MA'" in{
         SPExclusionsService(30,  countryIsleOfMan, false, "M", NpsDate(1959,1,1), List(), None,
-          iomNino.value, List(), 100, 100).getSPExclusions shouldBe None
+          iomNino.value, List(), 100, 100).getSPExclusions shouldBe noExclusions
       }
     }
 
     "checking if there is any dissonance between provided and calculated values" should {
       "return no exclusions for 200 provided and 200 calculated" in {
-        SPExclusionsService(30, countryGB, false, "M", NpsDate(1959, 1, 1), List(), None, nino, List(), 200, 200).getSPExclusions shouldBe None
+        SPExclusionsService(30, countryGB, false, "M", NpsDate(1959, 1, 1), List(), None, nino, List(), 200, 200).getSPExclusions shouldBe noExclusions
       }
 
       "return dissonance exclusion for 200 provided and 201 calculated" in {

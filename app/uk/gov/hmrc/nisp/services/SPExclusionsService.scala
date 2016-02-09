@@ -23,80 +23,63 @@ import uk.gov.hmrc.nisp.models.enums.SPExclusion.SPExclusion
 import uk.gov.hmrc.nisp.models.nps.{NpsDate, NpsLiability, NpsSchemeMembership}
 import uk.gov.hmrc.nisp.utils.{FunctionHelper, NISPConstants}
 
-object SPExclusionsService {
-  def apply(numberOfQualifyingYears: Int, countryCode: Int, mwrre: Boolean, sex: String, dateOfBirth: NpsDate,
-            schemeMemberships: List[NpsSchemeMembership], dateOfDeath: Option[NpsDate],
-            nino: String, liabilities: List[NpsLiability], currentAmountReceived: BigDecimal, currentAmountCalculated: BigDecimal): SPExclusionsService =
-    new SPExclusionsService(numberOfQualifyingYears, countryCode, mwrre, sex, dateOfBirth, schemeMemberships, dateOfDeath, nino, liabilities,
-      currentAmountReceived, currentAmountCalculated)
-}
+case class SPExclusionsService(numberOfQualifyingYears: Int, countryCode: Int, mwrre: Boolean, sex: String, dateOfBirth: NpsDate,
+                               schemeMemberships: List[NpsSchemeMembership], dateOfDeath: Option[NpsDate], nino: String, liabilities: List[NpsLiability],
+                               currentAmountReceived: BigDecimal, currentAmountCalculated: BigDecimal) {
 
-class SPExclusionsService(numberOfQualifyingYears: Int, countryCode: Int, mwrre: Boolean, sex: String, dateOfBirth: NpsDate,
-                           schemeMemberships: List[NpsSchemeMembership], dateOfDeath: Option[NpsDate],
-                          nino: String, liabilities: List[NpsLiability], currentAmountReceived: BigDecimal, currentAmountCalculated: BigDecimal) {
-  def getSPExclusions: Option[SPExclusionsModel] = {
+  def getSPExclusions: SPExclusionsModel = {
+    val exclusions = allExclusions(List())
 
-    val allExclusions = FunctionHelper.composeAll(allRules)
-
-    allExclusions(List()) match {
-      case List() => None
-      case listOfExclusions =>
-        val formattedExclusions = listOfExclusions.map(_.toString).mkString(",")
-        Logger.info(s"User excluded: $formattedExclusions")
-        Some(SPExclusionsModel(listOfExclusions.distinct))
+    if (exclusions.nonEmpty) {
+      val formattedExclusions = exclusions.map(_.toString).mkString(",")
+      Logger.info(s"User excluded: $formattedExclusions")
     }
+
+    SPExclusionsModel(exclusions)
   }
 
-  val checkAbroad = (exclusionsList: List[SPExclusion]) => {
+  val checkAbroad = (exclusionList: List[SPExclusion]) => {
     countryCode match {
-      case NISPConstants.countryNotSpecified => exclusionsList
-      case NISPConstants.countryGB => exclusionsList
-      case NISPConstants.countryNI => exclusionsList
-      case NISPConstants.countryEngland => exclusionsList
-      case NISPConstants.countryScotland => exclusionsList
-      case NISPConstants.countryWales => exclusionsList
-      case NISPConstants.countryIsleOfMan => exclusionsList
-      case _ => SPExclusion.Abroad :: exclusionsList
+      case NISPConstants.countryNotSpecified => exclusionList
+      case NISPConstants.countryGB => exclusionList
+      case NISPConstants.countryNI => exclusionList
+      case NISPConstants.countryEngland => exclusionList
+      case NISPConstants.countryScotland => exclusionList
+      case NISPConstants.countryWales => exclusionList
+      case NISPConstants.countryIsleOfMan => exclusionList
+      case _ => SPExclusion.Abroad :: exclusionList
     }
   }
 
   val checkIOMLiabilities = (exclusionList: List[SPExclusion]) => {
-    liabilities.find( x => x.liabilityType==NISPConstants.isleOfManLiability) match {
-      case Some(_) => SPExclusion.IOM :: exclusionList
-      case None => exclusionList
-    }
+    if (liabilities.exists(_.liabilityType == NISPConstants.isleOfManLiability))
+      SPExclusion.IOM :: exclusionList
+    else
+      exclusionList
   }
 
-  val checkMWRRE = (exclusionList: List[SPExclusion]) => {
-    mwrre match {
-      case true => SPExclusion.MWRRE :: exclusionList
-      case _ => exclusionList
-    }
-  }
+  val checkMWRRE = (exclusionList: List[SPExclusion]) =>
+    if (mwrre) SPExclusion.MWRRE :: exclusionList else exclusionList
 
   val checkDateOfBirth = (exclusionList: List[SPExclusion]) => {
     sex.toLowerCase.trim match {
       case "m" =>
         if(dateOfBirth.localDate.compareTo(NISPConstants.nispMaleCutoffDOB) < 0) {
-          List(SPExclusion.CustomerTooOld)
+          SPExclusion.CustomerTooOld :: exclusionList
         } else {
           exclusionList
         }
       case _ =>
         if(dateOfBirth.localDate.compareTo(NISPConstants.nispFemaleCutoffDOB) < 0) {
-          List(SPExclusion.CustomerTooOld)
+          SPExclusion.CustomerTooOld :: exclusionList
         } else {
           exclusionList
         }
     }
   }
 
-  val checkDead = (exclusionList: List[SPExclusion]) => {
-    dateOfDeath match {
-      case Some(_) => SPExclusion.Dead :: exclusionList
-      case _ => exclusionList
-    }
-  }
+  val checkDead = (exclusionList: List[SPExclusion]) =>
+    dateOfDeath.fold(exclusionList)(_ => SPExclusion.Dead :: exclusionList)
 
   val checkAmountDissonance = (exclusionList: List[SPExclusion]) => {
     if(currentAmountCalculated != currentAmountReceived) {
@@ -107,5 +90,5 @@ class SPExclusionsService(numberOfQualifyingYears: Int, countryCode: Int, mwrre:
     }
   }
 
-  val allRules = List(checkDateOfBirth, checkAbroad, checkMWRRE, checkDead, checkIOMLiabilities, checkAmountDissonance)
+  val allExclusions = FunctionHelper.composeAll(List(checkDateOfBirth, checkAbroad, checkMWRRE, checkDead, checkIOMLiabilities, checkAmountDissonance))
 }
