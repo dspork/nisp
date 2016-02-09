@@ -61,14 +61,6 @@ case class SPExclusionsService(numberOfQualifyingYears: Int, countryCode: Int, m
   val checkMWRRE = (exclusionList: List[SPExclusion]) =>
     if (mwrre) SPExclusion.MWRRE :: exclusionList else exclusionList
 
-  val checkDateOfBirth = (exclusionList: List[SPExclusion]) => {
-    if(statePensionAge.localDate.isBefore(NISPConstants.newStatePensionStart)) {
-      SPExclusion.CustomerTooOld :: exclusionList
-    } else {
-      exclusionList
-    }
-  }
-
   val checkDead = (exclusionList: List[SPExclusion]) =>
     dateOfDeath.fold(exclusionList)(_ => SPExclusion.Dead :: exclusionList)
 
@@ -82,13 +74,16 @@ case class SPExclusionsService(numberOfQualifyingYears: Int, countryCode: Int, m
   }
 
   val checkPostStatePensionAge = (exclusionList: List[SPExclusion]) => {
-    if(!exclusionList.contains(SPExclusion.CustomerTooOld) &&
-      !now.localDate.isBefore(statePensionAge.localDate.minusDays(1))) {
-      SPExclusion.PostStatePensionAge :: exclusionList
+    if(statePensionAge.localDate.isBefore(NISPConstants.newStatePensionStart)) {
+      SPExclusion.CustomerTooOld :: exclusionList
     } else {
-      exclusionList
+      if(!now.localDate.isBefore(statePensionAge.localDate.minusDays(1))) {
+        SPExclusion.PostStatePensionAge :: exclusionList
+      } else {
+        exclusionList
+      }
     }
   }
 
-  val allExclusions = FunctionHelper.composeAll(List(checkPostStatePensionAge, checkDateOfBirth, checkAbroad, checkMWRRE, checkDead, checkIOMLiabilities, checkAmountDissonance))
+  val allExclusions = FunctionHelper.composeAll(List(checkPostStatePensionAge, checkAbroad, checkMWRRE, checkDead, checkIOMLiabilities, checkAmountDissonance))
 }
