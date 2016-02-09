@@ -23,7 +23,6 @@ import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.nisp.connectors.NpsConnector
 import uk.gov.hmrc.nisp.models.nps.NpsDate
 import uk.gov.hmrc.nisp.models.{SPAgeModel, SPAmountModel, SPResponseModel, SPSummaryModel}
-import uk.gov.hmrc.nisp.services.reference.QualifyingYearsAmountService
 import uk.gov.hmrc.nisp.utils.WithCurrentDate
 import uk.gov.hmrc.play.http.HeaderCarrier
 import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
@@ -50,13 +49,14 @@ trait SPResponseService extends WithCurrentDate {
         npsSummary.countryCode,
         npsSummary.rreToConsider == 1,
         npsSummary.sex,
-        npsSummary.dateOfBirth,
         npsSchemeMembership,
         npsSummary.dateOfDeath,
         npsSummary.nino,
         npsLiabilities,
         spAmountModel.week,
-        SPCurrentAmountService.calculate(npsSummary.npsStatePensionAmount.npsAmountA2016, npsSummary.npsStatePensionAmount.npsAmountB2016)
+        SPCurrentAmountService.calculate(npsSummary.npsStatePensionAmount.npsAmountA2016, npsSummary.npsStatePensionAmount.npsAmountB2016),
+        NpsDate(now),
+        npsSummary.spaDate
       ).getSPExclusions
 
       if (spExclusions.spExclusions.nonEmpty) {

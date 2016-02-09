@@ -27,6 +27,7 @@ object SPExclusion extends Enumeration {
   val ContractedOut = Value
   val Dead = Value
   val AmountDissonance = Value
+  val PostStatePensionAge = Value
 
   implicit val formats = new Format[SPExclusion] {
     def reads(json: JsValue): JsResult[SPExclusion] = JsSuccess(SPExclusion.withName(json.as[String]) )

@@ -61,5 +61,5 @@ object SPContextMessageService {
   private def isFullBasicStatePension(qualifyingYears: Int): Boolean = qualifyingYears >= NISPConstants.fullBasicPensionQualifyingYears
 
   private def timeToFillBasicPensionGaps(earningsIncludedUpTo: NpsDate, numberOfQualifyingYears: Int): Boolean =
-    NISPConstants.newStatePensionStart - earningsIncludedUpTo.taxYear - 1 >= NISPConstants.fullBasicPensionQualifyingYears - numberOfQualifyingYears
+    NISPConstants.newStatePensionStartYear - earningsIncludedUpTo.taxYear - 1 >= NISPConstants.fullBasicPensionQualifyingYears - numberOfQualifyingYears
 }

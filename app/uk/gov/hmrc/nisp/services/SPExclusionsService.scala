@@ -17,15 +17,15 @@
 package uk.gov.hmrc.nisp.services
 
 import play.Logger
-import uk.gov.hmrc.nisp.models.{SPAmountModel, SPExclusionsModel}
+import uk.gov.hmrc.nisp.models.SPExclusionsModel
 import uk.gov.hmrc.nisp.models.enums.SPExclusion
 import uk.gov.hmrc.nisp.models.enums.SPExclusion.SPExclusion
 import uk.gov.hmrc.nisp.models.nps.{NpsDate, NpsLiability, NpsSchemeMembership}
 import uk.gov.hmrc.nisp.utils.{FunctionHelper, NISPConstants}
 
-case class SPExclusionsService(numberOfQualifyingYears: Int, countryCode: Int, mwrre: Boolean, sex: String, dateOfBirth: NpsDate,
+case class SPExclusionsService(numberOfQualifyingYears: Int, countryCode: Int, mwrre: Boolean, sex: String,
                                schemeMemberships: List[NpsSchemeMembership], dateOfDeath: Option[NpsDate], nino: String, liabilities: List[NpsLiability],
-                               currentAmountReceived: BigDecimal, currentAmountCalculated: BigDecimal) {
+                               currentAmountReceived: BigDecimal, currentAmountCalculated: BigDecimal, now: NpsDate, statePensionAge: NpsDate) {
 
   def getSPExclusions: SPExclusionsModel = {
     val exclusions = allExclusions(List())
@@ -62,19 +62,10 @@ case class SPExclusionsService(numberOfQualifyingYears: Int, countryCode: Int, m
     if (mwrre) SPExclusion.MWRRE :: exclusionList else exclusionList
 
   val checkDateOfBirth = (exclusionList: List[SPExclusion]) => {
-    sex.toLowerCase.trim match {
-      case "m" =>
-        if(dateOfBirth.localDate.compareTo(NISPConstants.nispMaleCutoffDOB) < 0) {
-          SPExclusion.CustomerTooOld :: exclusionList
-        } else {
-          exclusionList
-        }
-      case _ =>
-        if(dateOfBirth.localDate.compareTo(NISPConstants.nispFemaleCutoffDOB) < 0) {
-          SPExclusion.CustomerTooOld :: exclusionList
-        } else {
-          exclusionList
-        }
+    if(statePensionAge.localDate.isBefore(NISPConstants.newStatePensionStart)) {
+      SPExclusion.CustomerTooOld :: exclusionList
+    } else {
+      exclusionList
     }
   }
 
@@ -90,5 +81,14 @@ case class SPExclusionsService(numberOfQualifyingYears: Int, countryCode: Int, m
     }
   }
 
-  val allExclusions = FunctionHelper.composeAll(List(checkDateOfBirth, checkAbroad, checkMWRRE, checkDead, checkIOMLiabilities, checkAmountDissonance))
+  val checkPostStatePensionAge = (exclusionList: List[SPExclusion]) => {
+    if(!exclusionList.contains(SPExclusion.CustomerTooOld) &&
+      !now.localDate.isBefore(statePensionAge.localDate.minusDays(1))) {
+      SPExclusion.PostStatePensionAge :: exclusionList
+    } else {
+      exclusionList
+    }
+  }
+
+  val allExclusions = FunctionHelper.composeAll(List(checkPostStatePensionAge, checkDateOfBirth, checkAbroad, checkMWRRE, checkDead, checkIOMLiabilities, checkAmountDissonance))
 }
