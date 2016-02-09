@@ -110,5 +110,5 @@ trait SPResponseService extends WithCurrentDate {
 
 object SPResponseService extends SPResponseService {
   override val nps: NpsConnector = NpsConnector
-  override val now: LocalDate = LocalDate.now(DateTimeZone.forTimeZone(TimeZone.getTimeZone("Europe/London")))
+  override def now: LocalDate = LocalDate.now(DateTimeZone.forTimeZone(TimeZone.getTimeZone("Europe/London")))
 }
