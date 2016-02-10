@@ -171,7 +171,7 @@ class SPExclusionsServiceSpec extends UnitSpec with OneAppPerSuite  {
     }
 
     "checking if they have reached State Pension age -1 day on or after 6 April 2016" should {
-      "return no exclusions for pre SPa -1 and on or after 6 April 2016" should {
+      "return no exclusions for pre SPa -1 and on or after 6 April 2016" when {
         "Man, SPA: 08/04/2016, Current Date: 06/04/2016" in {
           SPExclusionsService(12, countryGB, false, "M", List(), None, nino, List(), 201, 201, NpsDate(2016, 4, 6), NpsDate(2016, 4, 8)).getSPExclusions shouldBe noExclusions
         }
@@ -182,7 +182,7 @@ class SPExclusionsServiceSpec extends UnitSpec with OneAppPerSuite  {
           SPExclusionsService(12, countryGB, false, "M", List(), None, nino, List(), 201, 201, NpsDate(2016, 4, 7), NpsDate(2016, 4, 9)).getSPExclusions shouldBe noExclusions
         }
       }
-      "return no exclusions for pre SPa -1 and before 6 April 2016" should {
+      "return no exclusions for pre SPa -1 and before 6 April 2016" when {
         "Man, SPA: 07/04/2016, Current Date: 05/04/2016" in {
           SPExclusionsService(12, countryGB, false, "M", List(), None, nino, List(), 201, 201, NpsDate(2016, 4, 5), NpsDate(2016, 4, 7)).getSPExclusions shouldBe noExclusions
         }
@@ -191,7 +191,7 @@ class SPExclusionsServiceSpec extends UnitSpec with OneAppPerSuite  {
         }
 
       }
-      "return post SPa exclusion for post SPa -1 and on or after 6 April 2016" should {
+      "return post SPa exclusion for post SPa -1 and on or after 6 April 2016" when {
         "Man, SPA: 06/04/2016, Current Date: 05/04/2016" in {
           SPExclusionsService(12, countryGB, false, "M", List(), None, nino, List(), 201, 201, NpsDate(2016, 4, 5), NpsDate(2016, 4, 6)).getSPExclusions shouldBe createModelWithListItems(SPExclusion.PostStatePensionAge)
         }
@@ -211,7 +211,7 @@ class SPExclusionsServiceSpec extends UnitSpec with OneAppPerSuite  {
           SPExclusionsService(12, countryGB, false, "M", List(), None, nino, List(), 201, 201, NpsDate(2016, 4, 8), NpsDate(2016, 4, 9)).getSPExclusions shouldBe createModelWithListItems(SPExclusion.PostStatePensionAge)
         }
       }
-      "return too old exclusion for post SPa -1 and before 6 April 2016" should {
+      "return too old exclusion for post SPa -1 and before 6 April 2016" when {
         "Man, SPA: 05/04/2016, Current Date: 05/04/2016" in {
           SPExclusionsService(12, countryGB, false, "M", List(), None, nino, List(), 201, 201, NpsDate(2016, 4, 5), NpsDate(2016, 4, 5)).getSPExclusions shouldBe createModelWithListItems(SPExclusion.CustomerTooOld)
         }
