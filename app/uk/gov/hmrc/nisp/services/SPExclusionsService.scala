@@ -73,7 +73,7 @@ case class SPExclusionsService(numberOfQualifyingYears: Int, countryCode: Int, m
     }
   }
 
-  val checkPostStatePensionAge = (exclusionList: List[SPExclusion]) => {
+  val checkStatePensionAge = (exclusionList: List[SPExclusion]) => {
     if(statePensionAge.localDate.isBefore(NISPConstants.newStatePensionStart)) {
       SPExclusion.CustomerTooOld :: exclusionList
     } else {
@@ -85,5 +85,5 @@ case class SPExclusionsService(numberOfQualifyingYears: Int, countryCode: Int, m
     }
   }
 
-  val allExclusions = FunctionHelper.composeAll(List(checkPostStatePensionAge, checkAbroad, checkMWRRE, checkDead, checkIOMLiabilities, checkAmountDissonance))
+  val allExclusions = FunctionHelper.composeAll(List(checkStatePensionAge, checkAbroad, checkMWRRE, checkDead, checkIOMLiabilities, checkAmountDissonance))
 }
