@@ -31,9 +31,6 @@ object NISPConstants {
   val countryWales = 116
   val countryIsleOfMan = 7
 
-  val nispMaleCutoffDOB = new LocalDate(1951,4, 6)
-  val nispFemaleCutoffDOB = new LocalDate(1953,4, 6)
-
   val fullBasicPensionQualifyingYears = 30
   val newStatePensionMinimumQualifyingYears = 10
 
@@ -41,11 +38,12 @@ object NISPConstants {
   val post78Factor = 52
   val pre78Factor = 50
 
-  val newStatePensionStart = 2016
+  val newStatePensionStartYear = 2016
 
   val taxYearStartDay = 6
   val taxYearStartEndMonth = 4
   val taxYearEndDay = 5
+  val newStatePensionStart = new LocalDate(newStatePensionStartYear, taxYearStartEndMonth, taxYearStartDay)
 
   val saturday = 6
   val sunday = 7

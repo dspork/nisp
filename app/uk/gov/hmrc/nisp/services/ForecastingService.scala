@@ -120,9 +120,9 @@ trait ForecastingService {
   def totalQualifyingYearsAt2016(earningsIncludedUpTo: NpsDate, currentQualifyingYears: Int): Int =
     qualifyingYearsTo2016(earningsIncludedUpTo) + currentQualifyingYears
 
-  def qualifyingYearsTo2016(earningsIncludedUpTo: NpsDate): Int = (NISPConstants.newStatePensionStart - 1 - earningsIncludedUpTo.taxYear).max(0)
+  def qualifyingYearsTo2016(earningsIncludedUpTo: NpsDate): Int = (NISPConstants.newStatePensionStartYear - 1 - earningsIncludedUpTo.taxYear).max(0)
 
-  def qualifyingYearsToFRY(finalRelevantYear: Int): Int = finalRelevantYear - NISPConstants.newStatePensionStart + 1
+  def qualifyingYearsToFRY(finalRelevantYear: Int): Int = finalRelevantYear - NISPConstants.newStatePensionStartYear + 1
 
   def forecastPost2016StatePension(finalRelevantYear: Int, startingAmount: BigDecimal, qualifyingYearsAt2016: Int): BigDecimal = {
     if(startingAmount >= QualifyingYearsAmountService.maxAmount)
