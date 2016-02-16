@@ -66,7 +66,7 @@ case class SPExclusionsService(numberOfQualifyingYears: Int, countryCode: Int, m
 
   val checkAmountDissonance = (exclusionList: List[SPExclusion]) => {
     if(currentAmountCalculated != currentAmountReceived) {
-      Logger.warn(s"Dissonance Found!: nSP Calc - $currentAmountReceived Breakdown - $currentAmountCalculated")
+      Logger.warn(s"Dissonance Found!: nSP Calc - $currentAmountReceived Breakdown - $currentAmountCalculated NINO - $nino")
       SPExclusion.AmountDissonance :: exclusionList
     } else {
       exclusionList
