@@ -62,6 +62,18 @@ trait SPResponseService extends WithCurrentDate {
       if (spExclusions.spExclusions.nonEmpty) {
         SPResponseModel(None, Some(spExclusions))
       } else {
+        val forecastAmount = ForecastingService.getForecastAmount(
+          npsSchemeMembership, npsSummary.earningsIncludedUpTo,
+          npsSummary.nspQualifyingYears,
+          npsSummary.npsStatePensionAmount.npsAmountA2016,
+          npsSummary.npsStatePensionAmount.npsAmountB2016,
+          npsNIRecord.niTaxYears.find(_.taxYear == npsSummary.earningsIncludedUpTo.taxYear).map(_.primaryPaidEarnings).getOrElse(0),
+          npsSummary.finalRelevantYear,
+          npsSummary.pensionForecast.forecastAmount,
+          npsSummary.pensionForecast.forecastAmount2016,
+          npsNIRecord.niTaxYears.find(_.taxYear == npsSummary.earningsIncludedUpTo.taxYear).exists(_.qualifying),
+          nino
+        )
         SPResponseModel(
           Some(SPSummaryModel(
             npsSummary.nino,
@@ -81,20 +93,10 @@ trait SPResponseService extends WithCurrentDate {
             npsSummary.yearsUntilPensionAge,
             npsSummary.pensionShareOrderCOEG != 0 || npsSummary.pensionShareOrderSERPS != 0,
             npsSummary.dateOfBirth,
-            ForecastingService.getForecastAmount(
-              npsSchemeMembership, npsSummary.earningsIncludedUpTo,
-              npsSummary.nspQualifyingYears,
-              npsSummary.npsStatePensionAmount.npsAmountA2016,
-              npsSummary.npsStatePensionAmount.npsAmountB2016,
-              npsNIRecord.niTaxYears.find(_.taxYear == npsSummary.earningsIncludedUpTo.taxYear).map(_.primaryPaidEarnings).getOrElse(0),
-              npsSummary.finalRelevantYear,
-              npsSummary.pensionForecast.forecastAmount,
-              npsSummary.pensionForecast.forecastAmount2016,
-              npsNIRecord.niTaxYears.find(_.taxYear == npsSummary.earningsIncludedUpTo.taxYear).exists(_.qualifying),
-              nino
-            ),
+            forecastAmount,
             npsSummary.pensionForecast.fullNewStatePensionAmount,
             npsSchemeMembership.nonEmpty,
+            npsSummary.npsStatePensionAmount.nspEntitlement > forecastAmount.week,
             getAge(npsSummary.dateOfBirth),
             SPAmountModel(npsSummary.npsStatePensionAmount.npsAmountB2016.rebateDerivedAmount)
           ))
