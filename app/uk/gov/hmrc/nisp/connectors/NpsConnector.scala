@@ -98,7 +98,6 @@ trait NpsConnector {
         metrics.incrementFailedCounter(api)
         Future.failed(ex)
       case Success(value) =>
-        metrics.incrementSuccessCounter(api)
         Future.successful(value)
     }
   }

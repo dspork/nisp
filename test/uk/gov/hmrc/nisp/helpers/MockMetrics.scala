@@ -29,7 +29,5 @@ object MockMetrics extends Metrics with MockitoSugar {
 
   override def startTimer(api: APITypes): Context = fakeTimerContext
 
-  override def incrementSuccessCounter(api: APITypes): Unit = {}
-
   override def incrementFailedCounter(api: APITypes): Unit = {}
 }

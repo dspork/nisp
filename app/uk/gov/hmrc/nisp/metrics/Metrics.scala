@@ -28,7 +28,6 @@ import uk.gov.hmrc.nisp.models.enums.APITypes.APITypes
 
 trait Metrics {
   def startTimer(api: APITypes): Timer.Context
-  def incrementSuccessCounter(api: APITypes.APITypes): Unit
   def incrementFailedCounter(api: APITypes.APITypes): Unit
 }
 
@@ -44,13 +43,6 @@ object Metrics extends Metrics {
     APITypes.SchemeMembership -> MetricsRegistry.defaultRegistry.timer("schememembership-response-timer")
   )
 
-  val successCounters = Map(
-    APITypes.Summary -> MetricsRegistry.defaultRegistry.counter("summary-success-counter"),
-    APITypes.NIRecord -> MetricsRegistry.defaultRegistry.counter("nirecord-success-counter"),
-    APITypes.Liabilities -> MetricsRegistry.defaultRegistry.counter("liabilities-success-counter"),
-    APITypes.SchemeMembership -> MetricsRegistry.defaultRegistry.counter("schememembership-success-counter")
-  )
-
   val failedCounters = Map(
     APITypes.Summary -> MetricsRegistry.defaultRegistry.counter("summary-failed-counter"),
     APITypes.NIRecord -> MetricsRegistry.defaultRegistry.counter("nirecord-failed-counter"),
@@ -59,8 +51,6 @@ object Metrics extends Metrics {
   )
 
   override def startTimer(api: APITypes): Context = timers(api).time()
-
-  override def incrementSuccessCounter(api: APITypes): Unit = successCounters(api).inc()
 
   override def incrementFailedCounter(api: APITypes): Unit = failedCounters(api).inc()
 
