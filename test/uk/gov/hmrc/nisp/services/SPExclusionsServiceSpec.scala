@@ -217,5 +217,11 @@ class SPExclusionsServiceSpec extends UnitSpec with OneAppPerSuite  {
         }
       }
     }
+
+    "checking only TooOld Exclusion appears" when {
+      "customer has TooOld and AmountDissonance" in {
+        SPExclusionsService(12, countryGB, false, "M", List(), None, "", List(), 0, 151.25, NpsDate(2015,1,1), NpsDate(2016,4,5)).getSPExclusions shouldBe createModelWithListItems(SPExclusion.CustomerTooOld)
+      }
+    }
   }
 }
