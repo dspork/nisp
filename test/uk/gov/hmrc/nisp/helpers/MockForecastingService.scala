@@ -16,15 +16,9 @@
 
 package uk.gov.hmrc.nisp.helpers
 
-import org.joda.time.LocalDate
-import uk.gov.hmrc.nisp.connectors.NpsConnector
-import uk.gov.hmrc.nisp.services.{ForecastingService, SPResponseService}
+import uk.gov.hmrc.nisp.connectors.CustomAuditConnector
+import uk.gov.hmrc.nisp.services.ForecastingService
 
-class MockSPResponseService(localDate: LocalDate = new LocalDate()) extends SPResponseService {
-  override val forecastingService: ForecastingService = MockForecastingService
-  override val nps: NpsConnector = MockNpsConnector
-
-  override def now: LocalDate = localDate
+object MockForecastingService extends ForecastingService {
+  override val customAuditConnector: CustomAuditConnector = MockCustomAuditConnector
 }
-
-object MockSPResponseService extends MockSPResponseService(new LocalDate())

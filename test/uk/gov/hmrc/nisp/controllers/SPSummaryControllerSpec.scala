@@ -25,8 +25,6 @@ import uk.gov.hmrc.nisp.helpers.{TestAccountBuilder, MockSPResponseService}
 import uk.gov.hmrc.nisp.services.SPResponseService
 import uk.gov.hmrc.play.test.UnitSpec
 
-import scala.concurrent.Future
-
 class SPSummaryControllerSpec extends UnitSpec with OneAppPerSuite {
   val nino = TestAccountBuilder.regularNino
   val nonExistentNino = TestAccountBuilder.nonExistentNino
@@ -48,7 +46,7 @@ class SPSummaryControllerSpec extends UnitSpec with OneAppPerSuite {
     }
 
     "return JSON containing nino" in {
-      val result = Future.successful(testSPSummaryController.getSPSummary(nino)(FakeRequest()))
+      val result = testSPSummaryController.getSPSummary(nino)(FakeRequest())
       val rawJson = Json.parse(contentAsString(result))
       (rawJson \ "spSummary" \ "nino").as[String] shouldBe nino.value
     }

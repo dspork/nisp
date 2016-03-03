@@ -29,8 +29,15 @@ import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 
 import scala.concurrent.Future
 
+object SPResponseService extends SPResponseService {
+  override val nps: NpsConnector = NpsConnector
+  override def now: LocalDate = LocalDate.now(DateTimeZone.forTimeZone(TimeZone.getTimeZone("Europe/London")))
+  override val forecastingService: ForecastingService = ForecastingService
+}
+
 trait SPResponseService extends WithCurrentDate {
-  def nps: NpsConnector
+  val forecastingService: ForecastingService
+  val nps: NpsConnector
 
   def getSPResponse(nino: Nino)(implicit hc: HeaderCarrier): Future[SPResponseModel] = {
     val futureNpsSummary = nps.connectToSummary(nino)
@@ -62,7 +69,7 @@ trait SPResponseService extends WithCurrentDate {
       if (spExclusions.spExclusions.nonEmpty) {
         SPResponseModel(None, Some(spExclusions))
       } else {
-        val forecastAmount = ForecastingService.getForecastAmount(
+        val forecastAmount = forecastingService.getForecastAmount(
           npsSchemeMembership, npsSummary.earningsIncludedUpTo,
           npsSummary.nspQualifyingYears,
           npsSummary.npsStatePensionAmount.npsAmountA2016,
@@ -108,9 +115,4 @@ trait SPResponseService extends WithCurrentDate {
   def getAge(dateOfBirth: NpsDate): Int =  {
     new Period(dateOfBirth.localDate, now, PeriodType.yearMonthDay()).getYears
   }
-}
-
-object SPResponseService extends SPResponseService {
-  override val nps: NpsConnector = NpsConnector
-  override def now: LocalDate = LocalDate.now(DateTimeZone.forTimeZone(TimeZone.getTimeZone("Europe/London")))
 }
