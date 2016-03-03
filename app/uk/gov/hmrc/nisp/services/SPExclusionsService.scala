@@ -75,7 +75,7 @@ case class SPExclusionsService(numberOfQualifyingYears: Int, countryCode: Int, m
 
   val checkStatePensionAge = (exclusionList: List[SPExclusion]) => {
     if(statePensionAge.localDate.isBefore(NISPConstants.newStatePensionStart)) {
-      SPExclusion.CustomerTooOld :: exclusionList
+      List(SPExclusion.CustomerTooOld)
     } else {
       if(!now.localDate.isBefore(statePensionAge.localDate.minusDays(1))) {
         SPExclusion.PostStatePensionAge :: exclusionList
