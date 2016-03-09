@@ -21,6 +21,8 @@ import com.codahale.metrics.Timer.Context
 import org.scalatest.mock.MockitoSugar
 import uk.gov.hmrc.nisp.metrics.Metrics
 import uk.gov.hmrc.nisp.models.enums.APITypes.APITypes
+import uk.gov.hmrc.nisp.models.enums.SPContextMessage.SPContextMessage
+import uk.gov.hmrc.nisp.models.enums.SPExclusion.SPExclusion
 
 
 object MockMetrics extends Metrics with MockitoSugar {
@@ -30,4 +32,9 @@ object MockMetrics extends Metrics with MockitoSugar {
   override def startTimer(api: APITypes): Context = fakeTimerContext
 
   override def incrementFailedCounter(api: APITypes): Unit = {}
+
+  override def summary(forecast: BigDecimal, current: BigDecimal, scenario: Option[SPContextMessage],
+                       contractedOut: Boolean, forecastOnly: Boolean, age: Int): Unit = ()
+  override def niRecord(gaps: Int, payableGaps: Int, pre75Years: Int, qualifyingYears: Int, yearsUntilSPA: Int): Unit = ()
+  override def exclusion(exclusions: List[SPExclusion]): Unit = ()
 }
