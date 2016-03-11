@@ -56,7 +56,7 @@ trait SPResponseService extends WithCurrentDate {
       val spAmountModel = SPAmountModel(npsSummary.npsStatePensionAmount.nspEntitlement)
 
       val spExclusions = ExclusionsService(
-        npsSummary.countryCode,
+        npsSummary.isAbroad,
         npsSummary.rreToConsider == 1,
         npsSummary.dateOfDeath,
         npsSummary.nino,

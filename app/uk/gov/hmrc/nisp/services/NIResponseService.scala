@@ -54,7 +54,7 @@ trait NIResponseService extends WithCurrentDate {
     ) yield {
 
       val niExclusions = ExclusionsService(
-        npsSummary.countryCode,
+        npsSummary.isAbroad,
         npsSummary.rreToConsider == 1,
         npsSummary.dateOfDeath,
         npsSummary.nino,
@@ -79,7 +79,8 @@ trait NIResponseService extends WithCurrentDate {
           calcPre75QualifyingYears(npsNIRecord.pre75ContributionCount, npsNIRecord.dateOfEntry),
           npsNIRecord.nonQualifyingYearsPayable,
           npsNIRecord.nonQualifyingYears - npsNIRecord.nonQualifyingYearsPayable,
-          npsSummary.npsStatePensionAmount.nspEntitlement < QualifyingYearsAmountService.maxAmount
+          npsSummary.npsStatePensionAmount.nspEntitlement < QualifyingYearsAmountService.maxAmount,
+          npsSummary.isAbroad
         )
 
         metrics.niRecord(niSummary.noOfNonQualifyingYears, niSummary.numberOfPayableGaps, niSummary.pre75QualifyingYears.getOrElse(0),

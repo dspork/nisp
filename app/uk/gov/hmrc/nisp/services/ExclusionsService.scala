@@ -23,7 +23,7 @@ import uk.gov.hmrc.nisp.models.enums.Exclusion.Exclusion
 import uk.gov.hmrc.nisp.models.nps.{NpsDate, NpsLiability, NpsSchemeMembership}
 import uk.gov.hmrc.nisp.utils.{FunctionHelper, NISPConstants}
 
-case class ExclusionsService(countryCode: Int, mwrre: Boolean, dateOfDeath: Option[NpsDate], nino: String,
+case class ExclusionsService(isAbroad: Boolean, mwrre: Boolean, dateOfDeath: Option[NpsDate], nino: String,
                              liabilities: List[NpsLiability], currentAmountReceived: BigDecimal,
                              currentAmountCalculated: BigDecimal, now: NpsDate, statePensionAge: NpsDate) {
 
@@ -40,18 +40,8 @@ case class ExclusionsService(countryCode: Int, mwrre: Boolean, dateOfDeath: Opti
     ExclusionsModel(exclusions)
   }
 
-  val checkAbroad = (exclusionList: List[Exclusion]) => {
-    countryCode match {
-      case NISPConstants.countryNotSpecified => exclusionList
-      case NISPConstants.countryGB => exclusionList
-      case NISPConstants.countryNI => exclusionList
-      case NISPConstants.countryEngland => exclusionList
-      case NISPConstants.countryScotland => exclusionList
-      case NISPConstants.countryWales => exclusionList
-      case NISPConstants.countryIsleOfMan => exclusionList
-      case _ => Exclusion.Abroad :: exclusionList
-    }
-  }
+  val checkAbroad = (exclusionList: List[Exclusion]) =>
+    if(isAbroad) Exclusion.Abroad :: exclusionList else exclusionList
 
   val checkIOMLiabilities = (exclusionList: List[Exclusion]) => {
     if (liabilities.exists(_.liabilityType == NISPConstants.isleOfManLiability))

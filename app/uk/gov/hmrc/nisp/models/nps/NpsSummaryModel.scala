@@ -18,6 +18,8 @@ package uk.gov.hmrc.nisp.models.nps
 
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
+import uk.gov.hmrc.nisp.models.enums.Exclusion
+import uk.gov.hmrc.nisp.utils.NISPConstants
 
 case class NpsSummaryModel( nino: String,
                             postcode: Option[String],
@@ -46,6 +48,15 @@ case class NpsSummaryModel( nino: String,
   val rreToConsider = rreToConsiderOption.getOrElse(0)
 
   val yearsUntilPensionAge = finalRelevantYear - earningsIncludedUpTo.taxYear
+
+  val isAbroad = countryCode != NISPConstants.countryNotSpecified &&
+                  countryCode != NISPConstants.countryGB &&
+                  countryCode != NISPConstants.countryNI &&
+                  countryCode != NISPConstants.countryEngland &&
+                  countryCode != NISPConstants.countryScotland &&
+                  countryCode != NISPConstants.countryWales &&
+                  countryCode != NISPConstants.countryIsleOfMan
+
 }
 
 object NpsSummaryModel {
