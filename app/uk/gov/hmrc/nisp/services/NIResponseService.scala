@@ -21,6 +21,7 @@ import java.util.TimeZone
 import org.joda.time.{DateTimeZone, LocalDate}
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.nisp.connectors.NpsConnector
+import uk.gov.hmrc.nisp.metrics.Metrics
 import uk.gov.hmrc.nisp.models.nps.{NpsDate, NpsNITaxYear}
 import uk.gov.hmrc.nisp.models.{NIRecord, NIRecordTaxYear, NIResponse, NISummary}
 import uk.gov.hmrc.nisp.services.reference.QualifyingYearsAmountService
@@ -30,8 +31,16 @@ import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 
 import scala.concurrent.Future
 
+object NIResponseService extends NIResponseService {
+  override val nps: NpsConnector = NpsConnector
+  override val metrics: Metrics = Metrics
+
+  override def now: LocalDate = LocalDate.now(DateTimeZone.forTimeZone(TimeZone.getTimeZone("Europe/London")))
+}
+
 trait NIResponseService extends WithCurrentDate {
   val nps: NpsConnector
+  val metrics: Metrics
 
   def getNIResponse(nino: Nino)(implicit hc: HeaderCarrier): Future[NIResponse] = {
     val npsNIRecordFuture = nps.connectToNIRecord(nino)
@@ -41,21 +50,23 @@ trait NIResponseService extends WithCurrentDate {
       npsNIRecord <- npsNIRecordFuture;
       npsSummary <- npsSummaryFuture
     ) yield {
-      NIResponse(
-        Some(NIRecord(mapNpsTaxYearsToNisp(npsNIRecord.niTaxYears))),
-        Some(NISummary(
-          npsNIRecord.numberOfQualifyingYears,
-          npsNIRecord.nonQualifyingYears,
-          npsSummary.yearsUntilPensionAge,
-          npsSummary.spaDate.localDate.getYear,
-          npsSummary.earningsIncludedUpTo,
-          npsSummary.earningsIncludedUpTo.taxYear + 1,
-          calcPre75QualifyingYears(npsNIRecord.pre75ContributionCount, npsNIRecord.dateOfEntry),
-          npsNIRecord.nonQualifyingYearsPayable,
-          npsNIRecord.nonQualifyingYears - npsNIRecord.nonQualifyingYearsPayable,
-          npsSummary.npsStatePensionAmount.nspEntitlement < QualifyingYearsAmountService.maxAmount
-        ))
+      val niSummary = NISummary(
+        npsNIRecord.numberOfQualifyingYears,
+        npsNIRecord.nonQualifyingYears,
+        npsSummary.yearsUntilPensionAge,
+        npsSummary.spaDate.localDate.getYear,
+        npsSummary.earningsIncludedUpTo,
+        npsSummary.earningsIncludedUpTo.taxYear + 1,
+        calcPre75QualifyingYears(npsNIRecord.pre75ContributionCount, npsNIRecord.dateOfEntry),
+        npsNIRecord.nonQualifyingYearsPayable,
+        npsNIRecord.nonQualifyingYears - npsNIRecord.nonQualifyingYearsPayable,
+        npsSummary.npsStatePensionAmount.nspEntitlement < QualifyingYearsAmountService.maxAmount
       )
+
+      metrics.niRecord(niSummary.noOfNonQualifyingYears, niSummary.numberOfPayableGaps, niSummary.pre75QualifyingYears.getOrElse(0),
+        niSummary.noOfQualifyingYears, niSummary.yearsToContributeUntilPensionAge)
+
+      NIResponse(NIRecord(mapNpsTaxYearsToNisp(npsNIRecord.niTaxYears)), niSummary)
     }
   }
 
@@ -86,9 +97,4 @@ trait NIResponseService extends WithCurrentDate {
       None
     }
   }
-}
-
-object NIResponseService extends NIResponseService {
-  override val nps: NpsConnector = NpsConnector
-  override def now: LocalDate = LocalDate.now(DateTimeZone.forTimeZone(TimeZone.getTimeZone("Europe/London")))
 }

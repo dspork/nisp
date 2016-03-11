@@ -22,7 +22,8 @@ import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mock.MockitoSugar
 import org.scalatestplus.play.OneAppPerSuite
 import uk.gov.hmrc.nisp.connectors.NpsConnector
-import uk.gov.hmrc.nisp.helpers.{TestAccountBuilder, MockNpsConnector}
+import uk.gov.hmrc.nisp.helpers.{MockMetrics, TestAccountBuilder, MockNpsConnector}
+import uk.gov.hmrc.nisp.metrics.Metrics
 import uk.gov.hmrc.nisp.models.NIRecordTaxYear
 import uk.gov.hmrc.play.http.{NotFoundException, HeaderCarrier}
 import uk.gov.hmrc.play.test.UnitSpec
@@ -36,17 +37,18 @@ class NIResponseServiceSpec  extends UnitSpec with MockitoSugar with BeforeAndAf
 
   val testNIServiceWithMockHttp = new NIResponseService {
     override val nps: NpsConnector = MockNpsConnector
+    override val metrics: Metrics = MockMetrics
     override def now: LocalDate = new LocalDate()
   }
 
   "customer with NINO regular has date of entry of 01/04/1972" should {
     "returns NIResponse" in {
       val niResponse = testNIServiceWithMockHttp.getNIResponse(nino)
-      niResponse.niRecord.get.taxYears.head shouldBe
+      niResponse.niRecord.taxYears.head shouldBe
         NIRecordTaxYear(1975, qualifying = true, 109.08, 0, 0, 0, None, None, None, payable = false, underInvestigation = false)
-      niResponse.niRecord.get.taxYears.last shouldBe
+      niResponse.niRecord.taxYears.last shouldBe
         NIRecordTaxYear(2013, qualifying = true, 0, 52, 0, 0, None, None, None, payable = false, underInvestigation = false)
-      niResponse.niRecord.get.taxYears.size shouldBe 39
+      niResponse.niRecord.taxYears.size shouldBe 39
     }
   }
 
