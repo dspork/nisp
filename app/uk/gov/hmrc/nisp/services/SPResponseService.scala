@@ -55,12 +55,9 @@ trait SPResponseService extends WithCurrentDate {
          npsSchemeMembership <- futureNpsSchemeMembership) yield {
       val spAmountModel = SPAmountModel(npsSummary.npsStatePensionAmount.nspEntitlement)
 
-      val spExclusions = SPExclusionsService(
-        npsSummary.nspQualifyingYears,
+      val spExclusions = ExclusionsService(
         npsSummary.countryCode,
         npsSummary.rreToConsider == 1,
-        npsSummary.sex,
-        npsSchemeMembership,
         npsSummary.dateOfDeath,
         npsSummary.nino,
         npsLiabilities,
@@ -70,8 +67,8 @@ trait SPResponseService extends WithCurrentDate {
         npsSummary.spaDate
       ).getSPExclusions
 
-      if (spExclusions.spExclusions.nonEmpty) {
-        metrics.exclusion(spExclusions.spExclusions)
+      if (spExclusions.exclusions.nonEmpty) {
+        metrics.exclusion(spExclusions.exclusions)
         SPResponseModel(None, Some(spExclusions))
       } else {
         val forecastAmount: SPAmountModel = forecastingService.getForecastAmount(

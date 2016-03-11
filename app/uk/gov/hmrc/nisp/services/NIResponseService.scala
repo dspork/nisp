@@ -23,7 +23,7 @@ import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.nisp.connectors.NpsConnector
 import uk.gov.hmrc.nisp.metrics.Metrics
 import uk.gov.hmrc.nisp.models.nps.{NpsDate, NpsNITaxYear}
-import uk.gov.hmrc.nisp.models.{NIRecord, NIRecordTaxYear, NIResponse, NISummary}
+import uk.gov.hmrc.nisp.models._
 import uk.gov.hmrc.nisp.services.reference.QualifyingYearsAmountService
 import uk.gov.hmrc.nisp.utils.{NISPConstants, WithCurrentDate}
 import uk.gov.hmrc.play.http.HeaderCarrier
@@ -45,28 +45,51 @@ trait NIResponseService extends WithCurrentDate {
   def getNIResponse(nino: Nino)(implicit hc: HeaderCarrier): Future[NIResponse] = {
     val npsNIRecordFuture = nps.connectToNIRecord(nino)
     val npsSummaryFuture = nps.connectToSummary(nino)
+    val npsLiabilitiesFuture = nps.connectToLiabilities(nino)
 
     for (
       npsNIRecord <- npsNIRecordFuture;
-      npsSummary <- npsSummaryFuture
+      npsSummary <- npsSummaryFuture;
+      npsLiabilities <- npsLiabilitiesFuture
     ) yield {
-      val niSummary = NISummary(
-        npsNIRecord.numberOfQualifyingYears,
-        npsNIRecord.nonQualifyingYears,
-        npsSummary.yearsUntilPensionAge,
-        npsSummary.spaDate.localDate.getYear,
-        npsSummary.earningsIncludedUpTo,
-        npsSummary.earningsIncludedUpTo.taxYear + 1,
-        calcPre75QualifyingYears(npsNIRecord.pre75ContributionCount, npsNIRecord.dateOfEntry),
-        npsNIRecord.nonQualifyingYearsPayable,
-        npsNIRecord.nonQualifyingYears - npsNIRecord.nonQualifyingYearsPayable,
-        npsSummary.npsStatePensionAmount.nspEntitlement < QualifyingYearsAmountService.maxAmount
-      )
 
-      metrics.niRecord(niSummary.noOfNonQualifyingYears, niSummary.numberOfPayableGaps, niSummary.pre75QualifyingYears.getOrElse(0),
-        niSummary.noOfQualifyingYears, niSummary.yearsToContributeUntilPensionAge)
+      val niExclusions = ExclusionsService(
+        npsSummary.countryCode,
+        npsSummary.rreToConsider == 1,
+        npsSummary.dateOfDeath,
+        npsSummary.nino,
+        npsLiabilities,
+        npsSummary.npsStatePensionAmount.nspEntitlement,
+        SPCurrentAmountService.calculate(npsSummary.npsStatePensionAmount.npsAmountA2016, npsSummary.npsStatePensionAmount.npsAmountB2016),
+        NpsDate(now),
+        npsSummary.spaDate
+      ).getNIExclusions
 
-      NIResponse(NIRecord(mapNpsTaxYearsToNisp(npsNIRecord.niTaxYears)), niSummary)
+      if (niExclusions.exclusions.nonEmpty) {
+        NIResponse(None, None, Some(niExclusions))
+      } else {
+
+        val niSummary = NISummary(
+          npsNIRecord.numberOfQualifyingYears,
+          npsNIRecord.nonQualifyingYears,
+          npsSummary.yearsUntilPensionAge,
+          npsSummary.spaDate.localDate.getYear,
+          npsSummary.earningsIncludedUpTo,
+          npsSummary.earningsIncludedUpTo.taxYear + 1,
+          calcPre75QualifyingYears(npsNIRecord.pre75ContributionCount, npsNIRecord.dateOfEntry),
+          npsNIRecord.nonQualifyingYearsPayable,
+          npsNIRecord.nonQualifyingYears - npsNIRecord.nonQualifyingYearsPayable,
+          npsSummary.npsStatePensionAmount.nspEntitlement < QualifyingYearsAmountService.maxAmount
+        )
+
+        metrics.niRecord(niSummary.noOfNonQualifyingYears, niSummary.numberOfPayableGaps, niSummary.pre75QualifyingYears.getOrElse(0),
+          niSummary.noOfQualifyingYears, niSummary.yearsToContributeUntilPensionAge)
+
+        NIResponse(
+          Some(NIRecord(mapNpsTaxYearsToNisp(npsNIRecord.niTaxYears))),
+          Some(niSummary)
+        )
+      }
     }
   }
 

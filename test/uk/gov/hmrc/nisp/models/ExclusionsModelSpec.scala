@@ -17,36 +17,36 @@
 package uk.gov.hmrc.nisp.models
 
 import play.api.libs.json._
-import uk.gov.hmrc.nisp.models.enums.SPExclusion
+import uk.gov.hmrc.nisp.models.enums.Exclusion
 import uk.gov.hmrc.play.test.UnitSpec
 
-class SPExclusionsModelSpec extends UnitSpec {
+class ExclusionsModelSpec extends UnitSpec {
 
   "serialised into JSON" should {
     "become a list of JsStrings" in {
-      Json.toJson(List(SPExclusion.Abroad, SPExclusion.ContractedOut, SPExclusion.CustomerTooOld)) shouldBe
+      Json.toJson(List(Exclusion.Abroad, Exclusion.ContractedOut, Exclusion.CustomerTooOld)) shouldBe
         JsArray(Seq[JsString](JsString("Abroad"), JsString("ContractedOut"), JsString("CustomerTooOld")))
     }
 
     "become a list of JSString with one exclusion" in {
-      Json.toJson(List(SPExclusion.Abroad)) shouldBe
+      Json.toJson(List(Exclusion.Abroad)) shouldBe
         JsArray(Seq[JsString](JsString("Abroad")))
     }
   }
 
   "parsed from JSON" should {
-    "become a SPExclusionModel with list of Enum values" in {
-      val json = Json.parse("{ \"spExclusions\" : [\"Abroad\", \"ContractedOut\", \"CustomerTooOld\"] }")
+    "become a ExclusionModel with list of Enum values" in {
+      val json = Json.parse("{ \"exclusions\" : [\"Abroad\", \"ContractedOut\", \"CustomerTooOld\"] }")
 
-      Json.fromJson[SPExclusionsModel](json).get shouldBe
-        SPExclusionsModel(List(SPExclusion.Abroad, SPExclusion.ContractedOut, SPExclusion.CustomerTooOld))
+      Json.fromJson[ExclusionsModel](json).get shouldBe
+        ExclusionsModel(List(Exclusion.Abroad, Exclusion.ContractedOut, Exclusion.CustomerTooOld))
     }
 
-    "become a SPExclusion model with one enum value in a list" in {
-      val json = Json.parse("{ \"spExclusions\" : [\"Abroad\"] }")
+    "become a Exclusion model with one enum value in a list" in {
+      val json = Json.parse("{ \"exclusions\" : [\"Abroad\"] }")
 
-      Json.fromJson[SPExclusionsModel](json).get shouldBe
-        SPExclusionsModel(List(SPExclusion.Abroad))
+      Json.fromJson[ExclusionsModel](json).get shouldBe
+        ExclusionsModel(List(Exclusion.Abroad))
     }
   }
 }

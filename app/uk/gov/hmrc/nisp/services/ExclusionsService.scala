@@ -17,28 +17,30 @@
 package uk.gov.hmrc.nisp.services
 
 import play.Logger
-import uk.gov.hmrc.nisp.models.SPExclusionsModel
-import uk.gov.hmrc.nisp.models.enums.SPExclusion
-import uk.gov.hmrc.nisp.models.enums.SPExclusion.SPExclusion
+import uk.gov.hmrc.nisp.models.ExclusionsModel
+import uk.gov.hmrc.nisp.models.enums.Exclusion
+import uk.gov.hmrc.nisp.models.enums.Exclusion.Exclusion
 import uk.gov.hmrc.nisp.models.nps.{NpsDate, NpsLiability, NpsSchemeMembership}
 import uk.gov.hmrc.nisp.utils.{FunctionHelper, NISPConstants}
 
-case class SPExclusionsService(numberOfQualifyingYears: Int, countryCode: Int, mwrre: Boolean, sex: String,
-                               schemeMemberships: List[NpsSchemeMembership], dateOfDeath: Option[NpsDate], nino: String, liabilities: List[NpsLiability],
-                               currentAmountReceived: BigDecimal, currentAmountCalculated: BigDecimal, now: NpsDate, statePensionAge: NpsDate) {
+case class ExclusionsService(countryCode: Int, mwrre: Boolean, dateOfDeath: Option[NpsDate], nino: String,
+                             liabilities: List[NpsLiability], currentAmountReceived: BigDecimal,
+                             currentAmountCalculated: BigDecimal, now: NpsDate, statePensionAge: NpsDate) {
 
-  def getSPExclusions: SPExclusionsModel = {
-    val exclusions = allExclusions(List())
+  def getSPExclusions: ExclusionsModel = calculateExclusions(spExclusions)
+  def getNIExclusions: ExclusionsModel = calculateExclusions(niExclusions)
 
+  private def calculateExclusions(rules: List[Exclusion] => List[Exclusion]): ExclusionsModel  = {
+    val exclusions = rules(List())
     if (exclusions.nonEmpty) {
       val formattedExclusions = exclusions.map(_.toString).mkString(",")
       Logger.info(s"User excluded: $formattedExclusions")
     }
 
-    SPExclusionsModel(exclusions)
+    ExclusionsModel(exclusions)
   }
 
-  val checkAbroad = (exclusionList: List[SPExclusion]) => {
+  val checkAbroad = (exclusionList: List[Exclusion]) => {
     countryCode match {
       case NISPConstants.countryNotSpecified => exclusionList
       case NISPConstants.countryGB => exclusionList
@@ -47,43 +49,44 @@ case class SPExclusionsService(numberOfQualifyingYears: Int, countryCode: Int, m
       case NISPConstants.countryScotland => exclusionList
       case NISPConstants.countryWales => exclusionList
       case NISPConstants.countryIsleOfMan => exclusionList
-      case _ => SPExclusion.Abroad :: exclusionList
+      case _ => Exclusion.Abroad :: exclusionList
     }
   }
 
-  val checkIOMLiabilities = (exclusionList: List[SPExclusion]) => {
+  val checkIOMLiabilities = (exclusionList: List[Exclusion]) => {
     if (liabilities.exists(_.liabilityType == NISPConstants.isleOfManLiability))
-      SPExclusion.IOM :: exclusionList
+      Exclusion.IOM :: exclusionList
     else
       exclusionList
   }
 
-  val checkMWRRE = (exclusionList: List[SPExclusion]) =>
-    if (mwrre) SPExclusion.MWRRE :: exclusionList else exclusionList
+  val checkMWRRE = (exclusionList: List[Exclusion]) =>
+    if (mwrre) Exclusion.MWRRE :: exclusionList else exclusionList
 
-  val checkDead = (exclusionList: List[SPExclusion]) =>
-    dateOfDeath.fold(exclusionList)(_ => SPExclusion.Dead :: exclusionList)
+  val checkDead = (exclusionList: List[Exclusion]) =>
+    dateOfDeath.fold(exclusionList)(_ => Exclusion.Dead :: exclusionList)
 
-  val checkAmountDissonance = (exclusionList: List[SPExclusion]) => {
+  val checkAmountDissonance = (exclusionList: List[Exclusion]) => {
     if(currentAmountCalculated != currentAmountReceived) {
       Logger.warn(s"Dissonance Found!: nSP Calc - $currentAmountReceived Breakdown - $currentAmountCalculated NINO - $nino")
-      SPExclusion.AmountDissonance :: exclusionList
+      Exclusion.AmountDissonance :: exclusionList
     } else {
       exclusionList
     }
   }
 
-  val checkStatePensionAge = (exclusionList: List[SPExclusion]) => {
+  val checkStatePensionAge = (exclusionList: List[Exclusion]) => {
     if(statePensionAge.localDate.isBefore(NISPConstants.newStatePensionStart)) {
-      List(SPExclusion.CustomerTooOld)
+      List(Exclusion.CustomerTooOld)
     } else {
       if(!now.localDate.isBefore(statePensionAge.localDate.minusDays(1))) {
-        SPExclusion.PostStatePensionAge :: exclusionList
+        Exclusion.PostStatePensionAge :: exclusionList
       } else {
         exclusionList
       }
     }
   }
 
-  val allExclusions = FunctionHelper.composeAll(List(checkStatePensionAge, checkAbroad, checkMWRRE, checkDead, checkIOMLiabilities, checkAmountDissonance))
+  val spExclusions = FunctionHelper.composeAll(List(checkStatePensionAge, checkAbroad, checkMWRRE, checkDead, checkIOMLiabilities, checkAmountDissonance))
+  val niExclusions = FunctionHelper.composeAll(List(checkMWRRE, checkDead, checkIOMLiabilities))
 }

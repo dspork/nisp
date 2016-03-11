@@ -22,7 +22,7 @@ import org.scalatest.mock.MockitoSugar
 import org.scalatestplus.play.OneAppPerSuite
 import uk.gov.hmrc.nisp.connectors.NpsConnector
 import uk.gov.hmrc.nisp.helpers.{MockSPResponseService, TestAccountBuilder, MockNpsConnector}
-import uk.gov.hmrc.nisp.models.enums.SPExclusion
+import uk.gov.hmrc.nisp.models.enums.Exclusion
 import uk.gov.hmrc.nisp.models.nps._
 import uk.gov.hmrc.nisp.models.{SPAgeModel, SPAmountModel}
 import uk.gov.hmrc.play.http.{HeaderCarrier, NotFoundException}
@@ -67,15 +67,15 @@ class SPResponseServiceSpec extends UnitSpec with MockitoSugar with OneAppPerSui
     spResponse.spSummary.get.statePensionAge shouldBe SPAgeModel(65,NpsDate(new LocalDate(2017,11,21)))
   }
 
-  "return no SPSummaryModel and a SPExclusionsModel" in {
+  "return no SPSummaryModel and an ExclusionsModel" in {
     val spResponse = MockSPResponseService.getSPResponse(exclusionNino)
     spResponse.spSummary shouldBe None
     spResponse.spExclusions.isEmpty shouldBe false
   }
 
-  "return an SPExclusionModel with correct exclusion" in {
+  "return an ExclusionModel with correct exclusion" in {
     val spResponse = MockSPResponseService.getSPResponse(exclusionNino)
-    spResponse.spExclusions.get.spExclusions shouldBe List(SPExclusion.Abroad)
+    spResponse.spExclusions.get.exclusions shouldBe List(Exclusion.Abroad, Exclusion.MWRRE)
   }
 
   "age Calculation" should {
