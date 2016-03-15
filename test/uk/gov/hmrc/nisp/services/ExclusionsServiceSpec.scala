@@ -58,39 +58,6 @@ class ExclusionsServiceSpec extends UnitSpec with OneAppPerSuite  {
         ExclusionsService(true, false, None, nino, List(), 100, 100, defaultDate, statePensionAge).getSPExclusions shouldBe createModelWithListItems(Exclusion.Abroad)
       }
 
-//      "return IsAbroad exclusion for customer in JERSEY" in {
-//        ExclusionsService(4, false, None, nino, List(), 100, 100, defaultDate, statePensionAge).getSPExclusions shouldBe createModelWithListItems(Exclusion.Abroad)
-//      }
-//
-//      "return IsAbroad exclusion for customer in MOZAMBIQUE" in {
-//        ExclusionsService(10, false, None, nino, List(), 100, 100, defaultDate, statePensionAge).getSPExclusions shouldBe createModelWithListItems(Exclusion.Abroad)
-//      }
-//
-//      "return no exclusions for customer in GREAT BRITAIN" in {
-//        ExclusionsService(false, false, None, nino, List(), 100, 100, defaultDate, statePensionAge).getSPExclusions shouldBe noExclusions
-//      }
-//
-//      "return no exclusions for customer in ENGLAND" in {
-
-
-//        ExclusionsService(countryEngland, false, None, nino, List(), 100, 100, defaultDate, statePensionAge).getSPExclusions shouldBe noExclusions
-//      }
-//
-//      "return no exclusions for customer in SCOTLAND" in {
-//        ExclusionsService(countryScotland, false, None, nino, List(), 100, 100, defaultDate, statePensionAge).getSPExclusions shouldBe noExclusions
-//      }
-//
-//      "return no exclusions for customer in WALES" in {
-//        ExclusionsService(countryWales, false, None, nino, List(), 100, 100, defaultDate, statePensionAge).getSPExclusions shouldBe noExclusions
-//      }
-//
-//      "return no exclusions for customer in NORTHERN IRELAND" in {
-//        ExclusionsService(countryNI, false, None, nino, List(), 100, 100, defaultDate, statePensionAge).getSPExclusions shouldBe noExclusions
-//      }
-//
-//      "return no exclusions for customer with not specified" in {
-//        ExclusionsService(countryNotSpecified, false, None, nino, List(), 100, 100, defaultDate, statePensionAge).getSPExclusions shouldBe noExclusions
-//      }
     }
 
     "checking for customer MWRRE" should {
@@ -221,37 +188,6 @@ class ExclusionsServiceSpec extends UnitSpec with OneAppPerSuite  {
         "return no exclusions if customer is abroad" in {
           ExclusionsService(true, false, None, nino, List(), 100, 100, defaultDate, statePensionAge).getNIExclusions shouldBe noExclusions
         }
-//      "return no exclusions for customer in JERSEY" in {
-//        ExclusionsService(4, false, None, nino, List(), 100, 100, defaultDate, statePensionAge).getNIExclusions shouldBe noExclusions
-//      }
-//
-//      "return no exclusions for customer in MOZAMBIQUE" in {
-//        ExclusionsService(10, false, None, nino, List(), 100, 100, defaultDate, statePensionAge).getNIExclusions shouldBe noExclusions
-//      }
-//
-//      "return no exclusions for customer in GREAT BRITAIN" in {
-//        ExclusionsService(false, false, None, nino, List(), 100, 100, defaultDate, statePensionAge).getNIExclusions shouldBe noExclusions
-//      }
-//
-//      "return no exclusions for customer in ENGLAND" in {
-//        ExclusionsService(countryEngland, false, None, nino, List(), 100, 100, defaultDate, statePensionAge).getNIExclusions shouldBe noExclusions
-//      }
-//
-//      "return no exclusions for customer in SCOTLAND" in {
-//        ExclusionsService(countryScotland, false, None, nino, List(), 100, 100, defaultDate, statePensionAge).getNIExclusions shouldBe noExclusions
-//      }
-//
-//      "return no exclusions for customer in WALES" in {
-//        ExclusionsService(countryWales, false, None, nino, List(), 100, 100, defaultDate, statePensionAge).getNIExclusions shouldBe noExclusions
-//      }
-//
-//      "return no exclusions for customer in NORTHERN IRELAND" in {
-//        ExclusionsService(countryNI, false, None, nino, List(), 100, 100, defaultDate, statePensionAge).getNIExclusions shouldBe noExclusions
-//      }
-//
-//      "return no exclusions for customer with not specified" in {
-//        ExclusionsService(countryNotSpecified, false, None, nino, List(), 100, 100, defaultDate, statePensionAge).getNIExclusions shouldBe noExclusions
-//      }
     }
 
     "checking for customer MWRRE" should {
