@@ -21,7 +21,7 @@ import uk.gov.hmrc.nisp.models.nps.NpsDate
 
 case class NISummary(noOfQualifyingYears: Int, noOfNonQualifyingYears: Int, yearsToContributeUntilPensionAge: Int,
                       spaYear: Int, earningsIncludedUpTo: NpsDate, unavailableYear: Int, pre75QualifyingYears : Option[Int],
-                      numberOfPayableGaps: Int, numberOfNonPayableGaps: Int, canImproveWithGaps: Boolean)
+                      numberOfPayableGaps: Int, numberOfNonPayableGaps: Int, canImproveWithGaps: Boolean, isAbroad: Boolean)
 
 object NISummary {
   implicit val formats = Json.format[NISummary]

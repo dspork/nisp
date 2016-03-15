@@ -20,9 +20,9 @@ import com.codahale.metrics.Timer.Context
 import com.codahale.metrics.{Counter, Timer}
 import com.kenshoo.play.metrics.MetricsRegistry
 import uk.gov.hmrc.nisp.models.enums.APITypes.APITypes
+import uk.gov.hmrc.nisp.models.enums.Exclusion._
 import uk.gov.hmrc.nisp.models.enums.SPContextMessage._
-import uk.gov.hmrc.nisp.models.enums.SPExclusion._
-import uk.gov.hmrc.nisp.models.enums.{APITypes, SPContextMessage, SPExclusion}
+import uk.gov.hmrc.nisp.models.enums.{Exclusion, APITypes, SPContextMessage}
 
 trait Metrics {
   def startTimer(api: APITypes): Timer.Context
@@ -30,7 +30,7 @@ trait Metrics {
   
   def summary(forecast: BigDecimal, current: BigDecimal, scenario: Option[SPContextMessage], contractedOut: Boolean, forecastOnly: Boolean, age: Int): Unit
   def niRecord(gaps: Int, payableGaps: Int, pre75Years: Int, qualifyingYears: Int, yearsUntilSPA: Int): Unit
-  def exclusion(exclusions: List[SPExclusion]): Unit
+  def exclusion(exclusions: List[Exclusion]): Unit
 }
 
 object Metrics extends Metrics {
@@ -83,15 +83,15 @@ object Metrics extends Metrics {
     SPContextMessage.ScenarioEight -> MetricsRegistry.defaultRegistry.counter("scenario-8")
   )
 
-  val exclusionMeters: Map[SPExclusion, Counter] = Map(
-    SPExclusion.Abroad -> MetricsRegistry.defaultRegistry.counter("exclusion-abroad"),
-    SPExclusion.MWRRE -> MetricsRegistry.defaultRegistry.counter("exclusion-mwrre"),
-    SPExclusion.CustomerTooOld -> MetricsRegistry.defaultRegistry.counter("exclusion-too-old"),
-    SPExclusion.ContractedOut -> MetricsRegistry.defaultRegistry.counter("exclusion-contracted-out"),
-    SPExclusion.Dead -> MetricsRegistry.defaultRegistry.counter("exclusion-dead"),
-    SPExclusion.IOM -> MetricsRegistry.defaultRegistry.counter("exclusion-isle-of-man"),
-    SPExclusion.AmountDissonance -> MetricsRegistry.defaultRegistry.counter("amount-dissonance"),
-    SPExclusion.PostStatePensionAge -> MetricsRegistry.defaultRegistry.counter("exclusion-post-spa")
+  val exclusionMeters: Map[Exclusion, Counter] = Map(
+    Exclusion.Abroad -> MetricsRegistry.defaultRegistry.counter("exclusion-abroad"),
+    Exclusion.MWRRE -> MetricsRegistry.defaultRegistry.counter("exclusion-mwrre"),
+    Exclusion.CustomerTooOld -> MetricsRegistry.defaultRegistry.counter("exclusion-too-old"),
+    Exclusion.ContractedOut -> MetricsRegistry.defaultRegistry.counter("exclusion-contracted-out"),
+    Exclusion.Dead -> MetricsRegistry.defaultRegistry.counter("exclusion-dead"),
+    Exclusion.IOM -> MetricsRegistry.defaultRegistry.counter("exclusion-isle-of-man"),
+    Exclusion.AmountDissonance -> MetricsRegistry.defaultRegistry.counter("amount-dissonance"),
+    Exclusion.PostStatePensionAge -> MetricsRegistry.defaultRegistry.counter("exclusion-post-spa")
   )
 
   override def summary(forecast: BigDecimal, current: BigDecimal, scenario: Option[SPContextMessage],
@@ -112,7 +112,7 @@ object Metrics extends Metrics {
     yearsUntilSPAMeter.update(yearsUntilSPA)
   }
 
-  override def exclusion(exclusions: List[SPExclusion]): Unit = exclusions.foreach(exclusionMeters(_).inc())
+  override def exclusion(exclusions: List[Exclusion]): Unit = exclusions.foreach(exclusionMeters(_).inc())
 
   private def mapToAgeMeter(age: Int): Unit = {
     if (56 to 65 contains age)

@@ -22,15 +22,17 @@ import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mock.MockitoSugar
 import org.scalatestplus.play.OneAppPerSuite
 import uk.gov.hmrc.nisp.connectors.NpsConnector
-import uk.gov.hmrc.nisp.helpers.{MockMetrics, TestAccountBuilder, MockNpsConnector}
+import uk.gov.hmrc.nisp.helpers.{MockMetrics, MockNpsConnector, TestAccountBuilder}
 import uk.gov.hmrc.nisp.metrics.Metrics
-import uk.gov.hmrc.nisp.models.NIRecordTaxYear
-import uk.gov.hmrc.play.http.{NotFoundException, HeaderCarrier}
+import uk.gov.hmrc.nisp.models.enums.Exclusion
+import uk.gov.hmrc.nisp.models.{ExclusionsModel, NIRecordTaxYear}
+import uk.gov.hmrc.play.http.{HeaderCarrier, NotFoundException}
 import uk.gov.hmrc.play.test.UnitSpec
 
 class NIResponseServiceSpec  extends UnitSpec with MockitoSugar with BeforeAndAfter with OneAppPerSuite {
 
   val nino = TestAccountBuilder.regularNino
+  val exclusionNino = TestAccountBuilder.excludedNino
   val nonexistentnino = TestAccountBuilder.nonExistentNino
 
   implicit val hc = HeaderCarrier()
@@ -44,11 +46,11 @@ class NIResponseServiceSpec  extends UnitSpec with MockitoSugar with BeforeAndAf
   "customer with NINO regular has date of entry of 01/04/1972" should {
     "returns NIResponse" in {
       val niResponse = testNIServiceWithMockHttp.getNIResponse(nino)
-      niResponse.niRecord.taxYears.head shouldBe
+      niResponse.niRecord.get.taxYears.head shouldBe
         NIRecordTaxYear(1975, qualifying = true, 109.08, 0, 0, 0, None, None, None, payable = false, underInvestigation = false)
-      niResponse.niRecord.taxYears.last shouldBe
+      niResponse.niRecord.get.taxYears.last shouldBe
         NIRecordTaxYear(2013, qualifying = true, 0, 52, 0, 0, None, None, None, payable = false, underInvestigation = false)
-      niResponse.niRecord.taxYears.size shouldBe 39
+      niResponse.niRecord.get.taxYears.size shouldBe 39
     }
   }
 
@@ -59,5 +61,13 @@ class NIResponseServiceSpec  extends UnitSpec with MockitoSugar with BeforeAndAf
         ex shouldBe a[NotFoundException]
       }
     }
+  }
+
+  "customer with excluded NINO" in {
+    val niResponse = testNIServiceWithMockHttp.getNIResponse(exclusionNino)
+    niResponse.niRecord shouldBe None
+    niResponse.niSummary shouldBe None
+    niResponse.niExclusions shouldBe Some(ExclusionsModel(List(Exclusion.MWRRE)))
+
   }
 }

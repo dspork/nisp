@@ -18,7 +18,9 @@ package uk.gov.hmrc.nisp.models
 
 import play.api.libs.json.Json
 
-case class NIResponse(niRecord: NIRecord, niSummary: NISummary)
+case class NIResponse(niRecord: Option[NIRecord],
+                      niSummary: Option[NISummary],
+                      niExclusions: Option[ExclusionsModel] = None)
 
 object NIResponse {
   implicit val formats = Json.format[NIResponse]
