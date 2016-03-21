@@ -21,7 +21,8 @@ import SPContextMessage.SPContextMessage
 import play.api.libs.json.Json
 import uk.gov.hmrc.nisp.models.nps.NpsDate
 
-case class SPSummaryModel( nino: String,
+case class SPSummaryModel(
+                           nino: String,
                            lastProcessedDate: NpsDate,
                            statePensionAmount: SPAmountModel,
                            statePensionAge: SPAgeModel,
@@ -33,13 +34,12 @@ case class SPSummaryModel( nino: String,
                            yearsToContributeUntilPensionAge: Int,
                            hasPsod: Boolean,
                            dateOfBirth: NpsDate,
-                           forecastAmount: SPAmountModel,
+                           forecast: SPForecastModel,
                            fullNewStatePensionAmount: BigDecimal,
                            contractedOutFlag: Boolean,
-                           forecastOnlyFlag: Boolean,
                            customerAge: Int,
                            copeAmount: SPAmountModel
-                           )
+                         )
 
 object SPSummaryModel {
   implicit val formats = Json.format[SPSummaryModel]

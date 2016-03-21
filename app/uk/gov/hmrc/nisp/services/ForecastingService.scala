@@ -19,9 +19,11 @@ package uk.gov.hmrc.nisp.services
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.nisp.connectors.CustomAuditConnector
 import uk.gov.hmrc.nisp.events.ForecastingEvent
-import uk.gov.hmrc.nisp.models.SPAmountModel
-import uk.gov.hmrc.nisp.models.nps.{NpsAmountB2016, NpsAmountA2016, NpsSchemeMembership, NpsDate}
-import uk.gov.hmrc.nisp.services.reference.{QualifyingYearsAmountService, EarningLevelService}
+import uk.gov.hmrc.nisp.models.enums.Scenario
+import uk.gov.hmrc.nisp.models.enums.Scenario.Scenario
+import uk.gov.hmrc.nisp.models.{Forecast, SPAmountModel, SPForecastModel}
+import uk.gov.hmrc.nisp.models.nps.{NpsAmountA2016, NpsAmountB2016, NpsDate, NpsSchemeMembership}
+import uk.gov.hmrc.nisp.services.reference.{EarningLevelService, QualifyingYearsAmountService}
 import uk.gov.hmrc.nisp.utils.NISPConstants
 import uk.gov.hmrc.play.http.HeaderCarrier
 
@@ -37,21 +39,31 @@ trait ForecastingService {
 
   def getForecastAmount(npsSchemeMembership: List[NpsSchemeMembership], earningsIncludedUpTo: NpsDate, currentQualifyingYears: Int, amountA: NpsAmountA2016,
                         amountB: NpsAmountB2016, lastYearEarnings: BigDecimal, finalRelevantYear: Int,
-                        forecastAmount: BigDecimal, forecastAmount2016: BigDecimal, lastYearQualifying: Boolean, nino: Nino)
-                       (implicit hc: HeaderCarrier): SPAmountModel = {
+                        forecastAmount: BigDecimal, forecastAmount2016: BigDecimal, lastYearQualifying: Boolean, nino: Nino, fillableGaps: Int, currentAmount: SPAmountModel)
+                       (implicit hc: HeaderCarrier): SPForecastModel = {
 
-    if (npsSchemeMembership.exists(_.contains(earningsIncludedUpTo))) {
-      customAuditConnector.sendEvent(ForecastingEvent(nino, earningsIncludedUpTo, currentQualifyingYears, amountA, amountB, lastYearEarnings, finalRelevantYear,
-        forecastAmount, forecastAmount2016, lastYearQualifying, "Contracted out at the end of the last posted tax year"))
-      SPAmountModel(ForecastingService.forecast(earningsIncludedUpTo, currentQualifyingYears, amountB.rebateDerivedAmount,
-        amountA.totalAP, lastYearEarnings, finalRelevantYear, contractedOutLastYear = true))
-    } else {
-      customAuditConnector.sendEvent(ForecastingEvent(nino, earningsIncludedUpTo, currentQualifyingYears, amountA, amountB, lastYearEarnings, finalRelevantYear,
-        forecastAmount, forecastAmount2016, lastYearQualifying,
-        "Customer has been contracted out in the past, but ended the last posted tax year contracted in"))
-      SPAmountModel(ForecastingService.forecast(earningsIncludedUpTo, currentQualifyingYears, amountB.rebateDerivedAmount,
-        amountA.totalAP, lastYearEarnings, finalRelevantYear, contractedOutLastYear = false))
-    }
+    val contractedOutLastYear: Boolean = npsSchemeMembership.exists(_.contains(earningsIncludedUpTo))
+
+    customAuditConnector.sendEvent(ForecastingEvent(nino, earningsIncludedUpTo, currentQualifyingYears, amountA,
+      amountB, lastYearEarnings, finalRelevantYear, forecastAmount, forecastAmount2016, lastYearQualifying,
+      contractedOutLastYear))
+
+    val calculatedForecast = forecast(earningsIncludedUpTo, currentQualifyingYears,
+      amountB.rebateDerivedAmount, amountA.totalAP, lastYearEarnings, finalRelevantYear, contractedOutLastYear)
+
+    val personalMaximumAmount = personalMaximum(earningsIncludedUpTo, currentQualifyingYears,
+      amountB.rebateDerivedAmount, amountA.totalAP, lastYearEarnings, finalRelevantYear, contractedOutLastYear,
+      fillableGaps)
+
+    val scenario = forecastScenario(currentAmount, SPAmountModel(calculatedForecast.amount), personalMaximumAmount)
+
+    SPForecastModel(
+      SPAmountModel(calculatedForecast.amount),
+      if(scenario == Scenario.Reached) 0 else calculatedForecast.yearsLeftToWork,
+      personalMaximumAmount,
+      scenario
+    )
+
   }
 
   def adjustForecast(forecastAmount: BigDecimal, forecastAmount2016: BigDecimal, amountATotal: BigDecimal, amountBTotal: BigDecimal): BigDecimal = {
@@ -69,7 +81,7 @@ trait ForecastingService {
   def isAmountA2016AfterAdjustment(amountATotal: BigDecimal, amountBTotal: BigDecimal): Boolean = NISPConstants.fraa2014 + amountATotal >= amountBTotal
 
   def forecast(earningsIncludedUpTo: NpsDate, currentQualifyingYears: Int, existingRDA: BigDecimal, existingAP: BigDecimal,
-               lastYearEarnings: BigDecimal, finalRelevantYear: Int, contractedOutLastYear: Boolean): BigDecimal = {
+               lastYearEarnings: BigDecimal, finalRelevantYear: Int, contractedOutLastYear: Boolean): Forecast = {
     val qysAt2016 = totalQualifyingYearsAt2016(earningsIncludedUpTo, currentQualifyingYears)
     val basicPensionAt2016 = QualifyingYearsAmountService.getBspAmount(qysAt2016)
 
@@ -83,7 +95,13 @@ trait ForecastingService {
     val amountB2016 = forecastAmountBAt2016(QualifyingYearsAmountService.getNspAmount(qysAt2016), rda2016)
 
     val startingAmount = amountA2016.max(amountB2016)
-    forecastPost2016StatePension(finalRelevantYear, startingAmount, qysAt2016)
+
+    forecastPost2016StatePension(
+      finalRelevantYear,
+      startingAmount,
+      qysAt2016,
+      qualifyingYearsTo2016(earningsIncludedUpTo)
+    )
   }
 
   def forecastAmountBAt2016(mainAmount2016: BigDecimal, rebateDerivedAmount2016: BigDecimal): BigDecimal =
@@ -124,14 +142,39 @@ trait ForecastingService {
 
   def qualifyingYearsToFRY(finalRelevantYear: Int): Int = finalRelevantYear - NISPConstants.newStatePensionStartYear + 1
 
-  def forecastPost2016StatePension(finalRelevantYear: Int, startingAmount: BigDecimal, qualifyingYearsAt2016: Int): BigDecimal = {
+  def forecastPost2016StatePension(finalRelevantYear: Int, startingAmount: BigDecimal, qualifyingYearsAt2016: Int,
+                                   pre2016YearsToContribute: Int): Forecast = {
     if(startingAmount >= QualifyingYearsAmountService.maxAmount)
-      startingAmount
+      Forecast(startingAmount, pre2016YearsToContribute)
     else if (qualifyingYearsToFRY(finalRelevantYear) + qualifyingYearsAt2016 < NISPConstants.newStatePensionMinimumQualifyingYears)
-      0
-    else
-      (startingAmount + (qualifyingYearsToFRY(finalRelevantYear) * QualifyingYearsAmountService.nSPAmountPerYear))
+      Forecast(0, 0)
+    else {
+      val amountNeeded: BigDecimal = QualifyingYearsAmountService.maxAmount - startingAmount
+      val yearsNeeded: Int = (amountNeeded / QualifyingYearsAmountService.nSPAmountPerYear).setScale(0, RoundingMode.CEILING).toInt
+      val yearsPossible: Int = yearsNeeded.min(qualifyingYearsToFRY(finalRelevantYear))
+
+      Forecast((startingAmount + (yearsPossible * QualifyingYearsAmountService.nSPAmountPerYear))
         .setScale(2, RoundingMode.HALF_UP)
-        .min(QualifyingYearsAmountService.maxAmount)
+        .min(QualifyingYearsAmountService.maxAmount), yearsPossible + pre2016YearsToContribute)
+    }
+
   }
+
+  def forecastScenario(current: SPAmountModel, forecast: SPAmountModel, personalMaximum: SPAmountModel): Scenario = {
+    if(forecast.week < current.week)
+      Scenario.ForecastOnly
+    else (current == forecast, personalMaximum.week > forecast.week) match {
+      case (true, false) => Scenario.Reached
+      case (_, true) => Scenario.FillGaps
+      case (false, false) if forecast.week >= QualifyingYearsAmountService.maxAmount => Scenario.ContinueWorkingMax
+      case (false, false) => Scenario.ContinueWorkingNonMax
+    }
+  }
+
+  def personalMaximum(earningsIncludedUpTo: NpsDate, currentQualifyingYears: Int, existingRDA: BigDecimal, existingAP: BigDecimal,
+                      lastYearEarnings: BigDecimal, finalRelevantYear: Int, contractedOutLastYear: Boolean, fillableGaps: Int): SPAmountModel = {
+    SPAmountModel(forecast(earningsIncludedUpTo, currentQualifyingYears + fillableGaps, existingRDA, existingAP,
+      lastYearEarnings, finalRelevantYear, contractedOutLastYear).amount)
+  }
+
 }
