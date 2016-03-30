@@ -1,7 +1,7 @@
 National Insurance and State Pension
 ====================================
 
-[![Build Status](https://travis-ci.org/hmrc/nisp.svg)](https://travis-ci.org/hmrc/nisp) [ ![Download](https://api.bintray.com/packages/hmrc/releases/nisp/images/download.svg) ](https://bintray.com/hmrc/releases/nisp/_latestVersion)
+[![Build Status](https://travis-ci.org/hmrc/nisp.svg?branch=master)](https://travis-ci.org/hmrc/nisp) [ ![Download](https://api.bintray.com/packages/hmrc/releases/nisp/images/download.svg) ](https://bintray.com/hmrc/releases/nisp/_latestVersion)
 
 This microservice retrieves data from a [HoD] system called [NPS], for calculating State Pension Age and Amount.
 
