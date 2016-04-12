@@ -24,7 +24,7 @@ import uk.gov.hmrc.nisp.connectors.NpsConnector
 import uk.gov.hmrc.nisp.metrics.Metrics
 import uk.gov.hmrc.nisp.models.enums.SPContextMessage.SPContextMessage
 import uk.gov.hmrc.nisp.models.nps.NpsDate
-import uk.gov.hmrc.nisp.models.{SPAgeModel, SPAmountModel, SPResponseModel, SPSummaryModel}
+import uk.gov.hmrc.nisp.models._
 import uk.gov.hmrc.nisp.utils.WithCurrentDate
 import uk.gov.hmrc.play.http.HeaderCarrier
 import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
@@ -71,12 +71,13 @@ trait SPResponseService extends WithCurrentDate {
         metrics.exclusion(spExclusions.exclusions)
         SPResponseModel(None, Some(spExclusions))
       } else {
-        val forecastAmount: SPAmountModel = forecastingService.getForecastAmount(
+        val forecast: SPForecastModel = forecastingService.getForecastAmount(
           npsSchemeMembership, npsSummary.earningsIncludedUpTo, npsSummary.nspQualifyingYears, npsSummary.npsStatePensionAmount.npsAmountA2016,
           npsSummary.npsStatePensionAmount.npsAmountB2016,
           npsNIRecord.niTaxYears.find(_.taxYear == npsSummary.earningsIncludedUpTo.taxYear).map(_.primaryPaidEarnings).getOrElse(0),
           npsSummary.finalRelevantYear, npsSummary.pensionForecast.forecastAmount, npsSummary.pensionForecast.forecastAmount2016,
-          npsNIRecord.niTaxYears.find(_.taxYear == npsSummary.earningsIncludedUpTo.taxYear).exists(_.qualifying), nino
+          npsNIRecord.niTaxYears.find(_.taxYear == npsSummary.earningsIncludedUpTo.taxYear).exists(_.qualifying), nino,
+          npsNIRecord.nonQualifyingYearsPayable, spAmountModel
         )
 
         val scenario: Option[SPContextMessage] = SPContextMessageService.getSPContextMessage(
@@ -86,8 +87,9 @@ trait SPResponseService extends WithCurrentDate {
           npsNIRecord.nonQualifyingYearsPayable
         )
 
-        metrics.summary(forecastAmount.week, spAmountModel.week, scenario, npsSchemeMembership.nonEmpty,
-          spAmountModel.week > forecastAmount.week, getAge(npsSummary.dateOfBirth))
+        metrics.summary(forecast.forecastAmount.week, spAmountModel.week, scenario, npsSchemeMembership.nonEmpty,
+          spAmountModel.week > forecast.forecastAmount.week, getAge(npsSummary.dateOfBirth), forecast.scenario,
+          forecast.personalMaximum.week, forecast.yearsLeftToWork)
 
         SPResponseModel(
           Some(SPSummaryModel(
@@ -103,10 +105,9 @@ trait SPResponseService extends WithCurrentDate {
             npsSummary.yearsUntilPensionAge,
             npsSummary.pensionShareOrderCOEG != 0 || npsSummary.pensionShareOrderSERPS != 0,
             npsSummary.dateOfBirth,
-            forecastAmount,
+            forecast,
             npsSummary.pensionForecast.fullNewStatePensionAmount,
             npsSchemeMembership.nonEmpty,
-            spAmountModel.week > forecastAmount.week,
             getAge(npsSummary.dateOfBirth),
             SPAmountModel(npsSummary.npsStatePensionAmount.npsAmountB2016.rebateDerivedAmount)
           ))
