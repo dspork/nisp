@@ -94,7 +94,8 @@ object Metrics extends Metrics {
     Scenario.ContinueWorkingMax -> MetricsRegistry.defaultRegistry.counter("forecastscenario-continueworkingmax"),
     Scenario.ContinueWorkingNonMax -> MetricsRegistry.defaultRegistry.counter("forecastscenario-continueworkingnonmax"),
     Scenario.FillGaps -> MetricsRegistry.defaultRegistry.counter("forecastscenario-fillgaps"),
-    Scenario.ForecastOnly -> MetricsRegistry.defaultRegistry.counter("forecastscenario-forecastonly")
+    Scenario.ForecastOnly -> MetricsRegistry.defaultRegistry.counter("forecastscenario-forecastonly"),
+    Scenario.CantGetPension -> MetricsRegistry.defaultRegistry.counter("forecastscenario-cantgetpension")
   )
 
 
