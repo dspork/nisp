@@ -586,41 +586,59 @@ class ForecastingServiceSpec extends UnitSpec with OneAppPerSuite {
   "personalMaximumScenario" when {
     "current == forecast == maxiumum" should {
       "return Reached" in {
-        MockForecastingService.forecastScenario(SPAmountModel(155.65), SPAmountModel(155.65), SPAmountModel(155.65)) shouldBe Scenario.Reached
+        MockForecastingService.forecastScenario(SPAmountModel(155.65), SPAmountModel(155.65), SPAmountModel(155.65), 36) shouldBe Scenario.Reached
       }
     }
 
     "current < forecast == maximum in" should {
       "return ContinueWorkingMax when forecast == State Pension Max" in {
-         MockForecastingService.forecastScenario(SPAmountModel(56), SPAmountModel(155.65), SPAmountModel(155.65)) shouldBe Scenario.ContinueWorkingMax
+         MockForecastingService.forecastScenario(SPAmountModel(56), SPAmountModel(155.65), SPAmountModel(155.65), 30) shouldBe Scenario.ContinueWorkingMax
       }
 
       "return ContinueWorkingMax when forecast >= State Pension Max" in {
-         MockForecastingService.forecastScenario(SPAmountModel(151), SPAmountModel(200.00), SPAmountModel(200)) shouldBe Scenario.ContinueWorkingMax
+         MockForecastingService.forecastScenario(SPAmountModel(151), SPAmountModel(200.00), SPAmountModel(200), 30) shouldBe Scenario.ContinueWorkingMax
       }
 
       "return ContinueWorkingNonMax when Forecast is less than the State Pension Max" in {
-        MockForecastingService.forecastScenario(SPAmountModel(56), SPAmountModel(155.64), SPAmountModel(155.64)) shouldBe Scenario.ContinueWorkingNonMax
+        MockForecastingService.forecastScenario(SPAmountModel(56), SPAmountModel(155.64), SPAmountModel(155.64), 25) shouldBe Scenario.ContinueWorkingNonMax
       }
     }
 
     "current < forecast < gaps" should {
       "return FillGaps" in {
-        MockForecastingService.forecastScenario(SPAmountModel(60), SPAmountModel(122), SPAmountModel(133)) shouldBe Scenario.FillGaps
+        MockForecastingService.forecastScenario(SPAmountModel(60), SPAmountModel(122), SPAmountModel(133), 25) shouldBe Scenario.FillGaps
       }
     }
 
     "current == forecast < gaps" should {
       "return FillGaps" in {
-        MockForecastingService.forecastScenario(SPAmountModel(60), SPAmountModel(60), SPAmountModel(133)) shouldBe Scenario.FillGaps
+        MockForecastingService.forecastScenario(SPAmountModel(60), SPAmountModel(60), SPAmountModel(133), 25) shouldBe Scenario.FillGaps
       }
     }
 
     "current > forecast" should {
       "return ForecastOnly regardless of Max" in {
-        MockForecastingService.forecastScenario(SPAmountModel(100), SPAmountModel(99), SPAmountModel(100)) shouldBe Scenario.ForecastOnly
-        MockForecastingService.forecastScenario(SPAmountModel(100), SPAmountModel(99), SPAmountModel(99)) shouldBe Scenario.ForecastOnly
-        MockForecastingService.forecastScenario(SPAmountModel(100), SPAmountModel(99), SPAmountModel(155.65)) shouldBe Scenario.ForecastOnly
+        MockForecastingService.forecastScenario(SPAmountModel(100), SPAmountModel(99), SPAmountModel(100), 35) shouldBe Scenario.ForecastOnly
+        MockForecastingService.forecastScenario(SPAmountModel(100), SPAmountModel(99), SPAmountModel(99), 35) shouldBe Scenario.ForecastOnly
+        MockForecastingService.forecastScenario(SPAmountModel(100), SPAmountModel(99), SPAmountModel(155.65), 35) shouldBe Scenario.ForecastOnly
+      }
+    }
+
+    "yearsToQualify < 10" should {
+      "return CantGetPension" in {
+        MockForecastingService.forecastScenario(SPAmountModel(0), SPAmountModel(0), SPAmountModel(0), 5) shouldBe Scenario.CantGetPension
+      }
+    }
+
+    "yearsToQualify = 10"  should {
+      "return CantGetPension" in {
+        MockForecastingService.forecastScenario(SPAmountModel(100), SPAmountModel(99), SPAmountModel(100), 10) shouldBe Scenario.ForecastOnly
+      }
+    }
+
+    "yearsToQualify > 10"  should {
+      "return CantGetPension" in {
+        MockForecastingService.forecastScenario(SPAmountModel(100), SPAmountModel(99), SPAmountModel(100), 12) shouldBe Scenario.ForecastOnly
       }
     }
   }

@@ -55,8 +55,8 @@ trait ForecastingService {
       amountB.rebateDerivedAmount, amountA.totalAP, lastYearEarnings, finalRelevantYear, contractedOutLastYear,
       fillableGaps)
 
-    val scenario = forecastScenario(currentAmount, SPAmountModel(calculatedForecast.amount), personalMaximumAmount)
-
+    val scenario = forecastScenario(currentAmount, SPAmountModel(calculatedForecast.amount), personalMaximumAmount,
+      currentQualifyingYears + calculatedForecast.yearsLeftToWork + fillableGaps  )
     SPForecastModel(
       SPAmountModel(calculatedForecast.amount),
       if(scenario == Scenario.Reached) 0 else calculatedForecast.yearsLeftToWork,
@@ -160,10 +160,12 @@ trait ForecastingService {
 
   }
 
-  def forecastScenario(current: SPAmountModel, forecast: SPAmountModel, personalMaximum: SPAmountModel): Scenario = {
-    if(forecast.week < current.week)
+  def forecastScenario(current: SPAmountModel, forecast: SPAmountModel, personalMaximum: SPAmountModel, yearsToQualify: Int): Scenario = {
+    if(yearsToQualify < NISPConstants.newStatePensionMinimumQualifyingYears)
+      Scenario.CantGetPension
+    else if(forecast.week < current.week){
       Scenario.ForecastOnly
-    else (current == forecast, personalMaximum.week > forecast.week) match {
+    } else (current == forecast, personalMaximum.week > forecast.week) match {
       case (true, false) => Scenario.Reached
       case (_, true) => Scenario.FillGaps
       case (false, false) if forecast.week >= QualifyingYearsAmountService.maxAmount => Scenario.ContinueWorkingMax
