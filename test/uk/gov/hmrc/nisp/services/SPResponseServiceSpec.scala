@@ -67,15 +67,17 @@ class SPResponseServiceSpec extends UnitSpec with MockitoSugar with OneAppPerSui
     spResponse.spSummary.get.statePensionAge shouldBe SPAgeModel(65,NpsDate(new LocalDate(2017,11,21)))
   }
 
-  "return no SPSummaryModel and an ExclusionsModel" in {
+  "return a SPSummaryModel and an ExclusionsModel" in {
     val spResponse = MockSPResponseService.getSPResponse(exclusionNino)
-    spResponse.spSummary shouldBe None
+    spResponse.spSummary.get.dateOfBirth shouldBe NpsDate(1952, 11, 21)
     spResponse.spExclusions.isEmpty shouldBe false
+    spResponse.niExclusions.isEmpty shouldBe false
   }
 
   "return an ExclusionModel with correct exclusion" in {
     val spResponse = MockSPResponseService.getSPResponse(exclusionNino)
     spResponse.spExclusions.get.exclusions shouldBe List(Exclusion.Abroad, Exclusion.MWRRE)
+    spResponse.niExclusions.get.exclusions shouldBe List(Exclusion.MWRRE)
   }
 
   "age Calculation" should {

@@ -91,11 +91,21 @@ Fetches the SPResponseModel object for the frontend service.
 
 ```json
 {
+    "spSummary":{
+       ...
+    }
     "spExclusions":{
-        "spExclusions":["Abroad"]
+        "exclusions":["Abroad", "MWRRE"]
+    },
+    "niExclusions":{
+        "exclusions":["MWRRE"]
     }
 }
 ```
+
+** IF THE USER IS EXCLUDED THE PENSION AMOUNT INFORMATION IS INACCURATE AND SHOULD NOT BE PRESENTED **
+
+
 
 ####   National Insurance Record
 
