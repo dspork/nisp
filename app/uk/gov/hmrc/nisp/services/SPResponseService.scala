@@ -55,7 +55,7 @@ trait SPResponseService extends WithCurrentDate {
          npsSchemeMembership <- futureNpsSchemeMembership) yield {
       val spAmountModel = SPAmountModel(npsSummary.npsStatePensionAmount.nspEntitlement)
 
-      val spExclusions = ExclusionsService(
+      val exclusionsService = ExclusionsService(
         npsSummary.isAbroad,
         npsSummary.rreToConsider == 1,
         npsSummary.dateOfDeath,
@@ -65,54 +65,57 @@ trait SPResponseService extends WithCurrentDate {
         SPCurrentAmountService.calculate(npsSummary.npsStatePensionAmount.npsAmountA2016, npsSummary.npsStatePensionAmount.npsAmountB2016),
         NpsDate(now),
         npsSummary.spaDate
-      ).getSPExclusions
+      )
 
-      if (spExclusions.exclusions.nonEmpty) {
-        metrics.exclusion(spExclusions.exclusions)
-        SPResponseModel(None, Some(spExclusions))
-      } else {
-        val forecast: SPForecastModel = forecastingService.getForecastAmount(
-          npsSchemeMembership, npsSummary.earningsIncludedUpTo, npsSummary.nspQualifyingYears, npsSummary.npsStatePensionAmount.npsAmountA2016,
-          npsSummary.npsStatePensionAmount.npsAmountB2016,
-          npsNIRecord.niTaxYears.find(_.taxYear == npsSummary.earningsIncludedUpTo.taxYear).map(_.primaryPaidEarnings).getOrElse(0),
-          npsSummary.finalRelevantYear, npsSummary.pensionForecast.forecastAmount, npsSummary.pensionForecast.forecastAmount2016,
-          npsNIRecord.niTaxYears.find(_.taxYear == npsSummary.earningsIncludedUpTo.taxYear).exists(_.qualifying), nino,
-          npsNIRecord.nonQualifyingYearsPayable, spAmountModel
-        )
+      val spExclusions = exclusionsService.getSPExclusions
+      val niExclusions = exclusionsService.getNIExclusions
 
-        val scenario: Option[SPContextMessage] = SPContextMessageService.getSPContextMessage(
-          spAmountModel,
-          npsSummary.nspQualifyingYears,
-          npsSummary.earningsIncludedUpTo,
-          npsNIRecord.nonQualifyingYearsPayable
-        )
+      val forecast: SPForecastModel = forecastingService.getForecastAmount(
+        npsSchemeMembership, npsSummary.earningsIncludedUpTo, npsSummary.nspQualifyingYears, npsSummary.npsStatePensionAmount.npsAmountA2016,
+        npsSummary.npsStatePensionAmount.npsAmountB2016,
+        npsNIRecord.niTaxYears.find(_.taxYear == npsSummary.earningsIncludedUpTo.taxYear).map(_.primaryPaidEarnings).getOrElse(0),
+        npsSummary.finalRelevantYear, npsSummary.pensionForecast.forecastAmount, npsSummary.pensionForecast.forecastAmount2016,
+        npsNIRecord.niTaxYears.find(_.taxYear == npsSummary.earningsIncludedUpTo.taxYear).exists(_.qualifying), nino,
+        npsNIRecord.nonQualifyingYearsPayable, spAmountModel
+      )
 
+      val scenario: Option[SPContextMessage] = SPContextMessageService.getSPContextMessage(
+        spAmountModel,
+        npsSummary.nspQualifyingYears,
+        npsSummary.earningsIncludedUpTo,
+        npsNIRecord.nonQualifyingYearsPayable
+      )
+
+      val spSummary = SPSummaryModel(
+        npsSummary.nino,
+        npsSummary.earningsIncludedUpTo,
+        spAmountModel,
+        SPAgeModel(new Period(npsSummary.dateOfBirth.localDate, npsSummary.spaDate.localDate).getYears, npsSummary.spaDate),
+        scenario,
+        npsSummary.finalRelevantYear,
+        npsNIRecord.numberOfQualifyingYears,
+        npsNIRecord.nonQualifyingYears,
+        npsNIRecord.nonQualifyingYearsPayable,
+        npsSummary.yearsUntilPensionAge,
+        npsSummary.pensionShareOrderCOEG != 0 || npsSummary.pensionShareOrderSERPS != 0,
+        npsSummary.dateOfBirth,
+        forecast,
+        npsSummary.pensionForecast.fullNewStatePensionAmount,
+        npsSchemeMembership.nonEmpty,
+        getAge(npsSummary.dateOfBirth),
+        SPAmountModel(npsSummary.npsStatePensionAmount.npsAmountB2016.rebateDerivedAmount)
+      )
+
+      if (spExclusions.exclusions.isEmpty && niExclusions.exclusions.isEmpty) {
         metrics.summary(forecast.forecastAmount.week, spAmountModel.week, scenario, npsSchemeMembership.nonEmpty,
           spAmountModel.week > forecast.forecastAmount.week, getAge(npsSummary.dateOfBirth), forecast.scenario,
           forecast.personalMaximum.week, forecast.yearsLeftToWork)
-
-        SPResponseModel(
-          Some(SPSummaryModel(
-            npsSummary.nino,
-            npsSummary.earningsIncludedUpTo,
-            spAmountModel,
-            SPAgeModel(new Period(npsSummary.dateOfBirth.localDate, npsSummary.spaDate.localDate).getYears, npsSummary.spaDate),
-            scenario,
-            npsSummary.finalRelevantYear,
-            npsNIRecord.numberOfQualifyingYears,
-            npsNIRecord.nonQualifyingYears,
-            npsNIRecord.nonQualifyingYearsPayable,
-            npsSummary.yearsUntilPensionAge,
-            npsSummary.pensionShareOrderCOEG != 0 || npsSummary.pensionShareOrderSERPS != 0,
-            npsSummary.dateOfBirth,
-            forecast,
-            npsSummary.pensionForecast.fullNewStatePensionAmount,
-            npsSchemeMembership.nonEmpty,
-            getAge(npsSummary.dateOfBirth),
-            SPAmountModel(npsSummary.npsStatePensionAmount.npsAmountB2016.rebateDerivedAmount)
-          ))
-        )
+        SPResponseModel(Some(spSummary), None, None)
+      } else {
+        metrics.exclusion(spExclusions.exclusions)
+        SPResponseModel(Some(spSummary), Some(spExclusions), Some(niExclusions))
       }
+
     }
   }
 
