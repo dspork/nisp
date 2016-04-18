@@ -82,7 +82,8 @@ trait NIResponseService extends WithCurrentDate {
           purgedNIRecord.nonQualifyingYearsPayable,
           purgedNIRecord.nonQualifyingYears - purgedNIRecord.nonQualifyingYearsPayable,
           npsSummary.npsStatePensionAmount.nspEntitlement < QualifyingYearsAmountService.maxAmount,
-          npsSummary.isAbroad
+          npsSummary.isAbroad,
+          npsSummary.finalRelevantYear
         )
 
         metrics.niRecord(niSummary.noOfNonQualifyingYears, niSummary.numberOfPayableGaps, niSummary.pre75QualifyingYears.getOrElse(0),
