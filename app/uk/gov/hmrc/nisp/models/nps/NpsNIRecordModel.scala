@@ -26,11 +26,16 @@ case class NpsNIRecordModel( nino:String,
                             nonQualifyingYearsPayable: Int,
                             pre75ContributionCount: Int,
                             dateOfEntry: NpsDate,
-                            niTaxYears: List[NpsNITaxYear])
+                            niTaxYears: List[NpsNITaxYear]) {
+  def purge(fry: Int) = {
+    val taxYears = niTaxYears.filter(_.taxYear <= fry)
+    this.copy(nonQualifyingYears = taxYears.count(!_.qualifying), nonQualifyingYearsPayable = taxYears.count(year => !year.qualifying && year.payable), niTaxYears = taxYears)
+  }
+}
 
 object NpsNIRecordModel {
   implicit val formats: Format[NpsNIRecordModel] = (
-    (__ \ "nino").format[String] and
+      (__ \ "nino").format[String] and
       (__ \ "number_of_qualifying_years").format[Int] and
       (__ \ "non_qualifying_years").format[Int] and
       (__ \ "years_to_fry").format[Int] and

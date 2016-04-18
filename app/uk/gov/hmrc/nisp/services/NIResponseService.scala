@@ -53,6 +53,8 @@ trait NIResponseService extends WithCurrentDate {
       npsLiabilities <- npsLiabilitiesFuture
     ) yield {
 
+      val purgedNIRecord = npsNIRecord.purge(npsSummary.finalRelevantYear)
+
       val niExclusions = ExclusionsService(
         npsSummary.isAbroad,
         npsSummary.rreToConsider == 1,
@@ -70,15 +72,15 @@ trait NIResponseService extends WithCurrentDate {
       } else {
 
         val niSummary = NISummary(
-          npsNIRecord.numberOfQualifyingYears,
-          npsNIRecord.nonQualifyingYears,
+          purgedNIRecord.numberOfQualifyingYears,
+          purgedNIRecord.nonQualifyingYears,
           npsSummary.yearsUntilPensionAge,
           npsSummary.spaDate.localDate.getYear,
           npsSummary.earningsIncludedUpTo,
           npsSummary.earningsIncludedUpTo.taxYear + 1,
-          calcPre75QualifyingYears(npsNIRecord.pre75ContributionCount, npsNIRecord.dateOfEntry),
-          npsNIRecord.nonQualifyingYearsPayable,
-          npsNIRecord.nonQualifyingYears - npsNIRecord.nonQualifyingYearsPayable,
+          calcPre75QualifyingYears(purgedNIRecord.pre75ContributionCount, purgedNIRecord.dateOfEntry),
+          purgedNIRecord.nonQualifyingYearsPayable,
+          purgedNIRecord.nonQualifyingYears - purgedNIRecord.nonQualifyingYearsPayable,
           npsSummary.npsStatePensionAmount.nspEntitlement < QualifyingYearsAmountService.maxAmount,
           npsSummary.isAbroad
         )
@@ -87,7 +89,7 @@ trait NIResponseService extends WithCurrentDate {
           niSummary.noOfQualifyingYears, niSummary.yearsToContributeUntilPensionAge)
 
         NIResponse(
-          Some(NIRecord(mapNpsTaxYearsToNisp(npsNIRecord.niTaxYears))),
+          Some(NIRecord(mapNpsTaxYearsToNisp(purgedNIRecord.niTaxYears))),
           Some(niSummary)
         )
       }
@@ -106,7 +108,7 @@ trait NIResponseService extends WithCurrentDate {
         npsNITaxYear.classThreePayable,
         npsNITaxYear.classThreePayableBy,
         npsNITaxYear.classThreePayableByPenalty,
-        npsNITaxYear.payable == 1,
+        npsNITaxYear.payable,
         npsNITaxYear.underInvestigation
       )
     }
