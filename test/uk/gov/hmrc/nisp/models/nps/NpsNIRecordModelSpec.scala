@@ -53,7 +53,7 @@ class NpsNIRecordModelSpec extends UnitSpec {
     }
   }
 
-  "return an nirecord with no tax years after 2014 when the FRY 2015" in {
+  "return an nirecord with no tax years after 2015 when the FRY 2015" in {
     val niRecord = NpsNIRecordModel("", 3, 4, 0, 3, pre75ContributionCount = 0, NpsDate(2010, 4, 6), List(
       taxYear(2010, true, false),
       taxYear(2011, false, false),
@@ -64,13 +64,13 @@ class NpsNIRecordModelSpec extends UnitSpec {
       taxYear(2016, false, true)
     ))
 
-    val purged = niRecord.purge(fry = 2014)
+    val purged = niRecord.purge(fry = 2015)
 
     purged.nino shouldBe ""
     purged.numberOfQualifyingYears shouldBe 3
-    purged.nonQualifyingYears shouldBe 2
+    purged.nonQualifyingYears shouldBe 3
     purged.yearsToFry shouldBe 0
-    purged.nonQualifyingYearsPayable shouldBe 1
+    purged.nonQualifyingYearsPayable shouldBe 2
     purged.pre75ContributionCount shouldBe 0
     purged.dateOfEntry shouldBe NpsDate(2010, 4, 6)
     purged.niTaxYears shouldBe List(
@@ -78,7 +78,8 @@ class NpsNIRecordModelSpec extends UnitSpec {
       taxYear(2011, false, false),
       taxYear(2012, false, true),
       taxYear(2013, true, false),
-      taxYear(2014, true, false)
+      taxYear(2014, true, false),
+      taxYear(2015, false, true)
     )
   }
 }
