@@ -25,6 +25,7 @@ import uk.gov.hmrc.nisp.connectors.NpsConnector
 import uk.gov.hmrc.nisp.helpers.{MockMetrics, MockNpsConnector, TestAccountBuilder}
 import uk.gov.hmrc.nisp.metrics.Metrics
 import uk.gov.hmrc.nisp.models.enums.Exclusion
+import uk.gov.hmrc.nisp.models.nps.NpsDate
 import uk.gov.hmrc.nisp.models.{ExclusionsModel, NIRecordTaxYear}
 import uk.gov.hmrc.play.http.{HeaderCarrier, NotFoundException}
 import uk.gov.hmrc.play.test.UnitSpec
@@ -68,6 +69,14 @@ class NIResponseServiceSpec  extends UnitSpec with MockitoSugar with BeforeAndAf
     niResponse.niRecord shouldBe None
     niResponse.niSummary shouldBe None
     niResponse.niExclusions shouldBe Some(ExclusionsModel(List(Exclusion.MWRRE)))
+  }
 
+  "calc pre75 years" should {
+    "return 3 when the number of conts in 157 and the date of entry is 04/10/1972" in {
+      testNIServiceWithMockHttp.calcPre75QualifyingYears(157, NpsDate(1972, 10, 4)) shouldBe Some(3)
+    }
+    "return 8 when the number of conts in 408 and the date of entry is 08/01/1968" in {
+      testNIServiceWithMockHttp.calcPre75QualifyingYears(408, NpsDate(1968, 1, 8)) shouldBe Some(8)
+    }
   }
 }
