@@ -23,14 +23,14 @@ import uk.gov.hmrc.play.http.HeaderCarrier
 object ForecastingEvent {
   def apply(nino: Nino, earningsIncludedUpTo: NpsDate, currentQualifyingYears: Int, amountA: NpsAmountA2016, amountB: NpsAmountB2016,
             lastYearEarnings: BigDecimal, finalRelevantYear: Int, forecastAmount: BigDecimal, forecastAmount2016: BigDecimal, lastYearQualifying: Boolean,
-            contractedOutInfo: String)(implicit hc: HeaderCarrier): ForecastingEvent =
+            contractedOutLastYear: Boolean)(implicit hc: HeaderCarrier): ForecastingEvent =
     new ForecastingEvent(nino, earningsIncludedUpTo, currentQualifyingYears, amountA, amountB, lastYearEarnings, finalRelevantYear, forecastAmount,
-      forecastAmount2016, lastYearQualifying, contractedOutInfo)
+      forecastAmount2016, lastYearQualifying, contractedOutLastYear)
 }
 
 class ForecastingEvent(nino: Nino, earningsIncludedUpTo: NpsDate, currentQualifyingYears: Int, amountA: NpsAmountA2016,
                        amountB: NpsAmountB2016, lastYearEarnings: BigDecimal, finalRelevantYear: Int,
-                       forecastAmount: BigDecimal, forecastAmount2016: BigDecimal, lastYearQualifying: Boolean, contractedOutInfo: String)
+                       forecastAmount: BigDecimal, forecastAmount2016: BigDecimal, lastYearQualifying: Boolean, contractedOutLastYear: Boolean)
                       (implicit hc: HeaderCarrier)
   extends BusinessEvent("Forecasting", Map(
      "nino" -> nino.value,
@@ -54,5 +54,8 @@ class ForecastingEvent(nino: Nino, earningsIncludedUpTo: NpsDate, currentQualify
      "forecastAmount" -> forecastAmount.toString(),
      "forecastAmount2016" -> forecastAmount2016.toString(),
      "lastYearQualifying" -> lastYearQualifying.toString,
-     "contractedOutInfo" -> contractedOutInfo
+     "contractedOutInfo" -> {
+          if (contractedOutLastYear) "Contracted out at the end of the last posted tax year"
+          else "Customer was contracted in at the end of the last posted tax year"
+     }
   ))
