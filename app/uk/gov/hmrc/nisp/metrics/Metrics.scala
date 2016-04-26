@@ -19,16 +19,19 @@ package uk.gov.hmrc.nisp.metrics
 import com.codahale.metrics.Timer.Context
 import com.codahale.metrics.{Counter, Timer}
 import com.kenshoo.play.metrics.MetricsRegistry
+import uk.gov.hmrc.nisp.models.SPForecastModel
 import uk.gov.hmrc.nisp.models.enums.APITypes.APITypes
 import uk.gov.hmrc.nisp.models.enums.Exclusion._
 import uk.gov.hmrc.nisp.models.enums.SPContextMessage._
-import uk.gov.hmrc.nisp.models.enums.{Exclusion, APITypes, SPContextMessage}
+import uk.gov.hmrc.nisp.models.enums.Scenario.Scenario
+import uk.gov.hmrc.nisp.models.enums.{APITypes, Exclusion, SPContextMessage, Scenario}
 
 trait Metrics {
   def startTimer(api: APITypes): Timer.Context
   def incrementFailedCounter(api: APITypes.APITypes): Unit
   
-  def summary(forecast: BigDecimal, current: BigDecimal, scenario: Option[SPContextMessage], contractedOut: Boolean, forecastOnly: Boolean, age: Int): Unit
+  def summary(forecast: BigDecimal, current: BigDecimal, scenario: Option[SPContextMessage], contractedOut: Boolean, forecastOnly: Boolean, age: Int,
+              forecastScenario: Scenario, personalMaximum: BigDecimal, yearsToContribute: Int): Unit
   def niRecord(gaps: Int, payableGaps: Int, pre75Years: Int, qualifyingYears: Int, yearsUntilSPA: Int): Unit
   def exclusion(exclusions: List[Exclusion]): Unit
 }
@@ -68,9 +71,12 @@ object Metrics extends Metrics {
   val payableGapsMeter = MetricsRegistry.defaultRegistry.histogram("payable-gaps")
   val pre75YearsMeter = MetricsRegistry.defaultRegistry.histogram("pre75-years")
   val qualifyingYearsMeter = MetricsRegistry.defaultRegistry.histogram("qualifying-years")
-  val forecastAmountMeter = MetricsRegistry.defaultRegistry.histogram("forecast-amount")
-  val currentAmountMeter = MetricsRegistry.defaultRegistry.histogram("current-amount")
   val yearsUntilSPAMeter = MetricsRegistry.defaultRegistry.histogram("years-until-spa")
+
+  val currentAmountMeter = MetricsRegistry.defaultRegistry.histogram("current-amount")
+  val forecastAmountMeter = MetricsRegistry.defaultRegistry.histogram("forecast-amount")
+  val personalMaxAmountMeter = MetricsRegistry.defaultRegistry.histogram("personal-maximum-amount")
+  val yearsNeededToContribute = MetricsRegistry.defaultRegistry.histogram("years-needed-to-contribute")
 
   val scenarioMeters: Map[SPContextMessage, Counter] = Map(
     SPContextMessage.ScenarioOne -> MetricsRegistry.defaultRegistry.counter("scenario-1"),
@@ -82,6 +88,16 @@ object Metrics extends Metrics {
     SPContextMessage.ScenarioSeven -> MetricsRegistry.defaultRegistry.counter("scenario-7"),
     SPContextMessage.ScenarioEight -> MetricsRegistry.defaultRegistry.counter("scenario-8")
   )
+
+  val forecastScenarioMeters: Map[Scenario, Counter] = Map(
+    Scenario.Reached -> MetricsRegistry.defaultRegistry.counter("forecastscenario-reached"),
+    Scenario.ContinueWorkingMax -> MetricsRegistry.defaultRegistry.counter("forecastscenario-continueworkingmax"),
+    Scenario.ContinueWorkingNonMax -> MetricsRegistry.defaultRegistry.counter("forecastscenario-continueworkingnonmax"),
+    Scenario.FillGaps -> MetricsRegistry.defaultRegistry.counter("forecastscenario-fillgaps"),
+    Scenario.ForecastOnly -> MetricsRegistry.defaultRegistry.counter("forecastscenario-forecastonly"),
+    Scenario.CantGetPension -> MetricsRegistry.defaultRegistry.counter("forecastscenario-cantgetpension")
+  )
+
 
   val exclusionMeters: Map[Exclusion, Counter] = Map(
     Exclusion.Abroad -> MetricsRegistry.defaultRegistry.counter("exclusion-abroad"),
@@ -95,10 +111,14 @@ object Metrics extends Metrics {
   )
 
   override def summary(forecast: BigDecimal, current: BigDecimal, scenario: Option[SPContextMessage],
-                       contractedOut: Boolean, forecastOnly: Boolean, age: Int): Unit = {
+                       contractedOut: Boolean, forecastOnly: Boolean, age: Int, forecastScenario: Scenario,
+                       personalMaximum: BigDecimal, yearsToContribute: Int): Unit = {
     forecastAmountMeter.update(forecast.toInt)
     currentAmountMeter.update(current.toInt)
+    personalMaxAmountMeter.update(personalMaximum.toInt)
     scenario.foreach(scenarioMeters(_).inc())
+    forecastScenarioMeters(forecastScenario).inc()
+    yearsNeededToContribute.update(yearsToContribute)
     if(contractedOut) contractedOutMeter.inc() else notContractedOutMeter.inc()
     if(forecastOnly) forecastOnlyMeter.inc() else notForecastOnlyMeter.inc()
     mapToAgeMeter(age)
