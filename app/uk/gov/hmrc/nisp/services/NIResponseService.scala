@@ -53,6 +53,8 @@ trait NIResponseService extends WithCurrentDate {
       npsLiabilities <- npsLiabilitiesFuture
     ) yield {
 
+      val purgedNIRecord = npsNIRecord.purge(npsSummary.finalRelevantYear)
+
       val niExclusions = ExclusionsService(
         npsSummary.isAbroad,
         npsSummary.rreToConsider == 1,
@@ -70,24 +72,25 @@ trait NIResponseService extends WithCurrentDate {
       } else {
 
         val niSummary = NISummary(
-          npsNIRecord.numberOfQualifyingYears,
-          npsNIRecord.nonQualifyingYears,
+          purgedNIRecord.numberOfQualifyingYears,
+          purgedNIRecord.nonQualifyingYears,
           npsSummary.yearsUntilPensionAge,
           npsSummary.spaDate.localDate.getYear,
           npsSummary.earningsIncludedUpTo,
           npsSummary.earningsIncludedUpTo.taxYear + 1,
-          calcPre75QualifyingYears(npsNIRecord.pre75ContributionCount, npsNIRecord.dateOfEntry),
-          npsNIRecord.nonQualifyingYearsPayable,
-          npsNIRecord.nonQualifyingYears - npsNIRecord.nonQualifyingYearsPayable,
+          calcPre75QualifyingYears(purgedNIRecord.pre75ContributionCount, purgedNIRecord.dateOfEntry),
+          purgedNIRecord.nonQualifyingYearsPayable,
+          purgedNIRecord.nonQualifyingYears - purgedNIRecord.nonQualifyingYearsPayable,
           npsSummary.npsStatePensionAmount.nspEntitlement < QualifyingYearsAmountService.maxAmount,
-          npsSummary.isAbroad
+          npsSummary.isAbroad,
+          if(npsSummary.yearsUntilPensionAge <= 0) Some(npsSummary.finalRelevantYear) else None
         )
 
         metrics.niRecord(niSummary.noOfNonQualifyingYears, niSummary.numberOfPayableGaps, niSummary.pre75QualifyingYears.getOrElse(0),
           niSummary.noOfQualifyingYears, niSummary.yearsToContributeUntilPensionAge)
 
         NIResponse(
-          Some(NIRecord(mapNpsTaxYearsToNisp(npsNIRecord.niTaxYears))),
+          Some(NIRecord(mapNpsTaxYearsToNisp(purgedNIRecord.niTaxYears))),
           Some(niSummary)
         )
       }
@@ -106,14 +109,14 @@ trait NIResponseService extends WithCurrentDate {
         npsNITaxYear.classThreePayable,
         npsNITaxYear.classThreePayableBy,
         npsNITaxYear.classThreePayableByPenalty,
-        npsNITaxYear.payable == 1,
+        npsNITaxYear.payable,
         npsNITaxYear.underInvestigation
       )
     }
   }
 
   def calcPre75QualifyingYears(pre75Contributions: Int, dateOfEntry: NpsDate): Option[Int] = {
-    val yearCalc = BigDecimal(pre75Contributions)/50
+    val yearCalc: BigDecimal = BigDecimal(pre75Contributions)/50
     val yearsPre75 = NISPConstants.niRecordStart - dateOfEntry.taxYear
     if (yearsPre75 > 0) {
       Some(yearCalc.setScale(0, BigDecimal.RoundingMode.CEILING).min(yearsPre75).toInt)

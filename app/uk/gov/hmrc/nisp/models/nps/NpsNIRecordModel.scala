@@ -16,8 +16,11 @@
 
 package uk.gov.hmrc.nisp.models.nps
 
+import play.Logger
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
+
+import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 
 case class NpsNIRecordModel( nino:String,
                             numberOfQualifyingYears:Int,
@@ -26,11 +29,20 @@ case class NpsNIRecordModel( nino:String,
                             nonQualifyingYearsPayable: Int,
                             pre75ContributionCount: Int,
                             dateOfEntry: NpsDate,
-                            niTaxYears: List[NpsNITaxYear])
+                            niTaxYears: List[NpsNITaxYear]) {
+  def purge(fry: Int): NpsNIRecordModel = {
+    val taxYears = niTaxYears.filter(_.taxYear <= fry)
+
+    val purgedYears = niTaxYears.filter(_.taxYear > fry)
+    if(purgedYears.nonEmpty) Logger.info(s"Purged years (FRY $fry): ${purgedYears.map(_.taxYear).mkString(",")}")
+
+    this.copy(nonQualifyingYears = taxYears.count(!_.qualifying), nonQualifyingYearsPayable = taxYears.count(year => !year.qualifying && year.payable), niTaxYears = taxYears)
+  }
+}
 
 object NpsNIRecordModel {
   implicit val formats: Format[NpsNIRecordModel] = (
-    (__ \ "nino").format[String] and
+      (__ \ "nino").format[String] and
       (__ \ "number_of_qualifying_years").format[Int] and
       (__ \ "non_qualifying_years").format[Int] and
       (__ \ "years_to_fry").format[Int] and

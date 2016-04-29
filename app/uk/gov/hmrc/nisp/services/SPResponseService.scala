@@ -55,6 +55,8 @@ trait SPResponseService extends WithCurrentDate {
          npsSchemeMembership <- futureNpsSchemeMembership) yield {
       val spAmountModel = SPAmountModel(npsSummary.npsStatePensionAmount.nspEntitlement)
 
+      val purgedNIRecord = npsNIRecord.purge(npsSummary.finalRelevantYear)
+
       val exclusionsService = ExclusionsService(
         npsSummary.isAbroad,
         npsSummary.rreToConsider == 1,
@@ -73,9 +75,9 @@ trait SPResponseService extends WithCurrentDate {
       val forecast: SPForecastModel = forecastingService.getForecastAmount(
         npsSchemeMembership, npsSummary.earningsIncludedUpTo, npsSummary.nspQualifyingYears, npsSummary.npsStatePensionAmount.npsAmountA2016,
         npsSummary.npsStatePensionAmount.npsAmountB2016,
-        npsNIRecord.niTaxYears.find(_.taxYear == npsSummary.earningsIncludedUpTo.taxYear).map(_.primaryPaidEarnings).getOrElse(0),
+        purgedNIRecord.niTaxYears.find(_.taxYear == npsSummary.earningsIncludedUpTo.taxYear).map(_.primaryPaidEarnings).getOrElse(0),
         npsSummary.finalRelevantYear, npsSummary.pensionForecast.forecastAmount, npsSummary.pensionForecast.forecastAmount2016,
-        npsNIRecord.niTaxYears.find(_.taxYear == npsSummary.earningsIncludedUpTo.taxYear).exists(_.qualifying), nino,
+        purgedNIRecord.niTaxYears.find(_.taxYear == npsSummary.earningsIncludedUpTo.taxYear).exists(_.qualifying), nino,
         npsNIRecord.nonQualifyingYearsPayable, spAmountModel
       )
 
@@ -83,7 +85,7 @@ trait SPResponseService extends WithCurrentDate {
         spAmountModel,
         npsSummary.nspQualifyingYears,
         npsSummary.earningsIncludedUpTo,
-        npsNIRecord.nonQualifyingYearsPayable
+        purgedNIRecord.nonQualifyingYearsPayable
       )
 
       val spSummary = SPSummaryModel(
@@ -93,9 +95,9 @@ trait SPResponseService extends WithCurrentDate {
         SPAgeModel(new Period(npsSummary.dateOfBirth.localDate, npsSummary.spaDate.localDate).getYears, npsSummary.spaDate),
         scenario,
         npsSummary.finalRelevantYear,
-        npsNIRecord.numberOfQualifyingYears,
-        npsNIRecord.nonQualifyingYears,
-        npsNIRecord.nonQualifyingYearsPayable,
+        purgedNIRecord.numberOfQualifyingYears,
+        purgedNIRecord.nonQualifyingYears,
+        purgedNIRecord.nonQualifyingYearsPayable,
         npsSummary.yearsUntilPensionAge,
         npsSummary.pensionShareOrderCOEG != 0 || npsSummary.pensionShareOrderSERPS != 0,
         npsSummary.dateOfBirth,
