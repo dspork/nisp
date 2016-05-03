@@ -36,7 +36,11 @@ case class NpsNIRecordModel( nino:String,
     val purgedYears = niTaxYears.filter(_.taxYear > fry)
     if(purgedYears.nonEmpty) Logger.info(s"Purged years (FRY $fry): ${purgedYears.map(_.taxYear).mkString(",")}")
 
-    this.copy(nonQualifyingYears = taxYears.count(!_.qualifying), nonQualifyingYearsPayable = taxYears.count(year => !year.qualifying && year.payable), niTaxYears = taxYears)
+    this.copy(nonQualifyingYears =
+      taxYears.count(!_.qualifying),
+      nonQualifyingYearsPayable = taxYears.count(year => !year.qualifying && year.payable && !year.underInvestigation),
+      niTaxYears = taxYears
+    )
   }
 }
 

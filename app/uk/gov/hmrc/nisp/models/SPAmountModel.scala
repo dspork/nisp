@@ -47,21 +47,4 @@ object SPAmountModel {
 
     implicit val formats = Format(spAmountModelReads, spAmountModelWrites)
   }
-
-  def getWeeklyAmount(numberOfQualifyingYears: Int, additionalPension: BigDecimal): SPAmountModel = {
-    if(numberOfQualifyingYears < NISPConstants.newStatePensionMinimumQualifyingYears) {
-      SPAmountModel(0)
-    } else {
-      getWeeklyAmountRaw(numberOfQualifyingYears, additionalPension)
-    }
-  }
-
-  def getWeeklyAmountRaw(numberOfQualifyingYears: Int, additionalPension: BigDecimal): SPAmountModel = {
-    SPAmountModel(getAmountA(numberOfQualifyingYears, additionalPension).max(getAmountB(numberOfQualifyingYears)))
-  }
-
-  def getAmountA(numberOfQualifyingYears: Int, additionalPension: BigDecimal): BigDecimal =
-    QualifyingYearsAmountService.getBspAmount(numberOfQualifyingYears) + additionalPension
-
-  def getAmountB(numberOfQualifyingYears: Int): BigDecimal = QualifyingYearsAmountService.getNspAmount(numberOfQualifyingYears)
 }

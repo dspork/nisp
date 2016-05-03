@@ -315,6 +315,24 @@ class ForecastingServiceSpec extends UnitSpec with OneAppPerSuite {
     "return 155.65 with 4 years, for starting amount 140, fry 2021, qys 36" in {
       MockForecastingService.forecastPost2016StatePension(2021, 140, 36, 0) shouldBe Forecast(155.65, 4)
     }
+
+    "return 155.65 with 5 for years for starting amount 137.86, fry 2021, qys 31" in {
+      MockForecastingService.forecastPost2016StatePension(2021, (155.65/35)*31, 31, 1) shouldBe Forecast(155.65, 5)
+    }
+
+    "return 155.65 with 26 for years for starting amount 44.47, fry 2041, qys 9" in {
+      MockForecastingService.forecastPost2016StatePension(2041, (155.65/35)*10, 10, 1) shouldBe Forecast(155.65, 26)
+    }
+
+    "return 155.65 with 26 for years for starting amount 4.447142857, fry 2099, qys 1" in {
+      MockForecastingService.forecastPost2016StatePension(2099, 155.65/35, 1, 0) shouldBe Forecast(155.65, 34)
+    }
+
+    "return 155.65 with 26 for years for starting amount 8.89, fry 2099, qys 2" in {
+      MockForecastingService.forecastPost2016StatePension(2099, (155.65/35)*2, 2, 0) shouldBe Forecast(155.65, 33)
+    }
+
+
   }
 
   "Forecast Contracted Out" should {

@@ -35,11 +35,11 @@ class QualifyingYearsAmountServiceSpec extends UnitSpec {
     }
 
     "22 Qualifying years should return £97.84" in {
-      QualifyingYearsAmountService.getNspAmount(22) shouldBe 97.84
+      QualifyingYearsAmountService.getNspAmount(22).setScale(10, RoundingMode.FLOOR) shouldBe BigDecimal((155.65/35)*22).setScale(10, RoundingMode.FLOOR)
     }
 
     "17 Qualifying years should return £75.60" in {
-      QualifyingYearsAmountService.getNspAmount(17) shouldBe 75.6
+      QualifyingYearsAmountService.getNspAmount(17).setScale(10, RoundingMode.FLOOR) shouldBe BigDecimal((155.65/35)*17).setScale(10, RoundingMode.FLOOR)
     }
   }
 
