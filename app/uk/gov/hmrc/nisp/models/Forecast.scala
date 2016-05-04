@@ -16,4 +16,4 @@
 
 package uk.gov.hmrc.nisp.models
 
-case class Forecast(amount: BigDecimal, yearsLeftToWork: Int)
+case class Forecast(amount: BigDecimal, yearsLeftToWork: Int, oldRulesCustomer: Boolean)

@@ -61,7 +61,8 @@ trait ForecastingService {
       SPAmountModel(calculatedForecast.amount),
       if(scenario == Scenario.Reached) 0 else calculatedForecast.yearsLeftToWork,
       personalMaximumAmount,
-      scenario
+      scenario,
+      calculatedForecast.oldRulesCustomer
     )
 
   }
@@ -145,9 +146,9 @@ trait ForecastingService {
   def forecastPost2016StatePension(finalRelevantYear: Int, startingAmount: BigDecimal, qualifyingYearsAt2016: Int,
                                    pre2016YearsToContribute: Int): Forecast = {
     if(startingAmount >= QualifyingYearsAmountService.maxAmount)
-      Forecast(startingAmount, pre2016YearsToContribute)
+      Forecast(startingAmount, pre2016YearsToContribute, oldRulesCustomer = true)
     else if (qualifyingYearsToFRY(finalRelevantYear) + qualifyingYearsAt2016 < NISPConstants.newStatePensionMinimumQualifyingYears)
-      Forecast(0, 0)
+      Forecast(0, 0, oldRulesCustomer = false)
     else {
       val amountNeeded: BigDecimal = QualifyingYearsAmountService.maxAmount - startingAmount
       val yearsNeeded: Int = (amountNeeded / QualifyingYearsAmountService.nSPAmountPerYear).setScale(0, RoundingMode.CEILING).toInt
@@ -155,7 +156,9 @@ trait ForecastingService {
 
       Forecast((startingAmount + (yearsPossible * QualifyingYearsAmountService.nSPAmountPerYear))
         .setScale(2, RoundingMode.HALF_UP)
-        .min(QualifyingYearsAmountService.maxAmount), yearsPossible + pre2016YearsToContribute)
+        .min(QualifyingYearsAmountService.maxAmount),
+        yearsPossible + pre2016YearsToContribute,
+        oldRulesCustomer = false)
     }
 
   }

@@ -264,72 +264,72 @@ class ForecastingServiceSpec extends UnitSpec with OneAppPerSuite {
 
   "Forecast Post 2016 New State Pension" should {
     "return 155.65 for starting amount 151.26, fry 2018, qys 30" in {
-      MockForecastingService.forecastPost2016StatePension(2018, 151.26, 30, 1) shouldBe Forecast(155.65, 2)
+      MockForecastingService.forecastPost2016StatePension(2018, 151.26, 30, 1) shouldBe Forecast(155.65, 2, false)
     }
 
     "return 155.66 for starting amount 155.66, fry 2018, qys 30" in {
-      MockForecastingService.forecastPost2016StatePension(2018, 155.66, 30, 1) shouldBe Forecast(155.66, 1)
+      MockForecastingService.forecastPost2016StatePension(2018, 155.66, 30, 1) shouldBe Forecast(155.66, 1, true)
     }
 
     "return 155.64 with 0 years for starting amount 155.64, fry 2015, qys 10" in {
-      MockForecastingService.forecastPost2016StatePension(2015, 155.64, 10, 0) shouldBe Forecast(155.64, 0)
+      MockForecastingService.forecastPost2016StatePension(2015, 155.64, 10, 0) shouldBe Forecast(155.64, 0, false)
     }
 
     "return 0 with 0 years, for starting amount 155.64, fry 2015, qys 9" in {
-      MockForecastingService.forecastPost2016StatePension(2015, 155.64, 9, 2) shouldBe Forecast(0, 0)
+      MockForecastingService.forecastPost2016StatePension(2015, 155.64, 9, 2) shouldBe Forecast(0, 0, false)
     }
 
     "return non-zero with 1 year, for starting amount 155.64, fry 2016, qys 9" in {
       MockForecastingService.forecastPost2016StatePension(2016, 155.64, 9, 1).amount should not be 0
-      MockForecastingService.forecastPost2016StatePension(2016, 155.64, 9, 1) shouldBe Forecast(155.65, 2)
+      MockForecastingService.forecastPost2016StatePension(2016, 155.64, 9, 1) shouldBe Forecast(155.65, 2, false)
     }
 
     "return 155.65 with 1 year, for starting amount 155.64, fry 2016, qys 30" in {
-      MockForecastingService.forecastPost2016StatePension(2016, 155.64, 30, 0) shouldBe Forecast(155.65, 1)
+      MockForecastingService.forecastPost2016StatePension(2016, 155.64, 30, 0) shouldBe Forecast(155.65, 1, false)
     }
 
     "return 155.64 with 1 year, for starting amount 151.19, fry 2016, qys 30" in {
-      MockForecastingService.forecastPost2016StatePension(2016, 151.19, 30, 0) shouldBe Forecast(155.64, 1)
+      MockForecastingService.forecastPost2016StatePension(2016, 151.19, 30, 0) shouldBe Forecast(155.64, 1, false)
     }
 
     "return 155.64 with 2 years, for starting amount 146.75, fry 2017, qys 30" in {
-      MockForecastingService.forecastPost2016StatePension(2017, 146.75, 30, 0) shouldBe Forecast(155.64, 2)
+      MockForecastingService.forecastPost2016StatePension(2017, 146.75, 30, 0) shouldBe Forecast(155.64, 2, false)
     }
 
     "return 153.34 with 3 years, for starting amount 140, fry 2018, qys 30" in {
-      MockForecastingService.forecastPost2016StatePension(2018, 140, 30, 0) shouldBe Forecast(153.34, 3)
+      MockForecastingService.forecastPost2016StatePension(2018, 140, 30, 0) shouldBe Forecast(153.34, 3, false)
     }
 
     "return 155.65 with 4 years, for starting amount 140, fry 2019, qys 30" in {
-      MockForecastingService.forecastPost2016StatePension(2019, 140, 30, 0) shouldBe Forecast(155.65, 4)
+      MockForecastingService.forecastPost2016StatePension(2019, 140, 30, 0) shouldBe Forecast(155.65, 4, false)
     }
 
     "return 155.65 with 4 years, for starting amount 140, fry 2020, qys 30" in {
-      MockForecastingService.forecastPost2016StatePension(2020, 140, 30, 0) shouldBe Forecast(155.65, 4)
+      MockForecastingService.forecastPost2016StatePension(2020, 140, 30, 0) shouldBe Forecast(155.65, 4, false)
     }
 
     "return 155.65 with 4 years, for starting amount 140, fry 2021, qys 30" in {
-      MockForecastingService.forecastPost2016StatePension(2021, 140, 30, 0) shouldBe Forecast(155.65, 4)
+      MockForecastingService.forecastPost2016StatePension(2021, 140, 30, 0) shouldBe Forecast(155.65, 4, false)
 
     }
     "return 155.65 with 4 years, for starting amount 140, fry 2021, qys 36" in {
-      MockForecastingService.forecastPost2016StatePension(2021, 140, 36, 0) shouldBe Forecast(155.65, 4)
+      MockForecastingService.forecastPost2016StatePension(2021, 140, 36, 0) shouldBe Forecast(155.65, 4, false)
     }
 
     "return 155.65 with 5 for years for starting amount 137.86, fry 2021, qys 31" in {
-      MockForecastingService.forecastPost2016StatePension(2021, (155.65/35)*31, 31, 1) shouldBe Forecast(155.65, 5)
+      MockForecastingService.forecastPost2016StatePension(2021, (155.65/35)*31, 31, 1) shouldBe Forecast(155.65, 5, false)
     }
 
     "return 155.65 with 26 for years for starting amount 44.47, fry 2041, qys 9" in {
-      MockForecastingService.forecastPost2016StatePension(2041, (155.65/35)*10, 10, 1) shouldBe Forecast(155.65, 26)
+      MockForecastingService.forecastPost2016StatePension(2041, (155.65/35)*10, 10, 1) shouldBe Forecast(155.65, 26, false)
     }
 
     "return 155.65 with 26 for years for starting amount 4.447142857, fry 2099, qys 1" in {
-      MockForecastingService.forecastPost2016StatePension(2099, 155.65/35, 1, 0) shouldBe Forecast(155.65, 34)
+      MockForecastingService.forecastPost2016StatePension(2099, 155.65/35, 1, 0) shouldBe Forecast(155.65, 34, false)
     }
 
     "return 155.65 with 26 for years for starting amount 8.89, fry 2099, qys 2" in {
-      MockForecastingService.forecastPost2016StatePension(2099, (155.65/35)*2, 2, 0) shouldBe Forecast(155.65, 33)
+      MockForecastingService.forecastPost2016StatePension(2099, (155.65/35)*2, 2, 0) shouldBe Forecast(155.65, 33, false)
     }
 
 
@@ -345,7 +345,7 @@ class ForecastingServiceSpec extends UnitSpec with OneAppPerSuite {
         lastYearEarnings = 10000,
         finalRelevantYear = 2015,
         contractedOutLastYear = true
-      ) shouldBe Forecast(154.87, 2)
+      ) shouldBe Forecast(154.87, 2, false)
     }
 
     "return 155.65 for 10000 last year earnings, 2013/14 last year, 35QYs, 2016 FRY" in {
@@ -357,7 +357,7 @@ class ForecastingServiceSpec extends UnitSpec with OneAppPerSuite {
         lastYearEarnings = 10000,
         finalRelevantYear = 2016,
         contractedOutLastYear = true
-      ) shouldBe Forecast(155.65, 3)
+      ) shouldBe Forecast(155.65, 3, false)
     }
 
     "return 222.06 for 10000 last year earnings, 2013/14 last year, 35QYs, 2016 FRY, existing AP 100" in {
@@ -369,7 +369,7 @@ class ForecastingServiceSpec extends UnitSpec with OneAppPerSuite {
         lastYearEarnings = 10000,
         finalRelevantYear = 2016,
         contractedOutLastYear = true
-      ) shouldBe Forecast(222.06, 2)
+      ) shouldBe Forecast(222.06, 2, true)
     }
 
     "return 145.98 for 10000 last year earnings, 2013/14 last year, 30QYs, 2016 FRY" in {
@@ -381,7 +381,7 @@ class ForecastingServiceSpec extends UnitSpec with OneAppPerSuite {
         lastYearEarnings = 10000,
         finalRelevantYear = 2016,
         contractedOutLastYear = true
-      ) shouldBe Forecast(145.98, 3)
+      ) shouldBe Forecast(145.98, 3, false)
     }
   }
 
@@ -436,32 +436,32 @@ class ForecastingServiceSpec extends UnitSpec with OneAppPerSuite {
     "return Reached Scenario, 155.65 with no years when 2013/14 last year, contracted in, 35, 2018 FRY" in {
       MockForecastingService.getForecastAmount(
         List(), NpsDate(2014, 4, 5), 35, npsAmountA2016(0), npsAmountB2016, 10000, 2018, 0, 0, lastYearQualifying = true, testNino,
-        0, SPAmountModel(155.65))(hc) shouldBe SPForecastModel(SPAmountModel(155.65), 0, SPAmountModel(155.65), Scenario.Reached)
+        0, SPAmountModel(155.65))(hc) shouldBe SPForecastModel(SPAmountModel(155.65), 0, SPAmountModel(155.65), Scenario.Reached, true)
     }
 
     "return ContinueWorkingMax Scenario 155.65 with 2 years when 2013/14 last year, contracted in, 33, 2018 FRY" in {
       MockForecastingService.getForecastAmount(
         List(), NpsDate(2014, 4, 5), 33, npsAmountA2016(0), npsAmountB2016, 10000, 2018, 0, 0, lastYearQualifying = true, testNino,
-        0, SPAmountModel(146.76))(hc) shouldBe SPForecastModel(SPAmountModel(155.65), 2, SPAmountModel(155.65), Scenario.ContinueWorkingMax)
+        0, SPAmountModel(146.76))(hc) shouldBe SPForecastModel(SPAmountModel(155.65), 2, SPAmountModel(155.65), Scenario.ContinueWorkingMax, true)
     }
 
     "return ContinueWorkingNonMax Scenario 111.18 with 5 years when 2013/14 last year, contracted in, *, 2018 FRY" in {
       MockForecastingService.getForecastAmount(
         List(), NpsDate(2014, 4, 5), 20, npsAmountA2016(0), npsAmountB2016, 10000, 2018, 0, 0, lastYearQualifying = true, testNino,
-        0, SPAmountModel(88.94))(hc) shouldBe SPForecastModel(SPAmountModel(111.18), 5, SPAmountModel(111.18), Scenario.ContinueWorkingNonMax)
+        0, SPAmountModel(88.94))(hc) shouldBe SPForecastModel(SPAmountModel(111.18), 5, SPAmountModel(111.18), Scenario.ContinueWorkingNonMax, false)
     }
 
 
     "return ContinueWorkingMax Scenario 111.18 Forecast, 120.07 Max  with 5 years when 2013/14 last year, contracted in, *, 2018 FRY" in {
       MockForecastingService.getForecastAmount(
         List(), NpsDate(2014, 4, 5), 20, npsAmountA2016(0), npsAmountB2016, 10000, 2018, 0, 0, lastYearQualifying = true, testNino,
-        2, SPAmountModel(88.94))(hc) shouldBe SPForecastModel(SPAmountModel(111.18), 5, SPAmountModel(120.07), Scenario.FillGaps)
+        2, SPAmountModel(88.94))(hc) shouldBe SPForecastModel(SPAmountModel(111.18), 5, SPAmountModel(120.07), Scenario.FillGaps, false)
     }
 
     "return Forecast Only Scenario 111.18 Forecast, 120.07 Max  with 5 years when 2013/14 last year, contracted in, *, 2018 FRY" in {
       MockForecastingService.getForecastAmount(
         List(NpsSchemeMembership(Some(NpsDate(2012,3,5)), Some(NpsDate(2014,4,6)))), NpsDate(2014, 4, 5), 35, npsAmountA2016(0), npsAmountB2016, 10000, 2015, 0, 0, lastYearQualifying = true, testNino,
-        0, SPAmountModel(155.65))(hc) shouldBe SPForecastModel(SPAmountModel(154.87), 2, SPAmountModel(154.87), Scenario.ForecastOnly)
+        0, SPAmountModel(155.65))(hc) shouldBe SPForecastModel(SPAmountModel(154.87), 2, SPAmountModel(154.87), Scenario.ForecastOnly, false)
     }
 
     MockForecastingService.forecast(
@@ -472,7 +472,7 @@ class ForecastingServiceSpec extends UnitSpec with OneAppPerSuite {
       lastYearEarnings = 10000,
       finalRelevantYear = 2015,
       contractedOutLastYear = true
-    ) shouldBe Forecast(154.87, 2)
+    ) shouldBe Forecast(154.87, 2, false)
 
   }
 
