@@ -69,4 +69,5 @@ object NISPConstants {
   val s2pBand2Divisor1Deduction = 5
 
   val niRecordStart = 1975
+  val niRecordMinAge = 16
 }

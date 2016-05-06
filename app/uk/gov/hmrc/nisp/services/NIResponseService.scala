@@ -78,7 +78,7 @@ trait NIResponseService extends WithCurrentDate {
           npsSummary.spaDate.localDate.getYear,
           npsSummary.earningsIncludedUpTo,
           npsSummary.earningsIncludedUpTo.taxYear + 1,
-          calcPre75QualifyingYears(purgedNIRecord.pre75ContributionCount, purgedNIRecord.dateOfEntry),
+          calcPre75QualifyingYears(purgedNIRecord.pre75ContributionCount, purgedNIRecord.dateOfEntry, npsSummary.dateOfBirth),
           purgedNIRecord.nonQualifyingYearsPayable,
           purgedNIRecord.nonQualifyingYears - purgedNIRecord.nonQualifyingYearsPayable,
           npsSummary.npsStatePensionAmount.nspEntitlement < QualifyingYearsAmountService.maxAmount,
@@ -116,9 +116,10 @@ trait NIResponseService extends WithCurrentDate {
     }
   }
 
-  def calcPre75QualifyingYears(pre75Contributions: Int, dateOfEntry: NpsDate): Option[Int] = {
+  def calcPre75QualifyingYears(pre75Contributions: Int, dateOfEntry: NpsDate, dateOfBirth: NpsDate): Option[Int] = {
     val yearCalc: BigDecimal = BigDecimal(pre75Contributions)/50
-    val yearsPre75 = NISPConstants.niRecordStart - dateOfEntry.taxYear
+    val sixteenthBirthday: NpsDate = NpsDate(dateOfBirth.localDate.plusYears(NISPConstants.niRecordMinAge))
+    val yearsPre75 = (NISPConstants.niRecordStart - dateOfEntry.taxYear).min(NISPConstants.niRecordStart - sixteenthBirthday.taxYear)
     if (yearsPre75 > 0) {
       Some(yearCalc.setScale(0, BigDecimal.RoundingMode.CEILING).min(yearsPre75).toInt)
     } else {
