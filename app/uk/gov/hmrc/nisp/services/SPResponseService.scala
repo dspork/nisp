@@ -99,7 +99,7 @@ trait SPResponseService extends WithCurrentDate {
         purgedNIRecord.nonQualifyingYears,
         purgedNIRecord.nonQualifyingYearsPayable,
         npsSummary.yearsUntilPensionAge,
-        npsSummary.pensionShareOrderCOEG != 0 || npsSummary.pensionShareOrderSERPS != 0,
+        npsSummary.pensionShareOrderSERPS != 0,
         npsSummary.dateOfBirth,
         forecast,
         npsSummary.pensionForecast.fullNewStatePensionAmount,
