@@ -45,6 +45,8 @@ object NISPConstants {
   val taxYearEndDay = 5
   val newStatePensionStart = new LocalDate(newStatePensionStartYear, taxYearStartEndMonth, taxYearStartDay)
 
+  val autoCreditExclusionDate = new LocalDate(2018, 10, 6)
+
   val saturday = 6
   val sunday = 7
 

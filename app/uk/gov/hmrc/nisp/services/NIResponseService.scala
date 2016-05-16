@@ -64,7 +64,8 @@ trait NIResponseService extends WithCurrentDate {
         npsSummary.npsStatePensionAmount.nspEntitlement,
         SPCurrentAmountService.calculate(npsSummary.npsStatePensionAmount.npsAmountA2016, npsSummary.npsStatePensionAmount.npsAmountB2016),
         NpsDate(now),
-        npsSummary.spaDate
+        npsSummary.spaDate,
+        npsSummary.sex
       ).getNIExclusions
 
       if (niExclusions.exclusions.nonEmpty) {

@@ -38,7 +38,8 @@ case class SPSummaryModel(
                            fullNewStatePensionAmount: BigDecimal,
                            contractedOutFlag: Boolean,
                            customerAge: Int,
-                           copeAmount: SPAmountModel
+                           copeAmount: SPAmountModel,
+                           isAbroad: Boolean
                          )
 
 object SPSummaryModel {

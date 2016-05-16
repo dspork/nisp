@@ -25,7 +25,7 @@ import uk.gov.hmrc.nisp.utils.{FunctionHelper, NISPConstants}
 
 case class ExclusionsService(isAbroad: Boolean, mwrre: Boolean, dateOfDeath: Option[NpsDate], nino: String,
                              liabilities: List[NpsLiability], currentAmountReceived: BigDecimal,
-                             currentAmountCalculated: BigDecimal, now: NpsDate, statePensionAge: NpsDate) {
+                             currentAmountCalculated: BigDecimal, now: NpsDate, statePensionAge: NpsDate, sex: String) {
 
   def getSPExclusions: ExclusionsModel = calculateExclusions(spExclusions)
   def getNIExclusions: ExclusionsModel = calculateExclusions(niExclusions)
@@ -41,7 +41,8 @@ case class ExclusionsService(isAbroad: Boolean, mwrre: Boolean, dateOfDeath: Opt
   }
 
   val checkAbroad = (exclusionList: List[Exclusion]) =>
-    if(isAbroad) Exclusion.Abroad :: exclusionList else exclusionList
+    if(isAbroad && statePensionAge.localDate.isBefore(NISPConstants.autoCreditExclusionDate) && sex.equalsIgnoreCase("M"))
+      Exclusion.Abroad :: exclusionList else exclusionList
 
   val checkIOMLiabilities = (exclusionList: List[Exclusion]) => {
     if (liabilities.exists(_.liabilityType == NISPConstants.isleOfManLiability))

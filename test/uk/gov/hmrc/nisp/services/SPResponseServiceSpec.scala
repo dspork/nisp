@@ -62,6 +62,11 @@ class SPResponseServiceSpec extends UnitSpec with MockitoSugar with OneAppPerSui
     spResponse.spSummary.get.statePensionAmount shouldBe SPAmountModel(118.24)
   }
 
+  "return an SPSummaryModel object with isAbroad" in {
+    val spResponse = MockSPResponseService.getSPResponse(nino)
+    spResponse.spSummary.get.isAbroad shouldBe(false)
+  }
+
   "return an SPSummaryModel object with the correct SPAge" in {
     val spResponse = MockSPResponseService.getSPResponse(nino)
     spResponse.spSummary.get.statePensionAge shouldBe SPAgeModel(65,NpsDate(new LocalDate(2017,11,21)))

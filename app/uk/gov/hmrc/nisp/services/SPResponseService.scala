@@ -66,7 +66,8 @@ trait SPResponseService extends WithCurrentDate {
         spAmountModel.week,
         SPCurrentAmountService.calculate(npsSummary.npsStatePensionAmount.npsAmountA2016, npsSummary.npsStatePensionAmount.npsAmountB2016),
         NpsDate(now),
-        npsSummary.spaDate
+        npsSummary.spaDate,
+        npsSummary.sex
       )
 
       val spExclusions = exclusionsService.getSPExclusions
@@ -105,7 +106,8 @@ trait SPResponseService extends WithCurrentDate {
         npsSummary.pensionForecast.fullNewStatePensionAmount,
         npsSchemeMembership.nonEmpty,
         getAge(npsSummary.dateOfBirth),
-        SPAmountModel(npsSummary.npsStatePensionAmount.npsAmountB2016.rebateDerivedAmount)
+        SPAmountModel(npsSummary.npsStatePensionAmount.npsAmountB2016.rebateDerivedAmount),
+        npsSummary.isAbroad
       )
 
       if (spExclusions.exclusions.isEmpty && niExclusions.exclusions.isEmpty) {
