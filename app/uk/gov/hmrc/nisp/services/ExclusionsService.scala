@@ -42,7 +42,9 @@ case class ExclusionsService(isAbroad: Boolean, mwrre: Boolean, dateOfDeath: Opt
 
   val checkAbroad = (exclusionList: List[Exclusion]) =>
     if(isAbroad && statePensionAge.localDate.isBefore(NISPConstants.autoCreditExclusionDate) && sex.equalsIgnoreCase("M"))
-      Exclusion.Abroad :: exclusionList else exclusionList
+      Exclusion.Abroad :: exclusionList
+    else
+      exclusionList
 
   val checkIOMLiabilities = (exclusionList: List[Exclusion]) => {
     if (liabilities.exists(_.liabilityType == NISPConstants.isleOfManLiability))
