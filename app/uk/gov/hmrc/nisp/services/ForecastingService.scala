@@ -27,6 +27,7 @@ import uk.gov.hmrc.nisp.services.reference.{EarningLevelService, QualifyingYears
 import uk.gov.hmrc.nisp.utils.NISPConstants
 import uk.gov.hmrc.play.http.HeaderCarrier
 
+import scala.annotation.tailrec
 import scala.math.BigDecimal.RoundingMode
 
 object ForecastingService extends ForecastingService {
@@ -51,16 +52,19 @@ trait ForecastingService {
     val calculatedForecast = forecast(earningsIncludedUpTo, currentQualifyingYears,
       amountB.rebateDerivedAmount, amountA.totalAP, lastYearEarnings, finalRelevantYear, contractedOutLastYear)
 
-    val personalMaximumAmount = personalMaximum(earningsIncludedUpTo, currentQualifyingYears,
-      amountB.rebateDerivedAmount, amountA.totalAP, lastYearEarnings, finalRelevantYear, contractedOutLastYear,
-      fillableGaps)
+    val forecastFillingsGaps: Int => BigDecimal = (gapsToFill: Int)  => forecast(earningsIncludedUpTo, currentQualifyingYears + gapsToFill,
+      amountB.rebateDerivedAmount, amountA.totalAP, lastYearEarnings, finalRelevantYear, contractedOutLastYear).amount
+
+    val personalMaximumAmount = personalMaximum(fillableGaps, forecastFillingsGaps)
 
     val scenario = forecastScenario(currentAmount, SPAmountModel(calculatedForecast.amount), personalMaximumAmount,
       currentQualifyingYears + calculatedForecast.yearsLeftToWork + fillableGaps  )
+
     SPForecastModel(
       SPAmountModel(calculatedForecast.amount),
       if(scenario == Scenario.Reached) 0 else calculatedForecast.yearsLeftToWork,
       personalMaximumAmount,
+      if(scenario == Scenario.FillGaps) minimumGapsToFillForPersonalMax(personalMaximumAmount.week, fillableGaps, forecastFillingsGaps) else 0,
       scenario,
       calculatedForecast.oldRulesCustomer
     )
@@ -176,10 +180,19 @@ trait ForecastingService {
     }
   }
 
-  def personalMaximum(earningsIncludedUpTo: NpsDate, currentQualifyingYears: Int, existingRDA: BigDecimal, existingAP: BigDecimal,
-                      lastYearEarnings: BigDecimal, finalRelevantYear: Int, contractedOutLastYear: Boolean, fillableGaps: Int): SPAmountModel = {
-    SPAmountModel(forecast(earningsIncludedUpTo, currentQualifyingYears + fillableGaps, existingRDA, existingAP,
-      lastYearEarnings, finalRelevantYear, contractedOutLastYear).amount)
+  def personalMaximum(fillableGaps: Int, forecastWithFilledGaps: Int => BigDecimal): SPAmountModel = {
+    SPAmountModel(forecastWithFilledGaps(fillableGaps))
+  }
+
+  def minimumGapsToFillForPersonalMax(personalMaximum: BigDecimal, fillableGaps: Int, forecastWithFilledGaps: Int => BigDecimal): Int = {
+    require(fillableGaps > 0)
+
+    @tailrec def go(years: Int): Int = {
+      if(forecastWithFilledGaps(years) < personalMaximum) years + 1
+      else go(years - 1)
+    }
+
+    go(fillableGaps)
   }
 
 }

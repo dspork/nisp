@@ -25,6 +25,7 @@ import uk.gov.hmrc.nisp.metrics.Metrics
 import uk.gov.hmrc.nisp.models.enums.SPContextMessage.SPContextMessage
 import uk.gov.hmrc.nisp.models.nps.NpsDate
 import uk.gov.hmrc.nisp.models._
+import uk.gov.hmrc.nisp.models.enums.Scenario
 import uk.gov.hmrc.nisp.utils.WithCurrentDate
 import uk.gov.hmrc.play.http.HeaderCarrier
 import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
@@ -112,7 +113,7 @@ trait SPResponseService extends WithCurrentDate {
 
       if (spExclusions.exclusions.isEmpty && niExclusions.exclusions.isEmpty) {
         metrics.summary(forecast.forecastAmount.week, spAmountModel.week, scenario, npsSchemeMembership.nonEmpty,
-          spAmountModel.week > forecast.forecastAmount.week, getAge(npsSummary.dateOfBirth), forecast.scenario,
+          forecast.scenario.equals(Scenario.ForecastOnly), getAge(npsSummary.dateOfBirth), forecast.scenario,
           forecast.personalMaximum.week, forecast.yearsLeftToWork)
         SPResponseModel(Some(spSummary), None, None)
       } else {
