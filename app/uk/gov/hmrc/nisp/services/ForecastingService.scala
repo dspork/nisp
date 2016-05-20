@@ -58,7 +58,7 @@ trait ForecastingService {
     val personalMaximumAmount = personalMaximum(fillableGaps, forecastFillingsGaps)
 
     val scenario = forecastScenario(currentAmount, SPAmountModel(calculatedForecast.amount), personalMaximumAmount,
-      currentQualifyingYears + calculatedForecast.yearsLeftToWork + fillableGaps  )
+      currentQualifyingYears + calculatedForecast.yearsLeftToWork + fillableGaps)
 
     SPForecastModel(
       SPAmountModel(calculatedForecast.amount),

@@ -22,10 +22,11 @@ import org.joda.time.{DateTimeZone, LocalDate, Period, PeriodType}
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.nisp.connectors.NpsConnector
 import uk.gov.hmrc.nisp.metrics.Metrics
-import uk.gov.hmrc.nisp.models.enums.SPContextMessage.SPContextMessage
-import uk.gov.hmrc.nisp.models.nps.NpsDate
 import uk.gov.hmrc.nisp.models._
-import uk.gov.hmrc.nisp.models.enums.Scenario
+import uk.gov.hmrc.nisp.models.enums.MQPScenario.MQPScenario
+import uk.gov.hmrc.nisp.models.enums.SPContextMessage.SPContextMessage
+import uk.gov.hmrc.nisp.models.enums.{MQPScenario, Scenario}
+import uk.gov.hmrc.nisp.models.nps.NpsDate
 import uk.gov.hmrc.nisp.utils.WithCurrentDate
 import uk.gov.hmrc.play.http.HeaderCarrier
 import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
@@ -43,6 +44,16 @@ trait SPResponseService extends WithCurrentDate {
   val forecastingService: ForecastingService
   val nps: NpsConnector
   val metrics: Metrics
+
+
+  def getMqpScenario(currentYears : Int , yearsToWork : Int, fillableGaps: Int) : Option[MQPScenario] = {
+    (currentYears < 10, currentYears + yearsToWork + fillableGaps < 10, currentYears + yearsToWork >= 10) match {
+      case (true, true, false) => Some(MQPScenario.CantGet)
+      case (true, false, true) => Some(MQPScenario.ContinueWorking)
+      case (true, false, false) => Some(MQPScenario.CanGetWithGaps)
+      case (_, _, _) => None
+    }
+  }
 
   def getSPResponse(nino: Nino)(implicit hc: HeaderCarrier): Future[SPResponseModel] = {
     val futureNpsSummary = nps.connectToSummary(nino)
@@ -83,6 +94,9 @@ trait SPResponseService extends WithCurrentDate {
         npsNIRecord.nonQualifyingYearsPayable, spAmountModel
       )
 
+      val mqpScenario = getMqpScenario(npsSummary.nspQualifyingYears, npsSummary.yearsUntilPensionAge,
+                      npsNIRecord.nonQualifyingYearsPayable)
+
       val scenario: Option[SPContextMessage] = SPContextMessageService.getSPContextMessage(
         spAmountModel,
         npsSummary.nspQualifyingYears,
@@ -108,13 +122,14 @@ trait SPResponseService extends WithCurrentDate {
         npsSchemeMembership.nonEmpty,
         getAge(npsSummary.dateOfBirth),
         SPAmountModel(npsSummary.npsStatePensionAmount.npsAmountB2016.rebateDerivedAmount),
+        mqpScenario,
         npsSummary.isAbroad
       )
 
       if (spExclusions.exclusions.isEmpty && niExclusions.exclusions.isEmpty) {
         metrics.summary(forecast.forecastAmount.week, spAmountModel.week, scenario, npsSchemeMembership.nonEmpty,
           forecast.scenario.equals(Scenario.ForecastOnly), getAge(npsSummary.dateOfBirth), forecast.scenario,
-          forecast.personalMaximum.week, forecast.yearsLeftToWork)
+          forecast.personalMaximum.week, forecast.yearsLeftToWork, mqpScenario)
         SPResponseModel(Some(spSummary), None, None)
       } else {
         metrics.exclusion(spExclusions.exclusions)

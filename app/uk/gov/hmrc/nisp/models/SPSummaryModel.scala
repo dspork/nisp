@@ -16,9 +16,10 @@
 
 package uk.gov.hmrc.nisp.models
 
-import uk.gov.hmrc.nisp.models.enums.SPContextMessage
-import SPContextMessage.SPContextMessage
 import play.api.libs.json.Json
+import uk.gov.hmrc.nisp.models.enums.MQPScenario.MQPScenario
+import uk.gov.hmrc.nisp.models.enums.SPContextMessage
+import uk.gov.hmrc.nisp.models.enums.SPContextMessage.SPContextMessage
 import uk.gov.hmrc.nisp.models.nps.NpsDate
 
 case class SPSummaryModel(
@@ -39,6 +40,7 @@ case class SPSummaryModel(
                            contractedOutFlag: Boolean,
                            customerAge: Int,
                            copeAmount: SPAmountModel,
+                           mqp: Option[MQPScenario],
                            isAbroad: Boolean
                          )
 

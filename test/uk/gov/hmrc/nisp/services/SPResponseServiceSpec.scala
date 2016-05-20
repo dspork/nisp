@@ -21,8 +21,8 @@ import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mock.MockitoSugar
 import org.scalatestplus.play.OneAppPerSuite
 import uk.gov.hmrc.nisp.connectors.NpsConnector
-import uk.gov.hmrc.nisp.helpers.{MockSPResponseService, TestAccountBuilder, MockNpsConnector}
-import uk.gov.hmrc.nisp.models.enums.Exclusion
+import uk.gov.hmrc.nisp.helpers.{MockNpsConnector, MockSPResponseService, TestAccountBuilder}
+import uk.gov.hmrc.nisp.models.enums.{Exclusion, MQPScenario}
 import uk.gov.hmrc.nisp.models.nps._
 import uk.gov.hmrc.nisp.models.{SPAgeModel, SPAmountModel}
 import uk.gov.hmrc.play.http.{HeaderCarrier, NotFoundException}
@@ -43,7 +43,7 @@ class SPResponseServiceSpec extends UnitSpec with MockitoSugar with OneAppPerSui
   "return failed Future for a non-existent NINO" in {
     val spResponse = MockSPResponseService.getSPResponse(nonexistentnino)
     ScalaFutures.whenReady(spResponse.failed) { ex =>
-      ex shouldBe a [NotFoundException]
+      ex shouldBe a[NotFoundException]
     }
   }
 
@@ -54,7 +54,7 @@ class SPResponseServiceSpec extends UnitSpec with MockitoSugar with OneAppPerSui
 
   "return an SPSummaryModel object with the correct last processed date" in {
     val spResponse = MockSPResponseService.getSPResponse(nino)
-    spResponse.spSummary.get.lastProcessedDate shouldBe NpsDate(new LocalDate(2014,4,5))
+    spResponse.spSummary.get.lastProcessedDate shouldBe NpsDate(new LocalDate(2014, 4, 5))
   }
 
   "return an SPSummaryModel object with the correct SPAmount" in {
@@ -69,7 +69,7 @@ class SPResponseServiceSpec extends UnitSpec with MockitoSugar with OneAppPerSui
 
   "return an SPSummaryModel object with the correct SPAge" in {
     val spResponse = MockSPResponseService.getSPResponse(nino)
-    spResponse.spSummary.get.statePensionAge shouldBe SPAgeModel(65,NpsDate(new LocalDate(2017,11,21)))
+    spResponse.spSummary.get.statePensionAge shouldBe SPAgeModel(65, NpsDate(new LocalDate(2017, 11, 21)))
   }
 
   "return a SPSummaryModel and an ExclusionsModel" in {
@@ -87,27 +87,60 @@ class SPResponseServiceSpec extends UnitSpec with MockitoSugar with OneAppPerSui
 
   "age Calculation" should {
     "return 30 age for date of Birth 10/05/1980 and current date 10/7/2010" in {
-      new MockSPResponseService(localDate = new LocalDate(2010,7,10)).getAge(NpsDate(1980, 5, 10)) shouldBe 30
+      new MockSPResponseService(localDate = new LocalDate(2010, 7, 10)).getAge(NpsDate(1980, 5, 10)) shouldBe 30
     }
 
     "return 9 age for date of Birth 10/05/2001 and current date 10/7/2010" in {
-      new MockSPResponseService(localDate = new LocalDate(2010,7,10)).getAge(NpsDate(2001, 5, 10)) shouldBe 9
+      new MockSPResponseService(localDate = new LocalDate(2010, 7, 10)).getAge(NpsDate(2001, 5, 10)) shouldBe 9
     }
 
     "return 59 age for date of Birth 19/07/1950 and current date 10/7/2010" in {
-      new MockSPResponseService(localDate = new LocalDate(2010,7,10)).getAge(NpsDate(1950, 7, 19)) shouldBe 59
+      new MockSPResponseService(localDate = new LocalDate(2010, 7, 10)).getAge(NpsDate(1950, 7, 19)) shouldBe 59
     }
 
     "return 50 age for date of Birth 10/07/1950 and current date 10/7/2000" in {
-      new MockSPResponseService(localDate = new LocalDate(2000,7,10)).getAge(NpsDate(1950, 7, 10)) shouldBe 50
+      new MockSPResponseService(localDate = new LocalDate(2000, 7, 10)).getAge(NpsDate(1950, 7, 10)) shouldBe 50
     }
 
     "return 49 age for date of Birth 10/07/1950 and current date 11/7/1999" in {
-      new MockSPResponseService(localDate = new LocalDate(1999,7,11)).getAge(NpsDate(1950, 7, 10)) shouldBe 49
+      new MockSPResponseService(localDate = new LocalDate(1999, 7, 11)).getAge(NpsDate(1950, 7, 10)) shouldBe 49
     }
 
     "return 48 age for date of Birth 10/07/1950 and current date 9/7/1999" in {
-      new MockSPResponseService(localDate = new LocalDate(1999,7,9)).getAge(NpsDate(1950, 7, 10)) shouldBe 48
+      new MockSPResponseService(localDate = new LocalDate(1999, 7, 9)).getAge(NpsDate(1950, 7, 10)) shouldBe 48
     }
   }
+
+  "return None in MQP scenario, for regular NINO" in {
+    val spResponse = MockSPResponseService.getSPResponse(nino)
+    spResponse.spSummary.get.mqp shouldBe None
+  }
+
+  "MQP Scenario" should {
+    "return Cant Get in MQP" in {
+      val spResponseMQP = MockSPResponseService.getMqpScenario(5, 3, 0)
+      spResponseMQP shouldBe Some(MQPScenario.CantGet)
+    }
+    "return Continue Working in MQP" in {
+      val spResponseMQP = MockSPResponseService.getMqpScenario(5, 5, 0)
+      spResponseMQP shouldBe Some(MQPScenario.ContinueWorking)
+    }
+    "return Can Get With Gaps in MQP" in {
+      val spResponseMQP = MockSPResponseService.getMqpScenario(5, 0, 5)
+      spResponseMQP shouldBe Some(MQPScenario.CanGetWithGaps)
+    }
+    "return Can't Get in MQP with 0 current years, 3 years to work and 5 fillable gaps" in {
+      val spResponseMQP =   MockSPResponseService.getMqpScenario(0, 3, 5)
+      spResponseMQP shouldBe Some(MQPScenario.CantGet)
+    }
+    "return Can Get With Gaps in MQP with 5 current years, 2 years to work and 4 fillable gaps" in {
+      val spResponseMQP =   MockSPResponseService.getMqpScenario(5, 2, 4)
+      spResponseMQP shouldBe Some(MQPScenario.CanGetWithGaps)
+    }
+    "return Continue Working in MQP with 6 current years, 6 years to work and 4 fillable gaps" in {
+      val spResponseMQP =   MockSPResponseService.getMqpScenario(6, 6, 4)
+      spResponseMQP shouldBe Some(MQPScenario.ContinueWorking)
+    }
+  }
+
 }

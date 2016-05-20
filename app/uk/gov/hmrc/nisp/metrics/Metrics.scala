@@ -22,18 +22,20 @@ import com.kenshoo.play.metrics.MetricsRegistry
 import uk.gov.hmrc.nisp.models.SPForecastModel
 import uk.gov.hmrc.nisp.models.enums.APITypes.APITypes
 import uk.gov.hmrc.nisp.models.enums.Exclusion._
+import uk.gov.hmrc.nisp.models.enums.MQPScenario._
 import uk.gov.hmrc.nisp.models.enums.SPContextMessage._
 import uk.gov.hmrc.nisp.models.enums.Scenario.Scenario
-import uk.gov.hmrc.nisp.models.enums.{APITypes, Exclusion, SPContextMessage, Scenario}
+import uk.gov.hmrc.nisp.models.enums.{Exclusion, MQPScenario, SPContextMessage, _}
 
 trait Metrics {
   def startTimer(api: APITypes): Timer.Context
   def incrementFailedCounter(api: APITypes.APITypes): Unit
   
   def summary(forecast: BigDecimal, current: BigDecimal, scenario: Option[SPContextMessage], contractedOut: Boolean, forecastOnly: Boolean, age: Int,
-              forecastScenario: Scenario, personalMaximum: BigDecimal, yearsToContribute: Int): Unit
+              forecastScenario: Scenario, personalMaximum: BigDecimal, yearsToContribute: Int, mqpScenario: Option[MQPScenario]): Unit
   def niRecord(gaps: Int, payableGaps: Int, pre75Years: Int, qualifyingYears: Int, yearsUntilSPA: Int): Unit
   def exclusion(exclusions: List[Exclusion]): Unit
+
 }
 
 object Metrics extends Metrics {
@@ -66,7 +68,6 @@ object Metrics extends Metrics {
   val age46To55 = MetricsRegistry.defaultRegistry.counter("age-46-to-55")
   val age56To65 = MetricsRegistry.defaultRegistry.counter("age-56-to-65")
   val age66AndAbove = MetricsRegistry.defaultRegistry.counter("age-66-and-above")
-
   val gapsMeter = MetricsRegistry.defaultRegistry.histogram("gaps")
   val payableGapsMeter = MetricsRegistry.defaultRegistry.histogram("payable-gaps")
   val pre75YearsMeter = MetricsRegistry.defaultRegistry.histogram("pre75-years")
@@ -98,6 +99,11 @@ object Metrics extends Metrics {
     Scenario.CantGetPension -> MetricsRegistry.defaultRegistry.counter("forecastscenario-cantgetpension")
   )
 
+  val mqpScenarioMeters: Map[MQPScenario, Counter] = Map(
+    MQPScenario.CantGet -> MetricsRegistry.defaultRegistry.counter("mqpscenario-cantget"),
+    MQPScenario.ContinueWorking -> MetricsRegistry.defaultRegistry.counter("mqpscenario-continueworking"),
+    MQPScenario.CanGetWithGaps -> MetricsRegistry.defaultRegistry.counter("mqpscenario-cangetwithgaps")
+  )
 
   val exclusionMeters: Map[Exclusion, Counter] = Map(
     Exclusion.Abroad -> MetricsRegistry.defaultRegistry.counter("exclusion-abroad"),
@@ -112,12 +118,13 @@ object Metrics extends Metrics {
 
   override def summary(forecast: BigDecimal, current: BigDecimal, scenario: Option[SPContextMessage],
                        contractedOut: Boolean, forecastOnly: Boolean, age: Int, forecastScenario: Scenario,
-                       personalMaximum: BigDecimal, yearsToContribute: Int): Unit = {
+                       personalMaximum: BigDecimal, yearsToContribute: Int, mqpScenario : Option[MQPScenario]): Unit = {
     forecastAmountMeter.update(forecast.toInt)
     currentAmountMeter.update(current.toInt)
     personalMaxAmountMeter.update(personalMaximum.toInt)
     scenario.foreach(scenarioMeters(_).inc())
     forecastScenarioMeters(forecastScenario).inc()
+    mqpScenario.foreach(mqpScenarioMeters(_).inc())
     yearsNeededToContribute.update(yearsToContribute)
     if(contractedOut) contractedOutMeter.inc() else notContractedOutMeter.inc()
     if(forecastOnly) forecastOnlyMeter.inc() else notForecastOnlyMeter.inc()

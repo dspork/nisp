@@ -22,6 +22,7 @@ import org.scalatest.mock.MockitoSugar
 import uk.gov.hmrc.nisp.metrics.Metrics
 import uk.gov.hmrc.nisp.models.enums.APITypes.APITypes
 import uk.gov.hmrc.nisp.models.enums.Exclusion.Exclusion
+import uk.gov.hmrc.nisp.models.enums.MQPScenario.MQPScenario
 import uk.gov.hmrc.nisp.models.enums.SPContextMessage.SPContextMessage
 import uk.gov.hmrc.nisp.models.enums.Scenario.Scenario
 
@@ -36,7 +37,7 @@ object MockMetrics extends Metrics with MockitoSugar {
 
   override def summary(forecast: BigDecimal, current: BigDecimal, scenario: Option[SPContextMessage], contractedOut: Boolean,
                        forecastOnly: Boolean, age: Int, forecastScenario: Scenario,
-                       personalMaximum: BigDecimal, yearsToContribute: Int): Unit = ()
+                       personalMaximum: BigDecimal, yearsToContribute: Int, mqpScenario: Option[MQPScenario]): Unit = ()
 
   override def niRecord(gaps: Int, payableGaps: Int, pre75Years: Int, qualifyingYears: Int, yearsUntilSPA: Int): Unit = ()
   override def exclusion(exclusions: List[Exclusion]): Unit = ()

@@ -608,7 +608,7 @@ class ForecastingServiceSpec extends UnitSpec with OneAppPerSuite {
   }
 
   "personalMaximumScenario" when {
-    "current == forecast == maxiumum" should {
+    "current == forecast == maximum" should {
       "return Reached" in {
         MockForecastingService.forecastScenario(SPAmountModel(155.65), SPAmountModel(155.65), SPAmountModel(155.65), 36) shouldBe Scenario.Reached
       }
@@ -655,13 +655,13 @@ class ForecastingServiceSpec extends UnitSpec with OneAppPerSuite {
     }
 
     "yearsToQualify = 10"  should {
-      "return CantGetPension" in {
+      "return ForecastOnly" in {
         MockForecastingService.forecastScenario(SPAmountModel(100), SPAmountModel(99), SPAmountModel(100), 10) shouldBe Scenario.ForecastOnly
       }
     }
 
     "yearsToQualify > 10"  should {
-      "return CantGetPension" in {
+      "return ForecastOnly" in {
         MockForecastingService.forecastScenario(SPAmountModel(100), SPAmountModel(99), SPAmountModel(100), 12) shouldBe Scenario.ForecastOnly
       }
     }
