@@ -21,7 +21,7 @@ import play.api.http._
 import play.api.libs.json.Json
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import uk.gov.hmrc.nisp.helpers.{TestAccountBuilder, MockSPResponseService}
+import uk.gov.hmrc.nisp.helpers.{TestAccountBuilder, StubSPResponseService}
 import uk.gov.hmrc.nisp.services.SPResponseService
 import uk.gov.hmrc.play.test.UnitSpec
 
@@ -30,7 +30,7 @@ class SPSummaryControllerSpec extends UnitSpec with OneAppPerSuite {
   val nonExistentNino = TestAccountBuilder.nonExistentNino
   
   val testSPSummaryController = new SPSummaryController {
-    override def spService: SPResponseService = MockSPResponseService
+    override def spService: SPResponseService = StubSPResponseService
   }
 
   "SPSummaryController" should {

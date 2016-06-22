@@ -27,11 +27,11 @@ import uk.gov.hmrc.nisp.models.enums.SPContextMessage.SPContextMessage
 import uk.gov.hmrc.nisp.models.enums.Scenario.Scenario
 
 
-object MockMetrics extends Metrics with MockitoSugar {
+object StubMetrics extends Metrics with MockitoSugar {
 
-  val fakeTimerContext = mock[Timer.Context]
+  val stubTimerContext = mock[Timer.Context]
 
-  override def startTimer(api: APITypes): Context = fakeTimerContext
+  override def startTimer(api: APITypes): Context = stubTimerContext
 
   override def incrementFailedCounter(api: APITypes): Unit = {}
 

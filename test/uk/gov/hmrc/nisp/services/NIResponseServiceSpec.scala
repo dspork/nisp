@@ -22,7 +22,7 @@ import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mock.MockitoSugar
 import org.scalatestplus.play.OneAppPerSuite
 import uk.gov.hmrc.nisp.connectors.NpsConnector
-import uk.gov.hmrc.nisp.helpers.{MockMetrics, MockNpsConnector, TestAccountBuilder}
+import uk.gov.hmrc.nisp.helpers.{StubMetrics, StubNpsConnector, TestAccountBuilder}
 import uk.gov.hmrc.nisp.metrics.Metrics
 import uk.gov.hmrc.nisp.models.enums.Exclusion
 import uk.gov.hmrc.nisp.models.nps.NpsDate
@@ -38,15 +38,15 @@ class NIResponseServiceSpec  extends UnitSpec with MockitoSugar with BeforeAndAf
 
   implicit val hc = HeaderCarrier()
 
-  val testNIServiceWithMockHttp = new NIResponseService {
-    override val nps: NpsConnector = MockNpsConnector
-    override val metrics: Metrics = MockMetrics
+  val testNIService = new NIResponseService {
+    override val nps: NpsConnector = StubNpsConnector
+    override val metrics: Metrics = StubMetrics
     override def now: LocalDate = new LocalDate()
   }
 
   "customer with NINO regular has date of entry of 01/04/1972" should {
     "returns NIResponse" in {
-      val niResponse = testNIServiceWithMockHttp.getNIResponse(nino)
+      val niResponse = testNIService.getNIResponse(nino)
       niResponse.niRecord.get.taxYears.head shouldBe
         NIRecordTaxYear(1975, qualifying = true, 109.08, 0, 0, 0, None, None, None, payable = false, underInvestigation = false)
       niResponse.niRecord.get.taxYears.last shouldBe
@@ -57,7 +57,7 @@ class NIResponseServiceSpec  extends UnitSpec with MockitoSugar with BeforeAndAf
 
   "customer with non-existent NINO" should {
     "returns failed Future" in {
-      val niResponse = testNIServiceWithMockHttp.getNIResponse(nonexistentnino)
+      val niResponse = testNIService.getNIResponse(nonexistentnino)
       ScalaFutures.whenReady(niResponse.failed) { ex =>
         ex shouldBe a[NotFoundException]
       }
@@ -65,7 +65,7 @@ class NIResponseServiceSpec  extends UnitSpec with MockitoSugar with BeforeAndAf
   }
 
   "customer with excluded NINO" in {
-    val niResponse = testNIServiceWithMockHttp.getNIResponse(exclusionNino)
+    val niResponse = testNIService.getNIResponse(exclusionNino)
     niResponse.niRecord shouldBe None
     niResponse.niSummary shouldBe None
     niResponse.niExclusions shouldBe Some(ExclusionsModel(List(Exclusion.MWRRE)))
@@ -73,25 +73,25 @@ class NIResponseServiceSpec  extends UnitSpec with MockitoSugar with BeforeAndAf
 
   "calc pre75 years" should {
     "return 3 when the number of conts in 157 and the date of entry is 04/10/1972 and their date of birth is 04/10/1956" in {
-      testNIServiceWithMockHttp.calcPre75QualifyingYears(157, NpsDate(1972, 10, 4), NpsDate(1956, 10, 4)) shouldBe Some(3)
+      testNIService.calcPre75QualifyingYears(157, NpsDate(1972, 10, 4), NpsDate(1956, 10, 4)) shouldBe Some(3)
     }
     "return 8 when the number of conts in 408 and the date of entry is 08/01/1968 and their date of birth is 08/01/1952" in {
-      testNIServiceWithMockHttp.calcPre75QualifyingYears(408, NpsDate(1968, 1, 8), NpsDate(1952, 1, 8)) shouldBe Some(8)
+      testNIService.calcPre75QualifyingYears(408, NpsDate(1968, 1, 8), NpsDate(1952, 1, 8)) shouldBe Some(8)
     }
     "return 2 when the number of conts in 157 and the date of entry is 06/04/1973 and their date of birth is 04/10/1956" in {
-      testNIServiceWithMockHttp.calcPre75QualifyingYears(157, NpsDate(1973, 4, 6), NpsDate(1956, 10, 4)) shouldBe Some(2)
+      testNIService.calcPre75QualifyingYears(157, NpsDate(1973, 4, 6), NpsDate(1956, 10, 4)) shouldBe Some(2)
     }
     "return 1 when the number of conts in 157 and the date of entry is 06/04/1973 and their date of birth is 06/04/1958" in {
-      testNIServiceWithMockHttp.calcPre75QualifyingYears(157, NpsDate(1973, 4, 6), NpsDate(1958, 4, 6)) shouldBe Some(1)
+      testNIService.calcPre75QualifyingYears(157, NpsDate(1973, 4, 6), NpsDate(1958, 4, 6)) shouldBe Some(1)
     }
     "return 3 when the number of conts in 157 and the date of entry is 06/04/1973 and their date of birth is 24/05/1996" in {
-      testNIServiceWithMockHttp.calcPre75QualifyingYears(157, NpsDate(1973, 4, 6), NpsDate(1996, 5, 24)) shouldBe None
+      testNIService.calcPre75QualifyingYears(157, NpsDate(1973, 4, 6), NpsDate(1996, 5, 24)) shouldBe None
     }
     "return 3 when the number of conts in 157 and the date of entry is 06/04/1976 and their date of birth is 06/04/1960" in {
-      testNIServiceWithMockHttp.calcPre75QualifyingYears(157, NpsDate(1976, 4, 6), NpsDate(1960, 4, 6)) shouldBe None
+      testNIService.calcPre75QualifyingYears(157, NpsDate(1976, 4, 6), NpsDate(1960, 4, 6)) shouldBe None
     }
     "return 3 when the number of conts in 157 and the date of entry is 06/04/2005 and their date of birth is 06/04/1958" in {
-      testNIServiceWithMockHttp.calcPre75QualifyingYears(157, NpsDate(2005, 4, 6), NpsDate(1958, 4, 6)) shouldBe None
+      testNIService.calcPre75QualifyingYears(157, NpsDate(2005, 4, 6), NpsDate(1958, 4, 6)) shouldBe None
     }
   }
 }

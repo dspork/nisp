@@ -22,7 +22,7 @@ import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import uk.gov.hmrc.play.audit.model.AuditEvent
 import uk.gov.hmrc.play.http.HeaderCarrier
 
-object MockCustomAuditConnector extends CustomAuditConnector {
+object StubCustomAuditConnector extends CustomAuditConnector {
   override val auditConnector: AuditConnector = new AuditConnector {
     override def auditingConfig: AuditingConfig = ???
   }

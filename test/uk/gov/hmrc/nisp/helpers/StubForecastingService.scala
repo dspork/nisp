@@ -16,14 +16,9 @@
 
 package uk.gov.hmrc.nisp.helpers
 
-import uk.gov.hmrc.nisp.connectors.NpsConnector
-import uk.gov.hmrc.nisp.metrics.Metrics
-import uk.gov.hmrc.play.http.HttpGet
+import uk.gov.hmrc.nisp.connectors.CustomAuditConnector
+import uk.gov.hmrc.nisp.services.ForecastingService
 
-object MockNpsConnector extends NpsConnector {
-  override def http: HttpGet = MockNPSHttp.mockHttp
-  override val serviceUrl: String = ""
-  override val metrics: Metrics = MockMetrics
-  override val serviceOriginatorIdKey: String = "key"
-  override val serviceOriginatorId: String = "id"
+object StubForecastingService extends ForecastingService {
+  override val customAuditConnector: CustomAuditConnector = StubCustomAuditConnector
 }

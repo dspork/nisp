@@ -16,14 +16,14 @@
 
 package uk.gov.hmrc.nisp.helpers
 
-import org.joda.time.LocalDate
 import uk.gov.hmrc.nisp.connectors.NpsConnector
 import uk.gov.hmrc.nisp.metrics.Metrics
-import uk.gov.hmrc.nisp.services.NIResponseService
+import uk.gov.hmrc.play.http.HttpGet
 
-object MockNIService extends NIResponseService {
-  override val nps: NpsConnector = MockNpsConnector
-  override val metrics: Metrics = MockMetrics
-
-  override def now: LocalDate = new LocalDate(2015,6,26)
+object StubNpsConnector extends NpsConnector {
+  override def http: HttpGet = StubNPSHttp.stubHttp
+  override val serviceUrl: String = ""
+  override val metrics: Metrics = StubMetrics
+  override val serviceOriginatorIdKey: String = "key"
+  override val serviceOriginatorId: String = "id"
 }

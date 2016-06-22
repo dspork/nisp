@@ -17,65 +17,90 @@
 package uk.gov.hmrc.nisp.connectors
 
 import org.scalatest.concurrent.ScalaFutures
-import uk.gov.hmrc.nisp.helpers.{TestAccountBuilder, MockNpsConnector}
+import uk.gov.hmrc.nisp.helpers.TestAccountBuilder._
+import uk.gov.hmrc.nisp.helpers.{TestAccountBuilder, StubNpsConnector}
 import uk.gov.hmrc.nisp.models.nps.NpsDate
-import uk.gov.hmrc.play.http.{HeaderCarrier, NotFoundException}
+import uk.gov.hmrc.play.http.{BadGatewayException, HeaderCarrier, NotFoundException}
 import uk.gov.hmrc.play.test.UnitSpec
 
 class NpsConnectorSpec extends UnitSpec with ScalaFutures {
 
-  val nino = TestAccountBuilder.regularNino
-  val excludedNino = TestAccountBuilder.excludedNino
-  val nonExistentNino = TestAccountBuilder.nonExistentNino
-
-  "return SUMMARY object on request with correct NINO" in {
-    val summaryResult = MockNpsConnector.connectToSummary(nino)(HeaderCarrier())
-    summaryResult.nino shouldBe nino.value
+  "return summary" in {
+    val npsSummaryModelF = StubNpsConnector.connectToSummary(regularNino)(HeaderCarrier())
+    npsSummaryModelF.nino shouldBe regularNino.value
   }
 
-  "return NOT_FOUND from SUMMARY feed for unknown NINO" in {
-    val summaryResult = MockNpsConnector.connectToSummary(nonExistentNino)(HeaderCarrier())
-    whenReady(summaryResult.failed) {ex =>
+  "throw not found for summary on unknown NINO" in {
+    val npsSummaryModelF = StubNpsConnector.connectToSummary(nonExistentNino)(HeaderCarrier())
+    whenReady(npsSummaryModelF.failed) {ex =>
+      ex shouldBe a [NotFoundException]
+    }
+  }
+  
+  "throw bad gateway for summary on NPS unavailable" in {
+    val npsSummaryModelF = StubNpsConnector.connectToSummary(isleOfManNino)(HeaderCarrier())
+    whenReady(npsSummaryModelF.failed) {ex =>
+      ex shouldBe a [BadGatewayException]
+    }
+  }
+
+  "return national insurance" in {
+    val npsNiRecordModelF = StubNpsConnector.connectToNIRecord(regularNino)(HeaderCarrier())
+    npsNiRecordModelF.nino shouldBe regularNino.value
+  }
+
+  "throw not found for national insurance on unknown NINO" in {
+    val npsNiRecordModelF = StubNpsConnector.connectToNIRecord(nonExistentNino)(HeaderCarrier())
+    whenReady(npsNiRecordModelF.failed) {ex =>
       ex shouldBe a [NotFoundException]
     }
   }
 
-  "return NI Record object on request with correct NINO" in {
-    val niRecordResult = MockNpsConnector.connectToNIRecord(nino)(HeaderCarrier())
-    niRecordResult.nino shouldBe nino.value
+  "throw bad gaeway for national insurance on NPS unavailable" in {
+    val npsNiRecordModelF = StubNpsConnector.connectToNIRecord(isleOfManNino)(HeaderCarrier())
+    whenReady(npsNiRecordModelF.failed) {ex =>
+      ex shouldBe a [BadGatewayException]
+    }
   }
 
-  "return NOT_FOUND from NI Record feed for unknown NINO" in {
-    val niRecordResult = MockNpsConnector.connectToNIRecord(nonExistentNino)(HeaderCarrier())
-    whenReady(niRecordResult.failed) {ex =>
+  "return liabilities" in {
+    val npsLiabilitiesF = StubNpsConnector.connectToLiabilities(regularNino)(HeaderCarrier())
+    npsLiabilitiesF.length shouldBe 1
+    npsLiabilitiesF(0).liabilityType shouldBe 6
+  }
+
+  "throw not found for liabilities on unknown NINO" in {
+    val npsLiabilitiesF = StubNpsConnector.connectToLiabilities(nonExistentNino)(HeaderCarrier())
+    whenReady(npsLiabilitiesF.failed) {ex =>
       ex shouldBe a [NotFoundException]
     }
   }
 
-  "return Liabilities on request with correct NINO" in {
-    val liabilities = MockNpsConnector.connectToLiabilities(nino)(HeaderCarrier())
-    liabilities.length shouldBe 1
-    liabilities(0).liabilityType shouldBe 6
-  }
-
-  "return NOT_FOUND from Liabilities feed for unknown NINO" in {
-    val liabilities = MockNpsConnector.connectToLiabilities(nonExistentNino)(HeaderCarrier())
-    whenReady(liabilities.failed) {ex =>
+  "throw bad gateway for liabilities on NPS unavailable" in {
+    val npsLiabilitiesF = StubNpsConnector.connectToLiabilities(nonExistentNino)(HeaderCarrier())
+    whenReady(npsLiabilitiesF.failed) {ex =>
       ex shouldBe a [NotFoundException]
     }
   }
 
-  "return Scheme Memberships on request with correct NINO" in {
-    val schemes = MockNpsConnector.connectToSchemeMembership(excludedNino)(HeaderCarrier())
-    schemes.length shouldBe 2
-    schemes(0).startDate shouldBe Some(NpsDate(1978, 4, 6))
-    schemes(0).endDate shouldBe Some(NpsDate(1979, 6, 30))
+  "return scheme membership" in {
+    val npsSchemeMembershipsF = StubNpsConnector.connectToSchemeMembership(TestAccountBuilder.excludedNino)(HeaderCarrier())
+    npsSchemeMembershipsF.length shouldBe 2
+    npsSchemeMembershipsF(0).startDate shouldBe Some(NpsDate(1978, 4, 6))
+    npsSchemeMembershipsF(0).endDate shouldBe Some(NpsDate(1979, 6, 30))
   }
 
-  "return NOT_FOUND from SchemeMemberships feed for unknown NINO" in {
-    val schemes = MockNpsConnector.connectToSchemeMembership(nonExistentNino)(HeaderCarrier())
-    whenReady(schemes.failed) {ex =>
+  "throw not found for scheme membership on unknown NINO" in {
+    val npsSchemeMembershipsF = StubNpsConnector.connectToSchemeMembership(nonExistentNino)(HeaderCarrier())
+    whenReady(npsSchemeMembershipsF.failed) {ex =>
       ex shouldBe a [NotFoundException]
+    }
+  }
+
+  "throw bad gateway for scheme membership on NPS unavailable" in {
+    val npsSchemeMembershipsF = StubNpsConnector.connectToSchemeMembership(isleOfManNino)(HeaderCarrier())
+    whenReady(npsSchemeMembershipsF.failed) {ex =>
+      ex shouldBe a [BadGatewayException]
     }
   }
 }
