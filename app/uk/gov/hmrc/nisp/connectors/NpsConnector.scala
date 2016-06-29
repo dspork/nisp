@@ -20,18 +20,20 @@ import play.Logger
 import play.api.data.validation.ValidationError
 import play.api.libs.json._
 import uk.gov.hmrc.domain.Nino
+import uk.gov.hmrc.nisp.cache._
 import uk.gov.hmrc.nisp.config.wiring.WSHttp
 import uk.gov.hmrc.nisp.metrics.Metrics
 import uk.gov.hmrc.nisp.models.enums.APITypes
 import uk.gov.hmrc.nisp.models.enums.APITypes.APITypes
 import uk.gov.hmrc.nisp.models.nps._
+import uk.gov.hmrc.nisp.services.CachingService
 import uk.gov.hmrc.nisp.utils.NISPConstants
 import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
-import uk.gov.hmrc.play.http.{HttpReads, HttpResponse, HttpGet, HeaderCarrier}
+import uk.gov.hmrc.play.http.{HeaderCarrier, HttpGet, HttpReads, HttpResponse}
 
 import scala.concurrent.Future
-import scala.util.{Success, Failure, Try}
+import scala.util.{Failure, Success, Try}
 
 object NpsConnector extends NpsConnector with ServicesConfig {
   override val serviceUrl = baseUrl("nps-hod")
@@ -39,11 +41,21 @@ object NpsConnector extends NpsConnector with ServicesConfig {
   override val serviceOriginatorId = getConfString("nps-hod.originatoridvalue", "")
   override def http: HttpGet = WSHttp
   override def metrics: Metrics = Metrics
+
+  override val summaryRepository: CachingService[SummaryCacheModel, NpsSummaryModel] = SummaryRepository()
+  override val nationalInsuranceRepository: CachingService[NationalInsuranceCacheModel, NpsNIRecordModel] = NationalInsuranceRepository()
+  override val liabilitiesRepository: CachingService[LiabilitiesCacheModel, NpsLiabilityContainer] = LiabilitiesRepository()
+  override val schemeMembershipRepository: CachingService[SchemeMembershipCacheModel, NpsSchemeMembershipContainer] = SchemeMembershipRepository()
 }
 
 trait NpsConnector {
   def http: HttpGet
   def metrics: Metrics
+
+  val summaryRepository: CachingService[SummaryCacheModel, NpsSummaryModel]
+  val nationalInsuranceRepository: CachingService[NationalInsuranceCacheModel, NpsNIRecordModel]
+  val liabilitiesRepository: CachingService[LiabilitiesCacheModel, NpsLiabilityContainer]
+  val schemeMembershipRepository: CachingService[SchemeMembershipCacheModel, NpsSchemeMembershipContainer]
 
   val serviceUrl: String
   val serviceOriginatorIdKey: String
@@ -58,22 +70,54 @@ trait NpsConnector {
 
   def connectToSummary(nino: Nino)(implicit hc: HeaderCarrier): Future[NpsSummaryModel] = {
     val urlToRead = url(s"/nps-rest-service/services/nps/pensions/${ninoWithoutSuffix(nino)}/sp_summary")
-    connectToNps(urlToRead, APITypes.Summary, requestHeaderCarrier)(hc, NpsSummaryModel.formats)
+    connectToCache[NpsSummaryModel, SummaryCacheModel](
+      nino,
+      urlToRead,
+      APITypes.Summary,
+      summaryRepository)
   }
 
   def connectToNIRecord(nino: Nino)(implicit hc: HeaderCarrier): Future[NpsNIRecordModel] = {
     val urlToRead = url(s"/nps-rest-service/services/nps/pensions/${ninoWithoutSuffix(nino)}/ni_record")
-    connectToNps(urlToRead, APITypes.NIRecord, requestHeaderCarrier)(hc, NpsNIRecordModel.formats)
+    connectToCache[NpsNIRecordModel, NationalInsuranceCacheModel](
+      nino,
+      urlToRead,
+      APITypes.NIRecord,
+      nationalInsuranceRepository
+    )
   }
 
   def connectToLiabilities(nino: Nino)(implicit hc: HeaderCarrier): Future[List[NpsLiability]] = {
     val urlToRead = url(s"/nps-rest-service/services/nps/pensions/${ninoWithoutSuffix(nino)}/liabilities")
-    connectToNps[NpsLiabilityContainer](urlToRead, APITypes.Liabilities, requestHeaderCarrier).map(_.npsLcdo004d)
+    connectToCache[NpsLiabilityContainer, LiabilitiesCacheModel](
+      nino,
+      urlToRead,
+      APITypes.Liabilities,
+      liabilitiesRepository
+    ).map(_.npsLcdo004d)
   }
 
   def connectToSchemeMembership(nino: Nino)(implicit hc: HeaderCarrier): Future[List[NpsSchemeMembership]] = {
     val urlToRead = url(s"/nps-rest-service/services/nps/pensions/${ninoWithoutSuffix(nino)}/scheme")
-    connectToNps[NpsSchemeMembershipContainer](urlToRead, APITypes.SchemeMembership, requestHeaderCarrier).map(_.npsLcdo022d)
+    connectToCache[NpsSchemeMembershipContainer, SchemeMembershipCacheModel](
+      nino,
+      urlToRead,
+      APITypes.SchemeMembership,
+      schemeMembershipRepository
+    ).map(_.npsLcdo022d)
+  }
+
+  private def connectToCache[A, B](nino: Nino, url: String, api: APITypes, repository: CachingService[B, A])
+                                  (implicit hc: HeaderCarrier, formatA: Format[A], formatB: OFormat[B]) = {
+    repository.findByNino(nino).flatMap {
+      case Some(responseModel) => Future.successful(responseModel)
+      case None =>
+        connectToNps(url, api, requestHeaderCarrier)(hc, formatA) map {
+          response =>
+            repository.insertByNino(nino, response)
+            response
+        }
+    }
   }
 
   private def connectToNps[A](url: String, api: APITypes, requestHc: HeaderCarrier)(implicit hc: HeaderCarrier, formats: Format[A]): Future[A] = {

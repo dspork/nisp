@@ -36,6 +36,10 @@ trait Metrics {
   def niRecord(gaps: Int, payableGaps: Int, pre75Years: Int, qualifyingYears: Int, yearsUntilSPA: Int): Unit
   def exclusion(exclusions: List[Exclusion]): Unit
 
+  def cacheRead()
+  def cacheReadFound()
+  def cacheReadNotFound()
+  def cacheWritten()
 }
 
 object Metrics extends Metrics {
@@ -153,4 +157,9 @@ object Metrics extends Metrics {
     else
       ageUpTo30.inc()
   }
+
+  override def cacheRead(): Unit = MetricsRegistry.defaultRegistry.meter("cache-read").mark
+  override def cacheReadFound(): Unit = MetricsRegistry.defaultRegistry.meter("cache-read-found").mark
+  override def cacheReadNotFound(): Unit = MetricsRegistry.defaultRegistry.meter("cache-read-not-found").mark
+  override def cacheWritten(): Unit = MetricsRegistry.defaultRegistry.meter("cache-written").mark
 }
