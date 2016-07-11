@@ -16,9 +16,9 @@
 
 package uk.gov.hmrc.nisp.models
 
-import play.api.libs.json.Json
-import uk.gov.hmrc.nisp.models.nps.NpsDate
-
+import play.api.libs.json.{Format, JsPath, Json, Writes}
+import play.api.libs.functional.syntax._
+import org.joda.time.LocalDate
 import scala.math.BigDecimal.RoundingMode
 
 case class StatePensionAmount(yearsToWork: Option[Int],
@@ -29,7 +29,18 @@ case class StatePensionAmount(yearsToWork: Option[Int],
   val annualAmount: BigDecimal = ((weeklyAmount / 7) * 365.25).setScale(2, RoundingMode.HALF_UP)
 }
 object StatePensionAmount {
-  implicit val formats = Json.format[StatePensionAmount]
+
+  implicit val reads = Json.reads[StatePensionAmount]
+  implicit val writes: Writes[StatePensionAmount] = (
+    (JsPath \ "yearsToWork").writeNullable[Int] and
+    (JsPath \ "gapsToFill").writeNullable[Int] and
+    (JsPath \ "weeklyAmount").write[BigDecimal] and
+    (JsPath \ "monthlyAmount").write[BigDecimal] and
+    (JsPath \ "annualAmount").write[BigDecimal]
+    )((sp: StatePensionAmount) => (sp.yearsToWork, sp.gapsToFill, sp.weeklyAmount, sp.monthlyAmount, sp.annualAmount))
+
+  implicit val formats: Format[StatePensionAmount] = Format(reads, writes)
+
 }
 
 
@@ -44,10 +55,10 @@ object StatePensionAmounts {
 }
 
 
-case class StatePension(earningsIncludedUpTo: NpsDate,
+case class StatePension(earningsIncludedUpTo: LocalDate,
                         amounts: StatePensionAmounts,
                         pensionAge: Int,
-                        pensionDate: NpsDate,
+                        pensionDate: LocalDate,
                         finalRelevantYear: Int,
                         numberOfQualifyingYears: Int,
                         pensionSharingOrder: Boolean,
