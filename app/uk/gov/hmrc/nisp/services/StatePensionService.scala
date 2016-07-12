@@ -16,14 +16,69 @@
 
 package uk.gov.hmrc.nisp.services
 
+import org.joda.time.Period
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.nisp.connectors.NpsConnector
-import uk.gov.hmrc.nisp.models.StatePension
+import uk.gov.hmrc.nisp.metrics.Metrics
+import uk.gov.hmrc.nisp.models.{SPAmountModel, StatePension, StatePensionAmount, StatePensionAmounts}
+import uk.gov.hmrc.nisp.services.reference.QualifyingYearsAmountService
+import uk.gov.hmrc.play.http.HeaderCarrier
+import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
+
+import scala.concurrent.Future
 
 trait StatePensionService {
   val npsConnector: NpsConnector
+  val metrics: Metrics
+  val forecastingService: ForecastingService
 
-  def getStatement(nino: Nino): Unit = {
-      //StatePension()
+  def getStatement(nino: Nino)(implicit request: HeaderCarrier): Future[StatePension] = {
+      val npsSummaryF = npsConnector.connectToSummary(nino)
+      val npsNationalInsuranceRecordF = npsConnector.connectToNIRecord(nino)
+      val npsSchemeMembershipsF = npsConnector.connectToSchemeMembership(nino)
+
+      for (
+        summary <- npsSummaryF;
+        nationalInsuranceRecord <- npsNationalInsuranceRecordF;
+        schemeMemberships <- npsSchemeMembershipsF
+      ) yield {
+
+        val purgedNationalInsuranceRecord = nationalInsuranceRecord.purge(summary.finalRelevantYear)
+
+        val forecast = ForecastingService.getForecastAmount(
+          schemeMemberships,
+          earningsIncludedUpTo = summary.earningsIncludedUpTo,
+          currentQualifyingYears = summary.nspQualifyingYears,
+          amountA = summary.npsStatePensionAmount.npsAmountA2016,
+          amountB = summary.npsStatePensionAmount.npsAmountB2016,
+          lastYearEarnings = purgedNationalInsuranceRecord.niTaxYears.
+            find(_.taxYear == summary.earningsIncludedUpTo.taxYear).map(_.primaryPaidEarnings).getOrElse(0),
+          finalRelevantYear = summary.finalRelevantYear,
+          forecastAmount = summary.pensionForecast.forecastAmount,
+          forecastAmount2016 = summary.pensionForecast.forecastAmount2016,
+          lastYearQualifying = purgedNationalInsuranceRecord.niTaxYears.
+            find(_.taxYear == summary.earningsIncludedUpTo.taxYear).exists(_.qualifying),
+          nino = nino,
+          fillableGaps = nationalInsuranceRecord.nonQualifyingYearsPayable,
+          currentAmount = SPAmountModel(summary.npsStatePensionAmount.nspEntitlement)
+        )
+
+        StatePension(
+          summary.earningsIncludedUpTo.localDate,
+          amounts = StatePensionAmounts(
+            protectedPayment = forecast.oldRulesCustomer,
+            current = StatePensionAmount(None, None, summary.npsStatePensionAmount.nspEntitlement),
+            forecast = StatePensionAmount(Some(forecast.yearsLeftToWork), None, forecast.forecastAmount.week),
+            maximum = StatePensionAmount(Some(forecast.yearsLeftToWork), Some(forecast.minGapsToFillToReachMaximum), forecast.personalMaximum.week),
+            cope = StatePensionAmount(None, None, summary.npsStatePensionAmount.npsAmountB2016.rebateDerivedAmount)
+          ),
+          pensionAge = new Period(summary.dateOfBirth.localDate, summary.spaDate.localDate).getYears,
+          pensionDate = summary.spaDate.localDate,
+          finalRelevantYear = summary.finalRelevantYear,
+          numberOfQualifyingYears = summary.nspQualifyingYears,
+          pensionSharingOrder = summary.pensionShareOrderCOEG != 0,
+          currentWeeklyPensionAmount = QualifyingYearsAmountService.maxAmount
+        )
+      }
   }
 }
