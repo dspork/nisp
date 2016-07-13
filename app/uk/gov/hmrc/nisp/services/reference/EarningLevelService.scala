@@ -16,8 +16,10 @@
 
 package uk.gov.hmrc.nisp.services.reference
 
+
 import play.api.Logger
 import uk.gov.hmrc.nisp.models.reference.EarningLevelModel
+import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 
 object EarningLevelService {
   // scalastyle:off magic.number

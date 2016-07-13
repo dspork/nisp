@@ -16,7 +16,9 @@
 
 package uk.gov.hmrc.nisp.services
 
-import org.joda.time.{LocalDate, Period}
+import java.util.TimeZone
+
+import org.joda.time.{DateTimeZone, LocalDate, Period}
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.nisp.connectors.NpsConnector
 import uk.gov.hmrc.nisp.metrics.Metrics
@@ -32,7 +34,7 @@ trait StatePensionService {
   val npsConnector: NpsConnector
   val metrics: Metrics
   val forecastingService: ForecastingService
-  val now: LocalDate
+  def now: LocalDate
 
   def getStatement(nino: Nino)(implicit request: HeaderCarrier): Future[Either[StatePensionExclusion, StatePension]] = {
       val npsSummaryF = npsConnector.connectToSummary(nino)
@@ -109,4 +111,11 @@ trait StatePensionService {
         }
       }
   }
+}
+
+object StatePensionService extends StatePensionService {
+  override val npsConnector: NpsConnector = NpsConnector
+  override def now: LocalDate = LocalDate.now(DateTimeZone.forTimeZone(TimeZone.getTimeZone("Europe/London")))
+  override val forecastingService: ForecastingService = ForecastingService
+  override val metrics: Metrics = Metrics
 }

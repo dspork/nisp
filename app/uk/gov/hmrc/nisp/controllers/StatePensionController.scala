@@ -16,17 +16,36 @@
 
 package uk.gov.hmrc.nisp.controllers
 
+import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent}
 import uk.gov.hmrc.domain.Nino
+import uk.gov.hmrc.nisp.services.StatePensionService
+import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
+import uk.gov.hmrc.play.http._
 import uk.gov.hmrc.play.microservice.controller.BaseController
 
-import scala.concurrent.Future
-
 trait StatePensionController extends BaseController {
-  def get(nino: Nino): Action[AnyContent] = Action {
-    implicit request =>
-      Ok("Hello")
+
+  val statePensionService: StatePensionService
+
+  def get(nino: Nino): Action[AnyContent] = Action.async {
+    implicit request => {
+      statePensionService.getStatement(nino).map {
+        case Left(exclusion) => Ok(Json.toJson(exclusion))
+        case Right(statePension) => Ok(Json.toJson(statePension))
+      } recover {
+        case e: NotFoundException => NotFound
+        case e: GatewayTimeoutException => GatewayTimeout
+        case e: BadGatewayException => BadGateway("Unable to connect to NPS")
+        case e: BadRequestException => BadRequest("NPS Returned Bad Request. Is this customer over state pension age?")
+        case e: Upstream4xxResponse => BadGateway("NPS returned 4XX")
+        case e: Upstream5xxResponse => BadGateway("NPS returned 5XX")
+        case _ => InternalServerError
+      }
     }
+  }
 }
 
-object StatePensionController extends StatePensionController
+object StatePensionController extends StatePensionController {
+  override val statePensionService: StatePensionService = StatePensionService
+}
