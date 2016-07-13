@@ -49,7 +49,7 @@ class StatePensionServiceSpec extends UnitSpec with OneAppPerSuite with EitherVa
   )
 
   val exclusionTestData: StatePensionExclusion = StatePensionExclusion(
-    exclusionReasons = List(Exclusion.Abroad, Exclusion.MWRRE),
+    exclusionReasons = List(Exclusion.MWRRE, Exclusion.Abroad),
     pensionAge = 65,
     pensionDate = new LocalDate(2017, 11, 21)
   )

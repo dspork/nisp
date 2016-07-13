@@ -80,6 +80,6 @@ case class ExclusionsService(isAbroad: Boolean, mwrre: Boolean, dateOfDeath: Opt
     }
   }
 
-  val spExclusions = FunctionHelper.composeAll(List(checkStatePensionAge, checkAbroad, checkMWRRE, checkDead, checkIOMLiabilities, checkAmountDissonance))
-  val niExclusions = FunctionHelper.composeAll(List(checkMWRRE, checkDead, checkIOMLiabilities))
+  val spExclusions = FunctionHelper.composeAll(List(checkDead, checkStatePensionAge, checkAmountDissonance, checkIOMLiabilities, checkMWRRE, checkAbroad))
+  val niExclusions = FunctionHelper.composeAll(List(checkDead, checkIOMLiabilities, checkMWRRE))
 }

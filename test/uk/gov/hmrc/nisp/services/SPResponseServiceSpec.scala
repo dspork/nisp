@@ -81,7 +81,7 @@ class SPResponseServiceSpec extends UnitSpec with MockitoSugar with OneAppPerSui
 
   "return an ExclusionModel with correct exclusion" in {
     val spResponse = StubSPResponseService.getSPResponse(exclusionNino)
-    spResponse.spExclusions.get.exclusions shouldBe List(Exclusion.Abroad, Exclusion.MWRRE)
+    spResponse.spExclusions.get.exclusions shouldBe List(Exclusion.MWRRE, Exclusion.Abroad)
     spResponse.niExclusions.get.exclusions shouldBe List(Exclusion.MWRRE)
   }
 
