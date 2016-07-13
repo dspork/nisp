@@ -19,6 +19,8 @@ package uk.gov.hmrc.nisp.models
 import play.api.libs.json.{Format, JsPath, Json, Writes}
 import play.api.libs.functional.syntax._
 import org.joda.time.LocalDate
+import uk.gov.hmrc.nisp.models.enums.Exclusion.Exclusion
+
 import scala.math.BigDecimal.RoundingMode
 
 case class StatePensionAmount(yearsToWork: Option[Int],
@@ -68,4 +70,12 @@ object StatePension {
   implicit val formats = Json.format[StatePension]
 }
 
+
+case class StatePensionExclusion(exclusionReasons: List[Exclusion],
+                                 pensionAge: Int,
+                                 pensionDate: LocalDate)
+
+object StatePensionExclusion {
+  implicit val formats = Json.format[StatePensionExclusion]
+}
 

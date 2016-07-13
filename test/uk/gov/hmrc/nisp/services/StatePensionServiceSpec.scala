@@ -16,23 +16,57 @@
 
 package uk.gov.hmrc.nisp.services
 
+import org.joda.time.LocalDate
+import org.scalatest.EitherValues
 import org.scalatestplus.play.OneAppPerSuite
 import uk.gov.hmrc.nisp.helpers.{StubStatePensionService, TestAccountBuilder}
+import uk.gov.hmrc.nisp.models.enums.Exclusion
+import uk.gov.hmrc.nisp.models.{StatePension, StatePensionAmount, StatePensionAmounts, StatePensionExclusion}
 import uk.gov.hmrc.play.http.HeaderCarrier
 import uk.gov.hmrc.play.test.UnitSpec
 
-class StatePensionServiceSpec extends UnitSpec with OneAppPerSuite {
+class StatePensionServiceSpec extends UnitSpec with OneAppPerSuite with EitherValues {
   val nino = TestAccountBuilder.regularNino
   val exclusionNino = TestAccountBuilder.excludedNino
   val nonexistentnino = TestAccountBuilder.nonExistentNino
 
 
+  val regularTestData: StatePension = StatePension(
+    earningsIncludedUpTo = new LocalDate(2014, 4, 5),
+    amounts = StatePensionAmounts(
+      protectedPayment = false,
+      current = StatePensionAmount(None, None, 118.24),
+      forecast = StatePensionAmount(Some(3), None, 137.19),
+      maximum = StatePensionAmount(Some(3), Some(0), 137.19),
+      cope = StatePensionAmount(None, None, 0)
+    ),
+    pensionAge = 65,
+    pensionDate = new LocalDate(2017, 11, 21),
+    finalRelevantYear = 2016,
+    numberOfQualifyingYears = 27,
+    pensionSharingOrder = false,
+    currentWeeklyPensionAmount = 155.65
+  )
+
+  val exclusionTestData: StatePensionExclusion = StatePensionExclusion(
+    exclusionReasons = List(Exclusion.Abroad, Exclusion.MWRRE),
+    pensionAge = 65,
+    pensionDate = new LocalDate(2017, 11, 21)
+  )
+
   implicit val hc: HeaderCarrier = HeaderCarrier()
 
   "getStatement" should {
     "return a State Pension Statement for a regular Nino and it should be the correct information" in {
-      val statePensionF = StubStatePensionService.getStatement(nino)
-      statePensionF.amounts.protectedPayment shouldBe false
+      val statePension: Either[StatePensionExclusion, StatePension] = StubStatePensionService.getStatement(nino)
+      statePension.isLeft shouldBe false
+      statePension.right.value shouldBe regularTestData
+    }
+
+    "return a Exclusion Message and some information for the excluded Nino" in {
+      val statePension: Either[StatePensionExclusion, StatePension] = StubStatePensionService.getStatement(exclusionNino)
+      statePension.isRight shouldBe false
+      statePension.left.value shouldBe exclusionTestData
     }
   }
 }
