@@ -116,31 +116,4 @@ class SPResponseServiceSpec extends UnitSpec with MockitoSugar with OneAppPerSui
     spResponse.spSummary.get.mqp shouldBe None
   }
 
-  "MQP Scenario" should {
-    "return Cant Get in MQP" in {
-      val spResponseMQP = StubSPResponseService.getMqpScenario(5, 3, 0)
-      spResponseMQP shouldBe Some(MQPScenario.CantGet)
-    }
-    "return Continue Working in MQP" in {
-      val spResponseMQP = StubSPResponseService.getMqpScenario(5, 5, 0)
-      spResponseMQP shouldBe Some(MQPScenario.ContinueWorking)
-    }
-    "return Can Get With Gaps in MQP" in {
-      val spResponseMQP = StubSPResponseService.getMqpScenario(5, 0, 5)
-      spResponseMQP shouldBe Some(MQPScenario.CanGetWithGaps)
-    }
-    "return Can't Get in MQP with 0 current years, 3 years to work and 5 fillable gaps" in {
-      val spResponseMQP =   StubSPResponseService.getMqpScenario(0, 3, 5)
-      spResponseMQP shouldBe Some(MQPScenario.CantGet)
-    }
-    "return Can Get With Gaps in MQP with 5 current years, 2 years to work and 4 fillable gaps" in {
-      val spResponseMQP =   StubSPResponseService.getMqpScenario(5, 2, 4)
-      spResponseMQP shouldBe Some(MQPScenario.CanGetWithGaps)
-    }
-    "return Continue Working in MQP with 6 current years, 6 years to work and 4 fillable gaps" in {
-      val spResponseMQP =   StubSPResponseService.getMqpScenario(6, 6, 4)
-      spResponseMQP shouldBe Some(MQPScenario.ContinueWorking)
-    }
-  }
-
 }

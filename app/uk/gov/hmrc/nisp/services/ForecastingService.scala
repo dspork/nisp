@@ -19,7 +19,8 @@ package uk.gov.hmrc.nisp.services
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.nisp.connectors.CustomAuditConnector
 import uk.gov.hmrc.nisp.events.ForecastingEvent
-import uk.gov.hmrc.nisp.models.enums.Scenario
+import uk.gov.hmrc.nisp.models.enums.MQPScenario._
+import uk.gov.hmrc.nisp.models.enums.{MQPScenario, Scenario}
 import uk.gov.hmrc.nisp.models.enums.Scenario.Scenario
 import uk.gov.hmrc.nisp.models.{Forecast, SPAmountModel, SPForecastModel}
 import uk.gov.hmrc.nisp.models.nps.{NpsAmountA2016, NpsAmountB2016, NpsDate, NpsSchemeMembership}
@@ -193,6 +194,15 @@ trait ForecastingService {
     }
 
     go(fillableGaps)
+  }
+
+  def getMqpScenario(currentYears : Int , yearsToWork : Int, fillableGaps: Int) : Option[MQPScenario] = {
+    (currentYears < 10, currentYears + yearsToWork + fillableGaps < 10, currentYears + yearsToWork >= 10) match {
+      case (true, true, false) => Some(MQPScenario.CantGet)
+      case (true, false, true) => Some(MQPScenario.ContinueWorking)
+      case (true, false, false) => Some(MQPScenario.CanGetWithGaps)
+      case (_, _, _) => None
+    }
   }
 
 }

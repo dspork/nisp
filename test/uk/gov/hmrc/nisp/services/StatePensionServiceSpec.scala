@@ -17,13 +17,14 @@
 package uk.gov.hmrc.nisp.services
 
 import org.joda.time.{DateTime, LocalDate}
+import org.mockito.Matchers
 import org.scalatest.EitherValues
 import org.scalatest.mock.MockitoSugar
 import org.scalatestplus.play.OneAppPerSuite
 import uk.gov.hmrc.nisp.connectors.NpsConnector
 import uk.gov.hmrc.nisp.helpers.{StubForecastingService, StubNpsConnector, StubStatePensionService, TestAccountBuilder}
 import uk.gov.hmrc.nisp.metrics.Metrics
-import uk.gov.hmrc.nisp.models.enums.Exclusion
+import uk.gov.hmrc.nisp.models.enums.{Exclusion, Scenario}
 import uk.gov.hmrc.nisp.models.{StatePension, StatePensionAmount, StatePensionAmounts, StatePensionExclusion}
 import uk.gov.hmrc.play.http.HeaderCarrier
 import uk.gov.hmrc.play.test.UnitSpec
@@ -74,17 +75,41 @@ class StatePensionServiceSpec extends UnitSpec with OneAppPerSuite with EitherVa
       statePension.left.value shouldBe exclusionTestData
     }
 
-    "Log a State Pension Metric" in {
-      val metrics = mock[Metrics]
+    "Log a StatePension Metric" in {
       val stub = new StatePensionService {
-        override def now: LocalDate = DateTime.now.toLocalDate
+        override def now: LocalDate = new LocalDate(2016, 7, 14)
         override val npsConnector: NpsConnector = StubNpsConnector
-        override val metrics: Metrics = metrics
+        override val metrics: Metrics = mock[Metrics]
         override val forecastingService: ForecastingService =  StubForecastingService
       }
 
-      stub.getStatement(nino)
-//      verify(metrics, times(1)).summary(forecas)
+      await(stub.getStatement(nino))
+      verify(stub.metrics, times(1)).summary(
+        Matchers.eq[BigDecimal](137.19),
+        Matchers.eq[BigDecimal](118.24),
+        Matchers.eq(false),
+        Matchers.eq(false),
+        Matchers.eq(63),
+        Matchers.eq(Scenario.ContinueWorkingNonMax),
+        Matchers.eq[BigDecimal](137.19),
+        Matchers.eq(3),
+        Matchers.eq(None)
+      )
+    }
+
+    "Log a StatePension Exclusion Metric" in {
+      val stub = new StatePensionService {
+        override def now: LocalDate = new LocalDate(2016, 7, 14)
+        override val npsConnector: NpsConnector = StubNpsConnector
+        override val metrics: Metrics = mock[Metrics]
+        override val forecastingService: ForecastingService =  StubForecastingService
+      }
+
+      await(stub.getStatement(exclusionNino))
+      verify(stub.metrics, never).summary(Matchers.any(), Matchers.any(), Matchers.any(), Matchers.any(), Matchers.any(), Matchers.any(), Matchers.any(), Matchers.any(), Matchers.any())
+      verify(stub.metrics, times(1)).exclusion(
+        Matchers.eq(List(Exclusion.MWRRE, Exclusion.Abroad))
+      )
     }
   }
 }

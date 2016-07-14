@@ -18,10 +18,11 @@ package uk.gov.hmrc.nisp.services
 
 import java.util.TimeZone
 
-import org.joda.time.{DateTimeZone, LocalDate, Period}
+import org.joda.time.{DateTimeZone, LocalDate, Period, PeriodType}
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.nisp.connectors.NpsConnector
 import uk.gov.hmrc.nisp.metrics.Metrics
+import uk.gov.hmrc.nisp.models.enums.Scenario
 import uk.gov.hmrc.nisp.models.nps.NpsDate
 import uk.gov.hmrc.nisp.models.{SPAmountModel, StatePension, StatePensionAmount, StatePensionAmounts, StatePensionExclusion}
 import uk.gov.hmrc.nisp.services.reference.QualifyingYearsAmountService
@@ -37,6 +38,7 @@ trait StatePensionService {
   def now: LocalDate
 
   def getStatement(nino: Nino)(implicit request: HeaderCarrier): Future[Either[StatePensionExclusion, StatePension]] = {
+
       val npsSummaryF = npsConnector.connectToSummary(nino)
       val npsNationalInsuranceRecordF = npsConnector.connectToNIRecord(nino)
       val npsLiabilitiesF = npsConnector.connectToLiabilities(nino)
@@ -56,13 +58,16 @@ trait StatePensionService {
           summary.nino,
           liabilities,
           summary.npsStatePensionAmount.nspEntitlement,
-          SPCurrentAmountService.calculate(summary.npsStatePensionAmount.npsAmountA2016, summary.npsStatePensionAmount.npsAmountB2016),
+          SPCurrentAmountService.calculate(summary.npsStatePensionAmount.npsAmountA2016,
+            summary.npsStatePensionAmount.npsAmountB2016),
           NpsDate(now),
           summary.spaDate,
           summary.sex
         ).getSPExclusions.exclusions
 
         if (exclusions.nonEmpty) {
+
+          metrics.exclusion(exclusions)
 
           Left(StatePensionExclusion(
             exclusions,
@@ -92,7 +97,13 @@ trait StatePensionService {
             currentAmount = SPAmountModel(summary.npsStatePensionAmount.nspEntitlement)
           )
 
-          Right(StatePension(
+          metrics.summary(forecast.forecastAmount.week, summary.npsStatePensionAmount.nspEntitlement, schemeMemberships.nonEmpty,
+            forecast.scenario.equals(Scenario.ForecastOnly), new Period(summary.dateOfBirth.localDate, now, PeriodType.yearMonthDay()).getYears, forecast.scenario,
+            forecast.personalMaximum.week, forecast.yearsLeftToWork, ForecastingService.getMqpScenario(summary.nspQualifyingYears, summary.yearsUntilPensionAge,
+              nationalInsuranceRecord.nonQualifyingYearsPayable))
+
+          Right(
+            StatePension(
             summary.earningsIncludedUpTo.localDate,
             amounts = StatePensionAmounts(
               protectedPayment = forecast.oldRulesCustomer,

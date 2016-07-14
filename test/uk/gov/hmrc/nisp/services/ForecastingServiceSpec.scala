@@ -18,7 +18,7 @@ package uk.gov.hmrc.nisp.services
 
 import org.scalatestplus.play.OneAppPerSuite
 import uk.gov.hmrc.nisp.helpers.{StubForecastingService, TestAccountBuilder}
-import uk.gov.hmrc.nisp.models.enums.Scenario
+import uk.gov.hmrc.nisp.models.enums.{MQPScenario, Scenario}
 import uk.gov.hmrc.nisp.models.nps.{NpsAmountA2016, NpsAmountB2016, NpsDate, NpsSchemeMembership}
 import uk.gov.hmrc.nisp.models.{Forecast, SPAmountModel, SPForecastModel}
 import uk.gov.hmrc.play.http.HeaderCarrier
@@ -708,5 +708,32 @@ class ForecastingServiceSpec extends UnitSpec with OneAppPerSuite {
     }
 
 
+  }
+
+  "MQP Scenario" should {
+    "return Cant Get in MQP" in {
+      val spResponseMQP = StubForecastingService.getMqpScenario(5, 3, 0)
+      spResponseMQP shouldBe Some(MQPScenario.CantGet)
+    }
+    "return Continue Working in MQP" in {
+      val spResponseMQP = StubForecastingService.getMqpScenario(5, 5, 0)
+      spResponseMQP shouldBe Some(MQPScenario.ContinueWorking)
+    }
+    "return Can Get With Gaps in MQP" in {
+      val spResponseMQP = StubForecastingService.getMqpScenario(5, 0, 5)
+      spResponseMQP shouldBe Some(MQPScenario.CanGetWithGaps)
+    }
+    "return Can't Get in MQP with 0 current years, 3 years to work and 5 fillable gaps" in {
+      val spResponseMQP =   StubForecastingService.getMqpScenario(0, 3, 5)
+      spResponseMQP shouldBe Some(MQPScenario.CantGet)
+    }
+    "return Can Get With Gaps in MQP with 5 current years, 2 years to work and 4 fillable gaps" in {
+      val spResponseMQP =   StubForecastingService.getMqpScenario(5, 2, 4)
+      spResponseMQP shouldBe Some(MQPScenario.CanGetWithGaps)
+    }
+    "return Continue Working in MQP with 6 current years, 6 years to work and 4 fillable gaps" in {
+      val spResponseMQP =   StubForecastingService.getMqpScenario(6, 6, 4)
+      spResponseMQP shouldBe Some(MQPScenario.ContinueWorking)
+    }
   }
 }

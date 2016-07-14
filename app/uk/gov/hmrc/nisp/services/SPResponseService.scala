@@ -44,16 +44,6 @@ trait SPResponseService extends WithCurrentDate {
   val nps: NpsConnector
   val metrics: Metrics
 
-
-  def getMqpScenario(currentYears : Int , yearsToWork : Int, fillableGaps: Int) : Option[MQPScenario] = {
-    (currentYears < 10, currentYears + yearsToWork + fillableGaps < 10, currentYears + yearsToWork >= 10) match {
-      case (true, true, false) => Some(MQPScenario.CantGet)
-      case (true, false, true) => Some(MQPScenario.ContinueWorking)
-      case (true, false, false) => Some(MQPScenario.CanGetWithGaps)
-      case (_, _, _) => None
-    }
-  }
-
   def getSPResponse(nino: Nino)(implicit hc: HeaderCarrier): Future[SPResponseModel] = {
     val futureNpsSummary = nps.connectToSummary(nino)
     val futureNpsNIRecord = nps.connectToNIRecord(nino)
@@ -93,7 +83,7 @@ trait SPResponseService extends WithCurrentDate {
         npsNIRecord.nonQualifyingYearsPayable, spAmountModel
       )
 
-      val mqpScenario = getMqpScenario(npsSummary.nspQualifyingYears, npsSummary.yearsUntilPensionAge,
+      val mqpScenario = ForecastingService.getMqpScenario(npsSummary.nspQualifyingYears, npsSummary.yearsUntilPensionAge,
                       npsNIRecord.nonQualifyingYearsPayable)
 
       val spSummary = SPSummaryModel(
