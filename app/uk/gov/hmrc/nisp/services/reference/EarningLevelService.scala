@@ -19,6 +19,7 @@ package uk.gov.hmrc.nisp.services.reference
 import play.api.Logger
 import uk.gov.hmrc.nisp.models.reference.EarningLevelModel
 
+
 object EarningLevelService {
   // scalastyle:off magic.number
 
@@ -68,18 +69,26 @@ object EarningLevelService {
     )
   }
 
-  def lowerEarningsLimit(taxYear: Int): BigDecimal = earningLevels(taxYear).lowEarningLevel
+  private def getEarningLevels(taxYear: Int): EarningLevelModel = {
+    earningLevels.getOrElse(taxYear, {
+      val (latestYear, latestValues) = earningLevels.toSeq.sortWith(_._1 > _._1).head
+      Logger.warn(s"Cannot find Earning Levels for $taxYear, using $latestYear")
+      latestValues
+    })
+  }
 
-  def qualifyingLevel(taxYear: Int): BigDecimal = earningLevels(taxYear).qualifyingLevel
+  def lowerEarningsLimit(taxYear: Int): BigDecimal = getEarningLevels(taxYear).lowEarningLevel
 
-  def maxMarkup(taxYear: Int): BigDecimal = earningLevels(taxYear).maxMarkUp
+  def qualifyingLevel(taxYear: Int): BigDecimal = getEarningLevels(taxYear).qualifyingLevel
 
-  def lowerEarningThreshold(taxYear: Int): BigDecimal = earningLevels(taxYear).lowerEarningThreshold
+  def maxMarkup(taxYear: Int): BigDecimal = getEarningLevels(taxYear).maxMarkUp
 
-  def s148Rate(taxYear: Int): BigDecimal = earningLevels(taxYear).s148Rate
+  def lowerEarningThreshold(taxYear: Int): BigDecimal = getEarningLevels(taxYear).lowerEarningThreshold
+
+  def s148Rate(taxYear: Int): BigDecimal = getEarningLevels(taxYear).s148Rate
 
   def rdaRate(taxYear: Int): BigDecimal = {
-    if (earningLevels(taxYear).rdaRate <= 0) Logger.warn(s"$taxYear's RDA rate does not exist")
-    earningLevels(taxYear).rdaRate
+    if (getEarningLevels(taxYear).rdaRate <= 0) Logger.warn(s"$taxYear's RDA rate does not exist")
+    getEarningLevels(taxYear).rdaRate
   }
 }
