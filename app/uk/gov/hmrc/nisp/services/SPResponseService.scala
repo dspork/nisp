@@ -23,9 +23,8 @@ import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.nisp.connectors.NpsConnector
 import uk.gov.hmrc.nisp.metrics.Metrics
 import uk.gov.hmrc.nisp.models._
-import uk.gov.hmrc.nisp.models.enums.MQPScenario.MQPScenario
-import uk.gov.hmrc.nisp.models.enums.SPContextMessage.SPContextMessage
 import uk.gov.hmrc.nisp.models.enums.{MQPScenario, Scenario}
+import uk.gov.hmrc.nisp.models.enums.MQPScenario.MQPScenario
 import uk.gov.hmrc.nisp.models.nps.NpsDate
 import uk.gov.hmrc.nisp.utils.WithCurrentDate
 import uk.gov.hmrc.play.http.HeaderCarrier
@@ -97,19 +96,11 @@ trait SPResponseService extends WithCurrentDate {
       val mqpScenario = getMqpScenario(npsSummary.nspQualifyingYears, npsSummary.yearsUntilPensionAge,
                       npsNIRecord.nonQualifyingYearsPayable)
 
-      val scenario: Option[SPContextMessage] = SPContextMessageService.getSPContextMessage(
-        spAmountModel,
-        npsSummary.nspQualifyingYears,
-        npsSummary.earningsIncludedUpTo,
-        purgedNIRecord.nonQualifyingYearsPayable
-      )
-
       val spSummary = SPSummaryModel(
         npsSummary.nino,
         npsSummary.earningsIncludedUpTo,
         spAmountModel,
         SPAgeModel(new Period(npsSummary.dateOfBirth.localDate, npsSummary.spaDate.localDate).getYears, npsSummary.spaDate),
-        scenario,
         npsSummary.finalRelevantYear,
         purgedNIRecord.numberOfQualifyingYears,
         purgedNIRecord.nonQualifyingYears,
@@ -127,7 +118,7 @@ trait SPResponseService extends WithCurrentDate {
       )
 
       if (spExclusions.exclusions.isEmpty && niExclusions.exclusions.isEmpty) {
-        metrics.summary(forecast.forecastAmount.week, spAmountModel.week, scenario, npsSchemeMembership.nonEmpty,
+        metrics.summary(forecast.forecastAmount.week, spAmountModel.week, npsSchemeMembership.nonEmpty,
           forecast.scenario.equals(Scenario.ForecastOnly), getAge(npsSummary.dateOfBirth), forecast.scenario,
           forecast.personalMaximum.week, forecast.yearsLeftToWork, mqpScenario)
         SPResponseModel(Some(spSummary), None, None)

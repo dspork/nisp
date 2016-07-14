@@ -23,7 +23,6 @@ import uk.gov.hmrc.nisp.metrics.Metrics
 import uk.gov.hmrc.nisp.models.enums.APITypes.APITypes
 import uk.gov.hmrc.nisp.models.enums.Exclusion.Exclusion
 import uk.gov.hmrc.nisp.models.enums.MQPScenario.MQPScenario
-import uk.gov.hmrc.nisp.models.enums.SPContextMessage.SPContextMessage
 import uk.gov.hmrc.nisp.models.enums.Scenario.Scenario
 
 
@@ -35,7 +34,7 @@ object StubMetrics extends Metrics with MockitoSugar {
 
   override def incrementFailedCounter(api: APITypes): Unit = {}
 
-  override def summary(forecast: BigDecimal, current: BigDecimal, scenario: Option[SPContextMessage], contractedOut: Boolean,
+  override def summary(forecast: BigDecimal, current: BigDecimal, contractedOut: Boolean,
                        forecastOnly: Boolean, age: Int, forecastScenario: Scenario,
                        personalMaximum: BigDecimal, yearsToContribute: Int, mqpScenario: Option[MQPScenario]): Unit = ()
 

@@ -16,16 +16,21 @@
 
 package uk.gov.hmrc.nisp.services
 
-import org.joda.time.LocalDate
+import org.joda.time.{DateTime, LocalDate}
 import org.scalatest.EitherValues
+import org.scalatest.mock.MockitoSugar
 import org.scalatestplus.play.OneAppPerSuite
-import uk.gov.hmrc.nisp.helpers.{StubStatePensionService, TestAccountBuilder}
+import uk.gov.hmrc.nisp.connectors.NpsConnector
+import uk.gov.hmrc.nisp.helpers.{StubForecastingService, StubNpsConnector, StubStatePensionService, TestAccountBuilder}
+import uk.gov.hmrc.nisp.metrics.Metrics
 import uk.gov.hmrc.nisp.models.enums.Exclusion
 import uk.gov.hmrc.nisp.models.{StatePension, StatePensionAmount, StatePensionAmounts, StatePensionExclusion}
 import uk.gov.hmrc.play.http.HeaderCarrier
 import uk.gov.hmrc.play.test.UnitSpec
+import org.mockito.Mockito._
+import org.scalatest.mock.MockitoSugar
 
-class StatePensionServiceSpec extends UnitSpec with OneAppPerSuite with EitherValues {
+class StatePensionServiceSpec extends UnitSpec with OneAppPerSuite with EitherValues with MockitoSugar {
   val nino = TestAccountBuilder.regularNino
   val exclusionNino = TestAccountBuilder.excludedNino
   val nonexistentnino = TestAccountBuilder.nonExistentNino
@@ -67,6 +72,19 @@ class StatePensionServiceSpec extends UnitSpec with OneAppPerSuite with EitherVa
       val statePension: Either[StatePensionExclusion, StatePension] = StubStatePensionService.getStatement(exclusionNino)
       statePension.isRight shouldBe false
       statePension.left.value shouldBe exclusionTestData
+    }
+
+    "Log a State Pension Metric" in {
+      val metrics = mock[Metrics]
+      val stub = new StatePensionService {
+        override def now: LocalDate = DateTime.now.toLocalDate
+        override val npsConnector: NpsConnector = StubNpsConnector
+        override val metrics: Metrics = metrics
+        override val forecastingService: ForecastingService =  StubForecastingService
+      }
+
+      stub.getStatement(nino)
+//      verify(metrics, times(1)).summary(forecas)
     }
   }
 }
