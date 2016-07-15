@@ -23,15 +23,14 @@ import uk.gov.hmrc.nisp.models.SPForecastModel
 import uk.gov.hmrc.nisp.models.enums.APITypes.APITypes
 import uk.gov.hmrc.nisp.models.enums.Exclusion._
 import uk.gov.hmrc.nisp.models.enums.MQPScenario._
-import uk.gov.hmrc.nisp.models.enums.SPContextMessage._
 import uk.gov.hmrc.nisp.models.enums.Scenario.Scenario
-import uk.gov.hmrc.nisp.models.enums.{Exclusion, MQPScenario, SPContextMessage, _}
+import uk.gov.hmrc.nisp.models.enums.{Exclusion, MQPScenario, _}
 
 trait Metrics {
   def startTimer(api: APITypes): Timer.Context
   def incrementFailedCounter(api: APITypes.APITypes): Unit
   
-  def summary(forecast: BigDecimal, current: BigDecimal, scenario: Option[SPContextMessage], contractedOut: Boolean, forecastOnly: Boolean, age: Int,
+  def summary(forecast: BigDecimal, current: BigDecimal, contractedOut: Boolean, forecastOnly: Boolean, age: Int,
               forecastScenario: Scenario, personalMaximum: BigDecimal, yearsToContribute: Int, mqpScenario: Option[MQPScenario]): Unit
   def niRecord(gaps: Int, payableGaps: Int, pre75Years: Int, qualifyingYears: Int, yearsUntilSPA: Int): Unit
   def exclusion(exclusions: List[Exclusion]): Unit
@@ -83,17 +82,6 @@ object Metrics extends Metrics {
   val personalMaxAmountMeter = MetricsRegistry.defaultRegistry.histogram("personal-maximum-amount")
   val yearsNeededToContribute = MetricsRegistry.defaultRegistry.histogram("years-needed-to-contribute")
 
-  val scenarioMeters: Map[SPContextMessage, Counter] = Map(
-    SPContextMessage.ScenarioOne -> MetricsRegistry.defaultRegistry.counter("scenario-1"),
-    SPContextMessage.ScenarioTwo -> MetricsRegistry.defaultRegistry.counter("scenario-2"),
-    SPContextMessage.ScenarioThree -> MetricsRegistry.defaultRegistry.counter("scenario-3"),
-    SPContextMessage.ScenarioFour -> MetricsRegistry.defaultRegistry.counter("scenario-4"),
-    SPContextMessage.ScenarioFive -> MetricsRegistry.defaultRegistry.counter("scenario-5"),
-    SPContextMessage.ScenarioSix -> MetricsRegistry.defaultRegistry.counter("scenario-6"),
-    SPContextMessage.ScenarioSeven -> MetricsRegistry.defaultRegistry.counter("scenario-7"),
-    SPContextMessage.ScenarioEight -> MetricsRegistry.defaultRegistry.counter("scenario-8")
-  )
-
   val forecastScenarioMeters: Map[Scenario, Counter] = Map(
     Scenario.Reached -> MetricsRegistry.defaultRegistry.counter("forecastscenario-reached"),
     Scenario.ContinueWorkingMax -> MetricsRegistry.defaultRegistry.counter("forecastscenario-continueworkingmax"),
@@ -120,13 +108,12 @@ object Metrics extends Metrics {
     Exclusion.PostStatePensionAge -> MetricsRegistry.defaultRegistry.counter("exclusion-post-spa")
   )
 
-  override def summary(forecast: BigDecimal, current: BigDecimal, scenario: Option[SPContextMessage],
-                       contractedOut: Boolean, forecastOnly: Boolean, age: Int, forecastScenario: Scenario,
-                       personalMaximum: BigDecimal, yearsToContribute: Int, mqpScenario : Option[MQPScenario]): Unit = {
+  override def summary(forecast: BigDecimal, current: BigDecimal, contractedOut: Boolean,
+                       forecastOnly: Boolean, age: Int, forecastScenario: Scenario, personalMaximum: BigDecimal,
+                       yearsToContribute: Int, mqpScenario : Option[MQPScenario]): Unit = {
     forecastAmountMeter.update(forecast.toInt)
     currentAmountMeter.update(current.toInt)
     personalMaxAmountMeter.update(personalMaximum.toInt)
-    scenario.foreach(scenarioMeters(_).inc())
     forecastScenarioMeters(forecastScenario).inc()
     mqpScenario.foreach(mqpScenarioMeters(_).inc())
     yearsNeededToContribute.update(yearsToContribute)
