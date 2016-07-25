@@ -51,7 +51,7 @@ class StatePensionServiceSpec extends UnitSpec with OneAppPerSuite with EitherVa
     finalRelevantYear = 2016,
     numberOfQualifyingYears = 27,
     pensionSharingOrder = false,
-    currentWeeklyPensionAmount = 155.65
+    currentFullWeeklyPensionAmount = 155.65
   )
 
   val exclusionTestData: StatePensionExclusion = StatePensionExclusion(
