@@ -117,7 +117,7 @@ trait StatePensionService {
             finalRelevantYear = summary.finalRelevantYear,
             numberOfQualifyingYears = summary.nspQualifyingYears,
             pensionSharingOrder = summary.pensionShareOrderCOEG != 0,
-            currentWeeklyPensionAmount = QualifyingYearsAmountService.maxAmount
+            currentFullWeeklyPensionAmount = QualifyingYearsAmountService.maxAmount
           ))
         }
       }

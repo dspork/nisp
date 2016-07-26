@@ -84,7 +84,7 @@ class StatePensionSpec extends UnitSpec {
       (json \ "finalRelevantYear").as[Int] shouldBe 2018
       (json \ "numberOfQualifyingYears").as[Int] shouldBe 30
       (json \ "pensionSharingOrder").as[Boolean] shouldBe false
-      (json \ "currentWeeklyPensionAmount").as[BigDecimal] shouldBe 155.65
+      (json \ "currentFullWeeklyPensionAmount").as[BigDecimal] shouldBe 155.65
     }
 
     "parse from JSON" in {
@@ -116,7 +116,7 @@ class StatePensionSpec extends UnitSpec {
                      |  "finalRelevantYear": 2018,
                      |  "numberOfQualifyingYears": 30,
                      |  "pensionSharingOrder": false,
-                     |  "currentWeeklyPensionAmount": 155.65
+                     |  "currentFullWeeklyPensionAmount": 155.65
                      |  }
                     """.stripMargin
          )
