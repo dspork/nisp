@@ -17,10 +17,9 @@
 package uk.gov.hmrc.nisp.models
 
 import play.api.libs.json.Json
-import uk.gov.hmrc.nisp.models.enums.Scenario.Scenario
 
-case class SPForecastModel(forecastAmount: SPAmountModel,
-                           yearsLeftToWork: Int)
-object SPForecastModel {
-  implicit val formats = Json.format[SPForecastModel]
+case class SPAmountsModel(current: SPAmountModel, forecast: SPForecastModel, maximum: SPMaximumModel, cope: SPAmountModel, protectedPayment: Boolean)
+
+object SPAmountsModel {
+  implicit val formats = Json.format[SPAmountsModel]
 }

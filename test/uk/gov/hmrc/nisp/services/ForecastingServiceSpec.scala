@@ -16,11 +16,12 @@
 
 package uk.gov.hmrc.nisp.services
 
+import org.scalatest.Assertions
 import org.scalatestplus.play.OneAppPerSuite
 import uk.gov.hmrc.nisp.helpers.{StubForecastingService, TestAccountBuilder}
 import uk.gov.hmrc.nisp.models.enums.{MQPScenario, Scenario}
 import uk.gov.hmrc.nisp.models.nps.{NpsAmountA2016, NpsAmountB2016, NpsDate, NpsSchemeMembership}
-import uk.gov.hmrc.nisp.models.{Forecast, SPAmountModel, SPForecastModel}
+import uk.gov.hmrc.nisp.models._
 import uk.gov.hmrc.play.http.HeaderCarrier
 import uk.gov.hmrc.play.test.UnitSpec
 
@@ -437,32 +438,32 @@ class ForecastingServiceSpec extends UnitSpec with OneAppPerSuite {
     "return Reached Scenario, 155.65 with no years when 2013/14 last year, contracted in, 35, 2018 FRY" in {
       StubForecastingService.getForecastAmount(
         List(), NpsDate(2014, 4, 5), 35, npsAmountA2016(0), npsAmountB2016, 10000, 2018, 0, 0, lastYearQualifying = true, testNino,
-        0, SPAmountModel(155.65))(hc) shouldBe SPForecastModel(SPAmountModel(155.65), 0, SPAmountModel(155.65), 0, Scenario.Reached, true)
+        0, SPAmountModel(155.65))(hc) shouldBe ForecastingResult(SPAmountModel(155.65), 0, SPAmountModel(155.65), 0, Scenario.Reached, true)
     }
 
     "return ContinueWorkingMax Scenario 155.65 with 2 years when 2013/14 last year, contracted in, 33, 2018 FRY" in {
       StubForecastingService.getForecastAmount(
         List(), NpsDate(2014, 4, 5), 33, npsAmountA2016(0), npsAmountB2016, 10000, 2018, 0, 0, lastYearQualifying = true, testNino,
-        0, SPAmountModel(146.76))(hc) shouldBe SPForecastModel(SPAmountModel(155.65), 2, SPAmountModel(155.65), 0, Scenario.ContinueWorkingMax, true)
+        0, SPAmountModel(146.76))(hc) shouldBe ForecastingResult(SPAmountModel(155.65), 2, SPAmountModel(155.65), 0, Scenario.ContinueWorkingMax, true)
     }
 
     "return ContinueWorkingNonMax Scenario 111.18 with 5 years when 2013/14 last year, contracted in, *, 2018 FRY" in {
       StubForecastingService.getForecastAmount(
         List(), NpsDate(2014, 4, 5), 20, npsAmountA2016(0), npsAmountB2016, 10000, 2018, 0, 0, lastYearQualifying = true, testNino,
-        0, SPAmountModel(88.94))(hc) shouldBe SPForecastModel(SPAmountModel(111.18), 5, SPAmountModel(111.18), 0, Scenario.ContinueWorkingNonMax, false)
+        0, SPAmountModel(88.94))(hc) shouldBe ForecastingResult(SPAmountModel(111.18), 5, SPAmountModel(111.18), 0, Scenario.ContinueWorkingNonMax, false)
     }
 
 
     "return ContinueWorkingMax Scenario 111.18 Forecast, 120.07 Max  with 5 years when 2013/14 last year, contracted in, *, 2018 FRY" in {
       StubForecastingService.getForecastAmount(
         List(), NpsDate(2014, 4, 5), 20, npsAmountA2016(0), npsAmountB2016, 10000, 2018, 0, 0, lastYearQualifying = true, testNino,
-        2, SPAmountModel(88.94))(hc) shouldBe SPForecastModel(SPAmountModel(111.18), 5, SPAmountModel(120.07), 2, Scenario.FillGaps, false)
+        2, SPAmountModel(88.94))(hc) shouldBe ForecastingResult(SPAmountModel(111.18), 5, SPAmountModel(120.07), 2, Scenario.FillGaps, false)
     }
 
     "return Forecast Only Scenario 111.18 Forecast, 120.07 Max  with 5 years when 2013/14 last year, contracted in, *, 2018 FRY" in {
       StubForecastingService.getForecastAmount(
         List(NpsSchemeMembership(Some(NpsDate(2012,3,5)), Some(NpsDate(2014,4,6)))), NpsDate(2014, 4, 5), 35, npsAmountA2016(0), npsAmountB2016, 10000, 2015, 0, 0, lastYearQualifying = true, testNino,
-        0, SPAmountModel(155.65))(hc) shouldBe SPForecastModel(SPAmountModel(154.87), 2, SPAmountModel(154.87), 0, Scenario.ForecastOnly, false)
+        0, SPAmountModel(155.65))(hc) shouldBe ForecastingResult(SPAmountModel(154.87), 2, SPAmountModel(154.87), 0, Scenario.ForecastOnly, false)
     }
 
     StubForecastingService.forecast(
@@ -735,5 +736,66 @@ class ForecastingServiceSpec extends UnitSpec with OneAppPerSuite {
       val spResponseMQP =   StubForecastingService.getMqpScenario(6, 6, 4)
       spResponseMQP shouldBe Some(MQPScenario.ContinueWorking)
     }
+  }
+
+  "modellingOptions" should {
+    "throw exception when fillable gaps is 0" in {
+      val ex = intercept[IllegalArgumentException] {
+        StubForecastingService.modellingOptions(0, 0, forecastingWithGaps(NpsDate(2015, 4, 5), 25, 0, 0, 10000, 2023, false)) shouldBe 0
+      }
+
+      ex.getMessage shouldBe "requirement failed"
+    }
+
+    "return 155.65 and 1 when the customer only gets 34 years through forecasting" in {
+      StubForecastingService.modellingOptions(155.65, 10, forecastingWithGaps(NpsDate(2015, 4, 5), 25, 0, 0, 10000, 2023, false)) shouldBe Seq(ModellingOption(1, SPAmountModel(155.65)))
+    }
+
+    "return an Empty Seq when the personal maximum has already been reached without gaps" in {
+      StubForecastingService.modellingOptions(155.65, 10, forecastingWithGaps(NpsDate(2015, 4, 5), 16, 0, 0, 10000, 2023, false)) shouldBe Seq(ModellingOption(1, SPAmountModel(155.65)))
+    }
+
+    "return (1, 151.20), (2, 155.65) when the customer needs to fill 2 gaps" in {
+      StubForecastingService.modellingOptions(155.65, 10, forecastingWithGaps(NpsDate(2015, 4, 5), 24, 0, 0, 10000, 2023, false)) shouldBe Seq(ModellingOption(1, SPAmountModel(151.20)), ModellingOption(2, SPAmountModel(155.65)))
+    }
+
+    "return (1, 146.76), (2, 151.20), (3, 155.65) when the customer needs to fill 3 gaps" in {
+      StubForecastingService.modellingOptions(155.65, 10, forecastingWithGaps(NpsDate(2015, 4, 5), 24, 0, 0, 10000, 2023, false)) shouldBe Seq(ModellingOption(1, SPAmountModel(146.76)), Seq(ModellingOption(2, SPAmountModel(151.20)), Seq(ModellingOption(3, SPAmountModel(155.65)))))
+    }
+
+    "return (1, 142.31), (2, 146.76), (3, 151.20), (4, 155.65) when the customer needs to fill 4 gaps" in {
+      StubForecastingService.modellingOptions(155.65, 10, forecastingWithGaps(NpsDate(2015, 4, 5), 24, 0, 0, 10000, 2023, false)) shouldBe Seq(ModellingOption(1, SPAmountModel(142.31)), ModellingOption(2, SPAmountModel(146.76)), Seq(ModellingOption(3, SPAmountModel(151.2)), Seq(ModellingOption(4, SPAmountModel(155.65)))))
+    }
+
+    "return (1, 115.63), (2, 120.07), (3, 124.52), (4, 128.97), (5, 133.41), (6, 137.86), (7, 142.31), (8, 146.76), (9, 151.20), (10, 155.65) when the customer needs to fill 10 gaps" in {
+      StubForecastingService.modellingOptions(155.65, 10, forecastingWithGaps(NpsDate(2015, 4, 5), 24, 0, 0, 10000, 2023, false)) shouldBe Seq(
+        ModellingOption(1, SPAmountModel(115.63)),
+        ModellingOption(2, SPAmountModel(120.07)),
+        ModellingOption(3, SPAmountModel(124.52)),
+        ModellingOption(4, SPAmountModel(128.97)),
+        ModellingOption(5, SPAmountModel(133.41)),
+        ModellingOption(6, SPAmountModel(137.86)),
+        ModellingOption(7, SPAmountModel(142.31)),
+        ModellingOption(8, SPAmountModel(146.76)),
+        ModellingOption(9, SPAmountModel(151.2)),
+        ModellingOption(10, SPAmountModel(155.65))
+      )
+    }
+
+    "return (1, 115.63), (2, 120.07), (3, 124.52), (4, 128.97), (5, 133.41), (6, 137.86), (7, 142.31), (8, 146.76), (9, 151.20), (10, 155.65) when the customer needs to fill 11 gaps but only has 10 fillable gaps" in {
+      StubForecastingService.modellingOptions(155.65, 10, forecastingWithGaps(NpsDate(2015, 4, 5), 23, 0, 0, 10000, 2023, false)) shouldBe Seq(
+        ModellingOption(1, SPAmountModel(111.18)),
+        ModellingOption(2, SPAmountModel(115.63)),
+        ModellingOption(3, SPAmountModel(120.07)),
+        ModellingOption(4, SPAmountModel(124.52)),
+        ModellingOption(5, SPAmountModel(128.97)),
+        ModellingOption(6, SPAmountModel(133.41)),
+        ModellingOption(7, SPAmountModel(137.86)),
+        ModellingOption(8, SPAmountModel(142.31)),
+        ModellingOption(9, SPAmountModel(146.76)),
+        ModellingOption(10, SPAmountModel(151.2))
+      )
+    }
+
   }
 }

@@ -59,7 +59,7 @@ class SPResponseServiceSpec extends UnitSpec with MockitoSugar with OneAppPerSui
 
   "return an SPSummaryModel object with the correct SPAmount" in {
     val spResponse = StubSPResponseService.getSPResponse(nino)
-    spResponse.spSummary.get.statePensionAmount shouldBe SPAmountModel(118.24)
+    spResponse.spSummary.get.amounts.current shouldBe SPAmountModel(118.24)
   }
 
   "return an SPSummaryModel object with isAbroad" in {

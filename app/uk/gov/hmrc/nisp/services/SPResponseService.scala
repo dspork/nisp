@@ -74,7 +74,7 @@ trait SPResponseService extends WithCurrentDate {
       val spExclusions = exclusionsService.getSPExclusions
       val niExclusions = exclusionsService.getNIExclusions
 
-      val forecast: SPForecastModel = forecastingService.getForecastAmount(
+      val forecast: ForecastingResult = forecastingService.getForecastAmount(
         npsSchemeMembership, npsSummary.earningsIncludedUpTo, npsSummary.nspQualifyingYears, npsSummary.npsStatePensionAmount.npsAmountA2016,
         npsSummary.npsStatePensionAmount.npsAmountB2016,
         purgedNIRecord.niTaxYears.find(_.taxYear == npsSummary.earningsIncludedUpTo.taxYear).map(_.primaryPaidEarnings).getOrElse(0),
@@ -89,7 +89,6 @@ trait SPResponseService extends WithCurrentDate {
       val spSummary = SPSummaryModel(
         npsSummary.nino,
         npsSummary.earningsIncludedUpTo,
-        spAmountModel,
         SPAgeModel(new Period(npsSummary.dateOfBirth.localDate, npsSummary.spaDate.localDate).getYears, npsSummary.spaDate),
         npsSummary.finalRelevantYear,
         purgedNIRecord.numberOfQualifyingYears,
@@ -98,11 +97,17 @@ trait SPResponseService extends WithCurrentDate {
         npsSummary.yearsUntilPensionAge,
         npsSummary.pensionShareOrderSERPS != 0,
         npsSummary.dateOfBirth,
-        forecast,
+        SPAmountsModel(
+          current = spAmountModel,
+          forecast = SPForecastModel(forecast.forecastAmount, forecast.yearsLeftToWork),
+          maximum = SPMaximumModel(forecast.personalMaximum, forecast.yearsLeftToWork, forecast.minGapsToFillToReachMaximum),
+          cope = SPAmountModel(npsSummary.npsStatePensionAmount.npsAmountB2016.rebateDerivedAmount),
+          protectedPayment = forecast.oldRulesCustomer
+        ),
         npsSummary.pensionForecast.fullNewStatePensionAmount,
         npsSchemeMembership.nonEmpty,
         getAge(npsSummary.dateOfBirth),
-        SPAmountModel(npsSummary.npsStatePensionAmount.npsAmountB2016.rebateDerivedAmount),
+        forecast.scenario,
         mqpScenario,
         npsSummary.isAbroad
       )

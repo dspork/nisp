@@ -22,7 +22,7 @@ import uk.gov.hmrc.nisp.events.ForecastingEvent
 import uk.gov.hmrc.nisp.models.enums.MQPScenario._
 import uk.gov.hmrc.nisp.models.enums.{MQPScenario, Scenario}
 import uk.gov.hmrc.nisp.models.enums.Scenario.Scenario
-import uk.gov.hmrc.nisp.models.{Forecast, SPAmountModel, SPForecastModel}
+import uk.gov.hmrc.nisp.models._
 import uk.gov.hmrc.nisp.models.nps.{NpsAmountA2016, NpsAmountB2016, NpsDate, NpsSchemeMembership}
 import uk.gov.hmrc.nisp.services.reference.{EarningLevelService, QualifyingYearsAmountService}
 import uk.gov.hmrc.nisp.utils.NISPConstants
@@ -42,7 +42,7 @@ trait ForecastingService {
   def getForecastAmount(npsSchemeMembership: List[NpsSchemeMembership], earningsIncludedUpTo: NpsDate, currentQualifyingYears: Int, amountA: NpsAmountA2016,
                         amountB: NpsAmountB2016, lastYearEarnings: BigDecimal, finalRelevantYear: Int,
                         forecastAmount: BigDecimal, forecastAmount2016: BigDecimal, lastYearQualifying: Boolean, nino: Nino, fillableGaps: Int, currentAmount: SPAmountModel)
-                       (implicit hc: HeaderCarrier): SPForecastModel = {
+                       (implicit hc: HeaderCarrier): ForecastingResult = {
 
     val contractedOutLastYear: Boolean = npsSchemeMembership.exists(_.contains(earningsIncludedUpTo))
 
@@ -61,7 +61,7 @@ trait ForecastingService {
     val scenario = forecastScenario(currentAmount, SPAmountModel(calculatedForecast.amount), personalMaximumAmount,
       currentQualifyingYears + calculatedForecast.yearsLeftToWork + fillableGaps)
 
-    SPForecastModel(
+    ForecastingResult(
       SPAmountModel(calculatedForecast.amount),
       if(scenario == Scenario.Reached) 0 else calculatedForecast.yearsLeftToWork,
       personalMaximumAmount,
@@ -194,6 +194,20 @@ trait ForecastingService {
     }
 
     go(fillableGaps)
+  }
+
+  def modellingOptions(personalMaximum: BigDecimal, fillableGaps: Int, forecastWithFilledGaps: Int => BigDecimal): Seq[ModellingOption] = {
+    require(fillableGaps > 0)
+
+    @tailrec def go(yearsToFill: Int, options: List[ModellingOption], acc: Int): List[ModellingOption] = {
+      if(acc == 0) options
+      else if(options.nonEmpty && options.head.amount.week >= personalMaximum) options
+      else {
+         go(yearsToFill + 1, ModellingOption(yearsToFill, SPAmountModel(forecastWithFilledGaps(yearsToFill))) :: options, acc - 1)
+      }
+    }
+
+    go(1, Nil, fillableGaps).reverse
   }
 
   def getMqpScenario(currentYears : Int , yearsToWork : Int, fillableGaps: Int) : Option[MQPScenario] = {

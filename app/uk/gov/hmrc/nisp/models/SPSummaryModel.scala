@@ -18,12 +18,12 @@ package uk.gov.hmrc.nisp.models
 
 import play.api.libs.json.Json
 import uk.gov.hmrc.nisp.models.enums.MQPScenario.MQPScenario
+import uk.gov.hmrc.nisp.models.enums.Scenario.Scenario
 import uk.gov.hmrc.nisp.models.nps.NpsDate
 
 case class SPSummaryModel(
                            nino: String,
                            lastProcessedDate: NpsDate,
-                           statePensionAmount: SPAmountModel,
                            statePensionAge: SPAgeModel,
                            finalRelevantYear: Int,
                            numberOfQualifyingYears: Int,
@@ -32,11 +32,11 @@ case class SPSummaryModel(
                            yearsToContributeUntilPensionAge: Int,
                            hasPsod: Boolean,
                            dateOfBirth: NpsDate,
-                           forecast: SPForecastModel,
+                           amounts: SPAmountsModel,
                            fullNewStatePensionAmount: BigDecimal,
                            contractedOutFlag: Boolean,
                            customerAge: Int,
-                           copeAmount: SPAmountModel,
+                           scenario: Scenario,
                            mqp: Option[MQPScenario],
                            isAbroad: Boolean
                          )
