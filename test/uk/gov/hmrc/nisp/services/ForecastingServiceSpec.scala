@@ -752,7 +752,7 @@ class ForecastingServiceSpec extends UnitSpec with OneAppPerSuite {
     }
 
     "return an Empty Seq when the personal maximum has already been reached without gaps" in {
-      StubForecastingService.modellingOptions(155.65, 10, forecastingWithGaps(NpsDate(2015, 4, 5), 16, 0, 0, 10000, 2023, false)) shouldBe Seq(ModellingOption(1, SPAmountModel(155.65)))
+      StubForecastingService.modellingOptions(155.65, 10, forecastingWithGaps(NpsDate(2015, 4, 5), 26, 0, 0, 10000, 2023, false)) shouldBe Seq(ModellingOption(1, SPAmountModel(155.65)))
     }
 
     "return (1, 151.20), (2, 155.65) when the customer needs to fill 2 gaps" in {
@@ -760,15 +760,15 @@ class ForecastingServiceSpec extends UnitSpec with OneAppPerSuite {
     }
 
     "return (1, 146.76), (2, 151.20), (3, 155.65) when the customer needs to fill 3 gaps" in {
-      StubForecastingService.modellingOptions(155.65, 10, forecastingWithGaps(NpsDate(2015, 4, 5), 24, 0, 0, 10000, 2023, false)) shouldBe Seq(ModellingOption(1, SPAmountModel(146.76)), Seq(ModellingOption(2, SPAmountModel(151.20)), Seq(ModellingOption(3, SPAmountModel(155.65)))))
+      StubForecastingService.modellingOptions(155.65, 10, forecastingWithGaps(NpsDate(2015, 4, 5), 23, 0, 0, 10000, 2023, false)) shouldBe Seq(ModellingOption(1, SPAmountModel(146.76)), ModellingOption(2, SPAmountModel(151.20)), ModellingOption(3, SPAmountModel(155.65)))
     }
 
     "return (1, 142.31), (2, 146.76), (3, 151.20), (4, 155.65) when the customer needs to fill 4 gaps" in {
-      StubForecastingService.modellingOptions(155.65, 10, forecastingWithGaps(NpsDate(2015, 4, 5), 24, 0, 0, 10000, 2023, false)) shouldBe Seq(ModellingOption(1, SPAmountModel(142.31)), ModellingOption(2, SPAmountModel(146.76)), Seq(ModellingOption(3, SPAmountModel(151.2)), Seq(ModellingOption(4, SPAmountModel(155.65)))))
+      StubForecastingService.modellingOptions(155.65, 10, forecastingWithGaps(NpsDate(2015, 4, 5), 22, 0, 0, 10000, 2023, false)) shouldBe Seq(ModellingOption(1, SPAmountModel(142.31)), ModellingOption(2, SPAmountModel(146.76)), ModellingOption(3, SPAmountModel(151.2)), ModellingOption(4, SPAmountModel(155.65)))
     }
 
     "return (1, 115.63), (2, 120.07), (3, 124.52), (4, 128.97), (5, 133.41), (6, 137.86), (7, 142.31), (8, 146.76), (9, 151.20), (10, 155.65) when the customer needs to fill 10 gaps" in {
-      StubForecastingService.modellingOptions(155.65, 10, forecastingWithGaps(NpsDate(2015, 4, 5), 24, 0, 0, 10000, 2023, false)) shouldBe Seq(
+      StubForecastingService.modellingOptions(155.65, 10, forecastingWithGaps(NpsDate(2015, 4, 5), 16, 0, 0, 10000, 2023, false)) shouldBe Seq(
         ModellingOption(1, SPAmountModel(115.63)),
         ModellingOption(2, SPAmountModel(120.07)),
         ModellingOption(3, SPAmountModel(124.52)),
@@ -783,7 +783,7 @@ class ForecastingServiceSpec extends UnitSpec with OneAppPerSuite {
     }
 
     "return (1, 115.63), (2, 120.07), (3, 124.52), (4, 128.97), (5, 133.41), (6, 137.86), (7, 142.31), (8, 146.76), (9, 151.20), (10, 155.65) when the customer needs to fill 11 gaps but only has 10 fillable gaps" in {
-      StubForecastingService.modellingOptions(155.65, 10, forecastingWithGaps(NpsDate(2015, 4, 5), 23, 0, 0, 10000, 2023, false)) shouldBe Seq(
+      StubForecastingService.modellingOptions(155.65, 10, forecastingWithGaps(NpsDate(2015, 4, 5), 15, 0, 0, 10000, 2023, false)) shouldBe Seq(
         ModellingOption(1, SPAmountModel(111.18)),
         ModellingOption(2, SPAmountModel(115.63)),
         ModellingOption(3, SPAmountModel(120.07)),
