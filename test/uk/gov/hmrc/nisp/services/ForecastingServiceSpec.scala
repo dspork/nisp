@@ -797,5 +797,25 @@ class ForecastingServiceSpec extends UnitSpec with OneAppPerSuite {
       )
     }
 
+    "return (1, 88.94), (2, 93.39), (3, 97.84), (4, 102.28), (5, 106.73), (6, 115.63), (7, 120.07), (8, 124.52), (9, 128.97), (10, 133.41), (11, 137.86), (12, 142.31), (13, 146.76), (14, 151.20), (15, 155.65) when the customer needs to fill 15 gaps" in {
+      StubForecastingService.modellingOptions(173.45, 15, forecastingWithGaps(NpsDate(2015, 4, 5), 10, 0, 0, 10000, 2023, false)) shouldBe Seq(
+        ModellingOption(1, SPAmountModel(88.94)),
+        ModellingOption(2, SPAmountModel(93.39)),
+        ModellingOption(3, SPAmountModel(97.84)),
+        ModellingOption(4, SPAmountModel(102.28)),
+        ModellingOption(5, SPAmountModel(106.73)),
+        ModellingOption(6, SPAmountModel(111.18)),
+        ModellingOption(7, SPAmountModel(115.63)),
+        ModellingOption(8, SPAmountModel(120.07)),
+        ModellingOption(9, SPAmountModel(124.52)),
+        ModellingOption(10, SPAmountModel(128.97)),
+        ModellingOption(11, SPAmountModel(133.41)),
+        ModellingOption(12, SPAmountModel(137.86)),
+        ModellingOption(13, SPAmountModel(142.31)),
+        ModellingOption(14, SPAmountModel(146.76)),
+        ModellingOption(15, SPAmountModel(151.2))
+      )
+    }
+
   }
 }
