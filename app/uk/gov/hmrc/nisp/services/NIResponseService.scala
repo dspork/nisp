@@ -34,6 +34,7 @@ import scala.concurrent.Future
 object NIResponseService extends NIResponseService {
   override val nps: NpsConnector = NpsConnector
   override val metrics: Metrics = Metrics
+  override val citizenDetailsService: CitizenDetailsService = CitizenDetailsService
 
   override def now: LocalDate = LocalDate.now(DateTimeZone.forTimeZone(TimeZone.getTimeZone("Europe/London")))
 }
@@ -41,16 +42,19 @@ object NIResponseService extends NIResponseService {
 trait NIResponseService extends WithCurrentDate {
   val nps: NpsConnector
   val metrics: Metrics
+  val citizenDetailsService: CitizenDetailsService
 
   def getNIResponse(nino: Nino)(implicit hc: HeaderCarrier): Future[NIResponse] = {
     val npsNIRecordFuture = nps.connectToNIRecord(nino)
     val npsSummaryFuture = nps.connectToSummary(nino)
     val npsLiabilitiesFuture = nps.connectToLiabilities(nino)
+    val manualCorrespondenceIndicatorFuture = citizenDetailsService.retrieveMCIStatus(nino)
 
     for (
       npsNIRecord <- npsNIRecordFuture;
       npsSummary <- npsSummaryFuture;
-      npsLiabilities <- npsLiabilitiesFuture
+      npsLiabilities <- npsLiabilitiesFuture;
+      manualCorrespondenceIndicator <- manualCorrespondenceIndicatorFuture
     ) yield {
 
       val purgedNIRecord = npsNIRecord.purge(npsSummary.finalRelevantYear)
@@ -65,7 +69,8 @@ trait NIResponseService extends WithCurrentDate {
         SPCurrentAmountService.calculate(npsSummary.npsStatePensionAmount.npsAmountA2016, npsSummary.npsStatePensionAmount.npsAmountB2016),
         NpsDate(now),
         npsSummary.spaDate,
-        npsSummary.sex
+        npsSummary.sex,
+        manualCorrespondenceIndicator
       ).getNIExclusions
 
       if (niExclusions.exclusions.nonEmpty) {

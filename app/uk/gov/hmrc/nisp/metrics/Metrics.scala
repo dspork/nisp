@@ -28,6 +28,7 @@ import uk.gov.hmrc.nisp.models.enums.{Exclusion, MQPScenario, _}
 
 trait Metrics {
   def startTimer(api: APITypes): Timer.Context
+  def startCitizenDetailsTimer(): Timer.Context
   def incrementFailedCounter(api: APITypes.APITypes): Unit
   
   def summary(forecast: BigDecimal, current: BigDecimal, contractedOut: Boolean, forecastOnly: Boolean, age: Int,
@@ -99,13 +100,14 @@ object Metrics extends Metrics {
 
   val exclusionMeters: Map[Exclusion, Counter] = Map(
     Exclusion.Abroad -> MetricsRegistry.defaultRegistry.counter("exclusion-abroad"),
-    Exclusion.MWRRE -> MetricsRegistry.defaultRegistry.counter("exclusion-mwrre"),
+    Exclusion.MarriedWomenReducedRateElection -> MetricsRegistry.defaultRegistry.counter("exclusion-mwrre"),
     Exclusion.CustomerTooOld -> MetricsRegistry.defaultRegistry.counter("exclusion-too-old"),
     Exclusion.ContractedOut -> MetricsRegistry.defaultRegistry.counter("exclusion-contracted-out"),
     Exclusion.Dead -> MetricsRegistry.defaultRegistry.counter("exclusion-dead"),
-    Exclusion.IOM -> MetricsRegistry.defaultRegistry.counter("exclusion-isle-of-man"),
+    Exclusion.IsleOfMan -> MetricsRegistry.defaultRegistry.counter("exclusion-isle-of-man"),
     Exclusion.AmountDissonance -> MetricsRegistry.defaultRegistry.counter("amount-dissonance"),
-    Exclusion.PostStatePensionAge -> MetricsRegistry.defaultRegistry.counter("exclusion-post-spa")
+    Exclusion.PostStatePensionAge -> MetricsRegistry.defaultRegistry.counter("exclusion-post-spa"),
+    Exclusion.ManualCorrespondenceIndicator -> MetricsRegistry.defaultRegistry.counter("exclusion-manual-correspondence")
   )
 
   override def summary(forecast: BigDecimal, current: BigDecimal, contractedOut: Boolean,
@@ -149,4 +151,5 @@ object Metrics extends Metrics {
   override def cacheReadFound(): Unit = MetricsRegistry.defaultRegistry.meter("cache-read-found").mark
   override def cacheReadNotFound(): Unit = MetricsRegistry.defaultRegistry.meter("cache-read-not-found").mark
   override def cacheWritten(): Unit = MetricsRegistry.defaultRegistry.meter("cache-written").mark
+  override def startCitizenDetailsTimer(): Context = MetricsRegistry.defaultRegistry.timer("citizen-details-timer").time()
 }

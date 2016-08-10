@@ -16,14 +16,9 @@
 
 package uk.gov.hmrc.nisp.helpers
 
-import org.joda.time.LocalDate
-import uk.gov.hmrc.nisp.connectors.NpsConnector
-import uk.gov.hmrc.nisp.metrics.Metrics
-import uk.gov.hmrc.nisp.services.{CitizenDetailsService, NIResponseService}
+import uk.gov.hmrc.nisp.connectors.CitizenDetailsConnector
+import uk.gov.hmrc.nisp.services.CitizenDetailsService
 
-object StubNIService extends NIResponseService {
-  override val nps: NpsConnector = StubNpsConnector
-  override val metrics: Metrics = StubMetrics
-  override def now: LocalDate = new LocalDate(2015,6,26)
-  override val citizenDetailsService: CitizenDetailsService = StubCitizenDetailsService
+object StubCitizenDetailsService extends CitizenDetailsService {
+  override val citizenDetailsConnector: CitizenDetailsConnector = StubCitizenDetailsConnector
 }

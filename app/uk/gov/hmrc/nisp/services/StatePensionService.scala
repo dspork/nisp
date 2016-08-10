@@ -35,6 +35,7 @@ trait StatePensionService {
   val npsConnector: NpsConnector
   val metrics: Metrics
   val forecastingService: ForecastingService
+  val citizenDetailsService: CitizenDetailsService
   def now: LocalDate
 
   def getStatement(nino: Nino)(implicit request: HeaderCarrier): Future[Either[StatePensionExclusion, StatePension]] = {
@@ -43,12 +44,14 @@ trait StatePensionService {
       val npsNationalInsuranceRecordF = npsConnector.connectToNIRecord(nino)
       val npsLiabilitiesF = npsConnector.connectToLiabilities(nino)
       val npsSchemeMembershipsF = npsConnector.connectToSchemeMembership(nino)
+      val manualCorrespondenceIndicatorF = citizenDetailsService.retrieveMCIStatus(nino)
 
       for (
         summary <- npsSummaryF;
         nationalInsuranceRecord <- npsNationalInsuranceRecordF;
         liabilities <- npsLiabilitiesF;
-        schemeMemberships <- npsSchemeMembershipsF
+        schemeMemberships <- npsSchemeMembershipsF;
+        manualCorrespondenceIndicator <- manualCorrespondenceIndicatorF
       ) yield {
 
         val exclusions = ExclusionsService(
@@ -62,7 +65,8 @@ trait StatePensionService {
             summary.npsStatePensionAmount.npsAmountB2016),
           NpsDate(now),
           summary.spaDate,
-          summary.sex
+          summary.sex,
+          manualCorrespondenceIndicator
         ).getSPExclusions.exclusions
 
         if (exclusions.nonEmpty) {
@@ -129,4 +133,5 @@ object StatePensionService extends StatePensionService {
   override def now: LocalDate = LocalDate.now(DateTimeZone.forTimeZone(TimeZone.getTimeZone("Europe/London")))
   override val forecastingService: ForecastingService = ForecastingService
   override val metrics: Metrics = Metrics
+  override val citizenDetailsService: CitizenDetailsService = CitizenDetailsService
 }

@@ -22,7 +22,7 @@ import org.scalatest.EitherValues
 import org.scalatest.mock.MockitoSugar
 import org.scalatestplus.play.OneAppPerSuite
 import uk.gov.hmrc.nisp.connectors.NpsConnector
-import uk.gov.hmrc.nisp.helpers.{StubForecastingService, StubNpsConnector, StubStatePensionService, TestAccountBuilder}
+import uk.gov.hmrc.nisp.helpers._
 import uk.gov.hmrc.nisp.metrics.Metrics
 import uk.gov.hmrc.nisp.models.enums.{Exclusion, Scenario}
 import uk.gov.hmrc.nisp.models.{StatePension, StatePensionAmount, StatePensionAmounts, StatePensionExclusion}
@@ -55,7 +55,7 @@ class StatePensionServiceSpec extends UnitSpec with OneAppPerSuite with EitherVa
   )
 
   val exclusionTestData: StatePensionExclusion = StatePensionExclusion(
-    exclusionReasons = List(Exclusion.MWRRE, Exclusion.Abroad),
+    exclusionReasons = List(Exclusion.MarriedWomenReducedRateElection, Exclusion.Abroad),
     pensionAge = 65,
     pensionDate = new LocalDate(2017, 11, 21)
   )
@@ -81,6 +81,7 @@ class StatePensionServiceSpec extends UnitSpec with OneAppPerSuite with EitherVa
         override val npsConnector: NpsConnector = StubNpsConnector
         override val metrics: Metrics = mock[Metrics]
         override val forecastingService: ForecastingService =  StubForecastingService
+        override val citizenDetailsService: CitizenDetailsService = StubCitizenDetailsService
       }
 
       await(stub.getStatement(nino))
@@ -103,12 +104,13 @@ class StatePensionServiceSpec extends UnitSpec with OneAppPerSuite with EitherVa
         override val npsConnector: NpsConnector = StubNpsConnector
         override val metrics: Metrics = mock[Metrics]
         override val forecastingService: ForecastingService =  StubForecastingService
+        override val citizenDetailsService: CitizenDetailsService = StubCitizenDetailsService
       }
 
       await(stub.getStatement(exclusionNino))
       verify(stub.metrics, never).summary(Matchers.any(), Matchers.any(), Matchers.any(), Matchers.any(), Matchers.any(), Matchers.any(), Matchers.any(), Matchers.any(), Matchers.any())
       verify(stub.metrics, times(1)).exclusion(
-        Matchers.eq(List(Exclusion.MWRRE, Exclusion.Abroad))
+        Matchers.eq(List(Exclusion.MarriedWomenReducedRateElection, Exclusion.Abroad))
       )
     }
   }

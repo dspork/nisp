@@ -37,23 +37,27 @@ object SPResponseService extends SPResponseService {
   override def now: LocalDate = LocalDate.now(DateTimeZone.forTimeZone(TimeZone.getTimeZone("Europe/London")))
   override val forecastingService: ForecastingService = ForecastingService
   override val metrics: Metrics = Metrics
+  override val citizenDetailsService: CitizenDetailsService = CitizenDetailsService
 }
 
 trait SPResponseService extends WithCurrentDate {
   val forecastingService: ForecastingService
   val nps: NpsConnector
   val metrics: Metrics
+  val citizenDetailsService: CitizenDetailsService
 
   def getSPResponse(nino: Nino)(implicit hc: HeaderCarrier): Future[SPResponseModel] = {
     val futureNpsSummary = nps.connectToSummary(nino)
     val futureNpsNIRecord = nps.connectToNIRecord(nino)
     val futureNpsLiabilities = nps.connectToLiabilities(nino)
     val futureNpsSchemeMembership = nps.connectToSchemeMembership(nino)
+    val futureManualCorrespondenceIndicator = citizenDetailsService.retrieveMCIStatus(nino)
 
     for (npsSummary <- futureNpsSummary;
          npsNIRecord <- futureNpsNIRecord;
          npsLiabilities <- futureNpsLiabilities;
-         npsSchemeMembership <- futureNpsSchemeMembership) yield {
+         npsSchemeMembership <- futureNpsSchemeMembership;
+         manualCorrespondenceIndicator <- futureManualCorrespondenceIndicator) yield {
       val spAmountModel = SPAmountModel(npsSummary.npsStatePensionAmount.nspEntitlement)
 
       val purgedNIRecord = npsNIRecord.purge(npsSummary.finalRelevantYear)
@@ -68,7 +72,8 @@ trait SPResponseService extends WithCurrentDate {
         SPCurrentAmountService.calculate(npsSummary.npsStatePensionAmount.npsAmountA2016, npsSummary.npsStatePensionAmount.npsAmountB2016),
         NpsDate(now),
         npsSummary.spaDate,
-        npsSummary.sex
+        npsSummary.sex,
+        manualCorrespondenceIndicator
       )
 
       val spExclusions = exclusionsService.getSPExclusions

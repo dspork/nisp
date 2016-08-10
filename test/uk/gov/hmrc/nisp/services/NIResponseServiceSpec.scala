@@ -22,7 +22,7 @@ import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mock.MockitoSugar
 import org.scalatestplus.play.OneAppPerSuite
 import uk.gov.hmrc.nisp.connectors.NpsConnector
-import uk.gov.hmrc.nisp.helpers.{StubMetrics, StubNpsConnector, TestAccountBuilder}
+import uk.gov.hmrc.nisp.helpers.{StubCitizenDetailsService, StubMetrics, StubNpsConnector, TestAccountBuilder}
 import uk.gov.hmrc.nisp.metrics.Metrics
 import uk.gov.hmrc.nisp.models.enums.Exclusion
 import uk.gov.hmrc.nisp.models.nps.NpsDate
@@ -42,6 +42,7 @@ class NIResponseServiceSpec  extends UnitSpec with MockitoSugar with BeforeAndAf
     override val nps: NpsConnector = StubNpsConnector
     override val metrics: Metrics = StubMetrics
     override def now: LocalDate = new LocalDate()
+    override val citizenDetailsService: CitizenDetailsService = StubCitizenDetailsService
   }
 
   "customer with NINO regular has date of entry of 01/04/1972" should {
@@ -68,7 +69,7 @@ class NIResponseServiceSpec  extends UnitSpec with MockitoSugar with BeforeAndAf
     val niResponse = testNIService.getNIResponse(exclusionNino)
     niResponse.niRecord shouldBe None
     niResponse.niSummary shouldBe None
-    niResponse.niExclusions shouldBe Some(ExclusionsModel(List(Exclusion.MWRRE)))
+    niResponse.niExclusions shouldBe Some(ExclusionsModel(List(Exclusion.MarriedWomenReducedRateElection)))
   }
 
   "calc pre75 years" should {

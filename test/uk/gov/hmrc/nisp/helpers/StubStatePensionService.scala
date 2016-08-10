@@ -19,13 +19,14 @@ package uk.gov.hmrc.nisp.helpers
 import org.joda.time.{DateTime, LocalDate}
 import uk.gov.hmrc.nisp.connectors.NpsConnector
 import uk.gov.hmrc.nisp.metrics.Metrics
-import uk.gov.hmrc.nisp.services.{ForecastingService, StatePensionService}
+import uk.gov.hmrc.nisp.services.{CitizenDetailsService, ForecastingService, StatePensionService}
 
 class StubStatePensionService(localDate: LocalDate = DateTime.now.toLocalDate) extends StatePensionService {
   override val npsConnector: NpsConnector = StubNpsConnector
   override val metrics: Metrics = StubMetrics
   override val forecastingService: ForecastingService = StubForecastingService
   override val now: LocalDate = localDate
+  override val citizenDetailsService: CitizenDetailsService = StubCitizenDetailsService
 }
 
 object StubStatePensionService extends StubStatePensionService(DateTime.now.toLocalDate)

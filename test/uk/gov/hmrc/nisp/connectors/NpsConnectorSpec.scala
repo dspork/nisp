@@ -29,9 +29,7 @@ import uk.gov.hmrc.nisp.models.nps.{NpsPensionForecast, _}
 import uk.gov.hmrc.nisp.services.CachingService
 import uk.gov.hmrc.play.http.{BadGatewayException, HeaderCarrier, HttpGet, NotFoundException}
 import uk.gov.hmrc.play.test.UnitSpec
-
 import scala.concurrent.Future
-
 import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 
 class NpsConnectorSpec extends UnitSpec with ScalaFutures with MockitoSugar {

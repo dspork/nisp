@@ -17,15 +17,16 @@
 package uk.gov.hmrc.nisp.services
 
 import play.Logger
+import uk.gov.hmrc.nisp.connectors.CitizenDetailsConnector
 import uk.gov.hmrc.nisp.models.ExclusionsModel
 import uk.gov.hmrc.nisp.models.enums.Exclusion
 import uk.gov.hmrc.nisp.models.enums.Exclusion.Exclusion
 import uk.gov.hmrc.nisp.models.nps.{NpsDate, NpsLiability, NpsSchemeMembership}
 import uk.gov.hmrc.nisp.utils.{FunctionHelper, NISPConstants}
 
-case class ExclusionsService(isAbroad: Boolean, mwrre: Boolean, dateOfDeath: Option[NpsDate], nino: String,
+case class ExclusionsService(isAbroad: Boolean, marriedWomenReducedRateElection: Boolean, dateOfDeath: Option[NpsDate], nino: String,
                              liabilities: List[NpsLiability], currentAmountReceived: BigDecimal,
-                             currentAmountCalculated: BigDecimal, now: NpsDate, statePensionAge: NpsDate, sex: String) {
+                             currentAmountCalculated: BigDecimal, now: NpsDate, statePensionAge: NpsDate, sex: String, manualCorrespondenceIndicator: Boolean) {
 
   def getSPExclusions: ExclusionsModel = calculateExclusions(spExclusions)
   def getNIExclusions: ExclusionsModel = calculateExclusions(niExclusions)
@@ -48,13 +49,13 @@ case class ExclusionsService(isAbroad: Boolean, mwrre: Boolean, dateOfDeath: Opt
 
   val checkIOMLiabilities = (exclusionList: List[Exclusion]) => {
     if (liabilities.exists(_.liabilityType == NISPConstants.isleOfManLiability))
-      Exclusion.IOM :: exclusionList
+      Exclusion.IsleOfMan :: exclusionList
     else
       exclusionList
   }
 
   val checkMWRRE = (exclusionList: List[Exclusion]) =>
-    if (mwrre) Exclusion.MWRRE :: exclusionList else exclusionList
+    if (marriedWomenReducedRateElection) Exclusion.MarriedWomenReducedRateElection :: exclusionList else exclusionList
 
   val checkDead = (exclusionList: List[Exclusion]) =>
     dateOfDeath.fold(exclusionList)(_ => Exclusion.Dead :: exclusionList)
@@ -80,6 +81,10 @@ case class ExclusionsService(isAbroad: Boolean, mwrre: Boolean, dateOfDeath: Opt
     }
   }
 
-  val spExclusions = FunctionHelper.composeAll(List(checkDead, checkStatePensionAge, checkAmountDissonance, checkIOMLiabilities, checkMWRRE, checkAbroad))
-  val niExclusions = FunctionHelper.composeAll(List(checkDead, checkIOMLiabilities, checkMWRRE))
+  val checkMCI = (exclusionList: List[Exclusion]) =>
+    if(manualCorrespondenceIndicator) Exclusion.ManualCorrespondenceIndicator :: exclusionList else exclusionList
+
+  val spExclusions = FunctionHelper.composeAll(List(
+    checkDead, checkMCI, checkStatePensionAge, checkAmountDissonance, checkIOMLiabilities, checkMWRRE, checkAbroad))
+  val niExclusions = FunctionHelper.composeAll(List(checkDead, checkMCI, checkIOMLiabilities, checkMWRRE))
 }

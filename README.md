@@ -95,10 +95,10 @@ Fetches the SPResponseModel object for the frontend service.
        ...
     }
     "spExclusions":{
-        "exclusions":["Abroad", "MWRRE"]
+        "exclusions":["Abroad", "MarriedWomenReducedRateElection"]
     },
     "niExclusions":{
-        "exclusions":["MWRRE"]
+        "exclusions":["MarriedWomenReducedRateElection"]
     }
 }
 ```

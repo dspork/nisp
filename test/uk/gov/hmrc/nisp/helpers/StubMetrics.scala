@@ -48,4 +48,6 @@ object StubMetrics extends Metrics with MockitoSugar {
   override def cacheReadFound(): Unit = ()
 
   override def cacheWritten(): Unit = ()
+
+  override def startCitizenDetailsTimer(): Context = stubTimerContext
 }
