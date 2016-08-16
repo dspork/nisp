@@ -24,7 +24,6 @@ import reactivemongo.api.{DefaultDB, ReadPreference}
 import reactivemongo.bson.{BSONDocument, BSONObjectID}
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.mongo.ReactiveRepository
-import uk.gov.hmrc.mongo.json.ReactiveMongoFormats
 import uk.gov.hmrc.nisp.config.ApplicationConfig
 import uk.gov.hmrc.nisp.metrics.Metrics
 import uk.gov.hmrc.nisp.models.enums.APITypes._
@@ -36,8 +35,6 @@ trait CachingModel[A, B] {
   val key: String
   val response: B
   val createdAt: DateTime
-  implicit val dateFormat = ReactiveMongoFormats.dateTimeFormats
-  implicit val idFormat = ReactiveMongoFormats.objectIdFormats
 }
 
 trait CachingService[A, B] {

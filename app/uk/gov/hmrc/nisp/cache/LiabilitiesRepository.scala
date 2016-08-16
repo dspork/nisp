@@ -35,6 +35,8 @@ case class LiabilitiesCacheModel(key: String,
 }
 
 object LiabilitiesCacheModel {
+  implicit val dateFormat = ReactiveMongoFormats.dateTimeFormats
+  implicit val idFormat = ReactiveMongoFormats.objectIdFormats
   implicit def formats = Json.format[LiabilitiesCacheModel]
 }
 

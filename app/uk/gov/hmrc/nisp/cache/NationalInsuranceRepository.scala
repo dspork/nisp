@@ -20,6 +20,7 @@ import org.joda.time.{DateTime, DateTimeZone}
 import play.api.libs.concurrent.Execution.Implicits._
 import play.api.libs.json.Json
 import play.modules.reactivemongo.MongoDbConnection
+import uk.gov.hmrc.mongo.json.ReactiveMongoFormats
 import uk.gov.hmrc.nisp.config.ApplicationConfig
 import uk.gov.hmrc.nisp.metrics.Metrics
 import uk.gov.hmrc.nisp.models.enums.APITypes
@@ -33,6 +34,8 @@ case class NationalInsuranceCacheModel(key: String,
 }
 
 object NationalInsuranceCacheModel {
+  implicit val dateFormat = ReactiveMongoFormats.dateTimeFormats
+  implicit val idFormat = ReactiveMongoFormats.objectIdFormats
   implicit def formats = Json.format[NationalInsuranceCacheModel]
 }
 
