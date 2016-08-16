@@ -29,8 +29,8 @@ import uk.gov.hmrc.nisp.models.enums.APITypes
 import uk.gov.hmrc.nisp.models.enums.APITypes.APITypes
 
 case class LiabilitiesCacheModel(key: String,
-                             response: NpsLiabilityContainer,
-                             createdAt: DateTime = DateTime.now(DateTimeZone.UTC))
+                                 response: NpsLiabilityContainer,
+                                 expiresAt: DateTime)
   extends CachingModel[LiabilitiesCacheModel, NpsLiabilityContainer] {
 }
 

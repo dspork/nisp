@@ -28,8 +28,8 @@ import uk.gov.hmrc.nisp.models.nps.NpsNIRecordModel
 import uk.gov.hmrc.nisp.services.{CachingModel, CachingMongoService}
 
 case class NationalInsuranceCacheModel(key: String,
-                             response: NpsNIRecordModel,
-                             createdAt: DateTime = DateTime.now(DateTimeZone.UTC))
+                                       response: NpsNIRecordModel,
+                                       expiresAt: DateTime)
   extends CachingModel[NationalInsuranceCacheModel, NpsNIRecordModel] {
 }
 

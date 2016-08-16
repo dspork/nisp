@@ -28,8 +28,8 @@ import uk.gov.hmrc.nisp.models.nps.NpsSchemeMembershipContainer
 import uk.gov.hmrc.nisp.services.{CachingModel, CachingMongoService}
 
 case class SchemeMembershipCacheModel(key: String,
-                             response: NpsSchemeMembershipContainer,
-                             createdAt: DateTime = DateTime.now(DateTimeZone.UTC))
+                                      response: NpsSchemeMembershipContainer,
+                                      expiresAt: DateTime)
   extends CachingModel[SchemeMembershipCacheModel, NpsSchemeMembershipContainer] {
 }
 

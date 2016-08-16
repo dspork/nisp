@@ -29,7 +29,7 @@ import uk.gov.hmrc.nisp.services.{CachingModel, CachingMongoService}
 
 case class SummaryCacheModel(key: String,
                              response: NpsSummaryModel,
-                             createdAt: DateTime = DateTime.now(DateTimeZone.UTC))
+                             expiresAt: DateTime)
   extends CachingModel[SummaryCacheModel, NpsSummaryModel]
 
 object SummaryCacheModel {

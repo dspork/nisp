@@ -34,7 +34,7 @@ import scala.util.{Failure, Success, Try}
 trait CachingModel[A, B] {
   val key: String
   val response: B
-  val createdAt: DateTime
+  val expiresAt: DateTime
 }
 
 trait CachingService[A, B] {
@@ -51,15 +51,15 @@ class CachingMongoService[A <: CachingModel[A, B], B]
   extends ReactiveRepository[A, BSONObjectID]("responses", mongo, formats)
     with CachingService[A, B] {
 
-  val fieldName = "createdAt"
+  val fieldName = "expiresAt"
   val createdIndexName = "npsResponseExpiry"
   val expireAfterSeconds = "expireAfterSeconds"
 
 
   override val timeToLive = appConfig.responseCacheTTL
 
-  Logger.info(s"NPS Cache TTL set to $timeToLive")
-  createIndex(fieldName, createdIndexName, timeToLive)
+  Logger.info(s"Document expiresAt will be set to $timeToLive")
+  createIndex(fieldName, createdIndexName, 0)
 
   private def createIndex(field: String, indexName: String, ttl: Int)(implicit e: ExecutionContext): Future[Boolean] = {
     collection.indexesManager.ensure(Index(Seq((field, IndexType.Ascending)), Some(indexName),
@@ -67,12 +67,13 @@ class CachingMongoService[A <: CachingModel[A, B], B]
       result => {
         // $COVERAGE-OFF$
         Logger.debug(s"set [$indexName] with value $ttl -> result : $result")
+        if(result) Logger.info(s"Successfully created TTL Index of 0")
         // $COVERAGE-ON$
         result
       }
     } recover {
       // $COVERAGE-OFF$
-      case e => Logger.error("Failed to set TTL index", e)
+      case ex => Logger.error("Failed to set TTL index", ex)
         false
       // $COVERAGE-ON$
     }
@@ -112,7 +113,7 @@ class CachingMongoService[A <: CachingModel[A, B], B]
 
   override def insertByNino(nino: Nino, response: B)
                            (implicit formats: OFormat[A], e: ExecutionContext): Future[Boolean] = {
-    collection.insert(apply(cacheKey(nino, apiType), response, DateTime.now(DateTimeZone.UTC))).map { result =>
+    collection.insert(apply(cacheKey(nino, apiType), response, DateTime.now(DateTimeZone.UTC).plusSeconds(timeToLive))).map { result =>
       Logger.debug(s"[$apiType][insertByNino] : { cacheKey : ${cacheKey(nino, apiType)}, " +
         s"request: $response, result: ${result.ok}, errors: ${result.errmsg} }")
       metrics.cacheWritten()
