@@ -29,12 +29,14 @@ import uk.gov.hmrc.nisp.models.enums.APITypes
 import uk.gov.hmrc.nisp.models.enums.APITypes.APITypes
 
 case class LiabilitiesCacheModel(key: String,
-                             response: NpsLiabilityContainer,
-                             createdAt: DateTime = DateTime.now(DateTimeZone.UTC))
+                                 response: NpsLiabilityContainer,
+                                 expiresAt: DateTime)
   extends CachingModel[LiabilitiesCacheModel, NpsLiabilityContainer] {
 }
 
 object LiabilitiesCacheModel {
+  implicit val dateFormat = ReactiveMongoFormats.dateTimeFormats
+  implicit val idFormat = ReactiveMongoFormats.objectIdFormats
   implicit def formats = Json.format[LiabilitiesCacheModel]
 }
 

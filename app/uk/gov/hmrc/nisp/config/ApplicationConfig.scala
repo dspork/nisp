@@ -25,7 +25,7 @@ trait ApplicationConfig {
 }
 
 object ApplicationConfig extends ApplicationConfig with ServicesConfig {
-  override val responseCacheTTL = getConfInt("mongodb.responseTTL", 600)
+  override val responseCacheTTL = configuration.getInt("mongodb.responseTTL").getOrElse(throw new RuntimeException("MongoDB TTL is not configured"))
 }
 
 
