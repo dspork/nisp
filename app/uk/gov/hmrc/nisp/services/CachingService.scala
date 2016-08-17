@@ -51,29 +51,36 @@ class CachingMongoService[A <: CachingModel[A, B], B]
   extends ReactiveRepository[A, BSONObjectID]("responses", mongo, formats)
     with CachingService[A, B] {
 
-  val fieldName = "expiresAt"
-  val createdIndexName = "responseExpiry"
+  val ttlfieldName = "expiresAt"
+  val ttlIndexName = "responseExpiry"
   val expireAfterSeconds = "expireAfterSeconds"
-
-
   override val timeToLive = appConfig.responseCacheTTL
 
   Logger.info(s"Document expiresAt will be set to $timeToLive")
-  createIndex(fieldName, createdIndexName, 0)
+  createIndex(ttlfieldName, ttlIndexName, Some(0), uniqueField = false)
 
-  private def createIndex(field: String, indexName: String, ttl: Int)(implicit e: ExecutionContext): Future[Boolean] = {
+  val uniqueFieldName = "key"
+  val uniqueIndexName = "responseUniqueKey"
+  val unique = "unique"
+  createIndex(uniqueFieldName, uniqueIndexName, None, uniqueField = true)
+
+  private def createIndex(field: String, indexName: String, ttl: Option[Int], uniqueField: Boolean)(implicit e: ExecutionContext): Future[Boolean] = {
+
+    val ttlOption = ttl.fold(BSONDocument())(time => BSONDocument(expireAfterSeconds -> time))
+    val options = if(uniqueField) ttlOption.add(unique -> true) else ttlOption
+
     collection.indexesManager.ensure(Index(Seq((field, IndexType.Ascending)), Some(indexName),
-      options = BSONDocument(expireAfterSeconds -> ttl))) map {
+      options = options)) map {
       result => {
         // $COVERAGE-OFF$
-        Logger.debug(s"set [$indexName] with value $ttl -> result : $result")
-        if(result) Logger.info(s"Successfully created TTL Index of 0")
+        Logger.debug(s"set [$indexName] with ttl $ttl and unique $uniqueField -> result : $result")
+        if(result) Logger.info(s"Successfully created $indexName")
         // $COVERAGE-ON$
         result
       }
     } recover {
       // $COVERAGE-OFF$
-      case ex => Logger.error("Failed to set TTL index", ex)
+      case ex => Logger.error(s"Failed to set $indexName index", ex)
         false
       // $COVERAGE-ON$
     }
