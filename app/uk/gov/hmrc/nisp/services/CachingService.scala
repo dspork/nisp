@@ -52,7 +52,7 @@ class CachingMongoService[A <: CachingModel[A, B], B]
     with CachingService[A, B] {
 
   val fieldName = "expiresAt"
-  val createdIndexName = "npsResponseExpiry"
+  val createdIndexName = "responseExpiry"
   val expireAfterSeconds = "expireAfterSeconds"
 
 
