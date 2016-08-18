@@ -58,7 +58,6 @@ trait CitizenDetailsConnector {
   private def handleResult[A](url: String, tryResult: Try[A]): Future[A] = {
     tryResult match {
       case Failure(ex) =>
-        Logger.error(s"Failed to connect to URL: ${ex.toString}", ex)
         Future.failed(ex)
       case Success(value) =>
         Future.successful(value)

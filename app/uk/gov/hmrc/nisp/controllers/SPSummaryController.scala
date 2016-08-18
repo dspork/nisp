@@ -16,7 +16,6 @@
 
 package uk.gov.hmrc.nisp.controllers
 
-import play.api.Logger
 import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent}
 import uk.gov.hmrc.domain.Nino
@@ -29,19 +28,15 @@ object SPSummaryController extends SPSummaryController {
   override val spService = SPResponseService
 }
 
-trait SPSummaryController extends BaseController {
+trait SPSummaryController extends BaseController with ErrorHandling {
   def spService: SPResponseService
 
-  def getSPSummary(nino: Nino): Action[AnyContent] =
-    Action.async {
-      implicit request => {
-        Metrics.spSummaryCounter.inc()
+  val method = "SPSummary"
 
-        spService.getSPResponse(nino).map (spResponse => Ok(Json.toJson(spResponse))) recover {
-          case _ =>
-            Logger.warn("Something went wrong. Empty SPResponse.")
-            NotFound
-        }
-      }
-    }
+  def getSPSummary(nino: Nino): Action[AnyContent] = Action.async {
+    implicit request => errorWrapper(nino, {
+      Metrics.spSummaryCounter.inc()
+      spService.getSPResponse(nino).map(spResponse => Ok(Json.toJson(spResponse)))
+    })
+  }
 }

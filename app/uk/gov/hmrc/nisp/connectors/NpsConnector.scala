@@ -138,7 +138,6 @@ trait NpsConnector {
   private def handleResult[A](api: APITypes, url: String, tryResult: Try[A]): Future[A] = {
     tryResult match {
       case Failure(ex) =>
-        Logger.error(s"URL: $url (API: $api): ${ex.toString}", ex)
         metrics.incrementFailedCounter(api)
         Future.failed(ex)
       case Success(value) =>

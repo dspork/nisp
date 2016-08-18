@@ -29,18 +29,14 @@ object NIRecordController extends NIRecordController {
   override val niService = NIResponseService
 }
 
-trait NIRecordController extends BaseController {
+trait NIRecordController extends BaseController with ErrorHandling {
   def niService: NIResponseService
 
-  def getNIRecord(nino: Nino) : Action[AnyContent] =
-    Action.async { implicit request => {
-        Metrics.niRecordCounter.inc()
+  val method = "NIRecord"
 
-        niService.getNIResponse(nino).map (niResponse => Ok(Json.toJson(niResponse))) recover {
-          case _ =>
-            Logger.warn("Something went wrong. Empty NI Response.")
-            NotFound
-        }
-      }
-    }
+  def getNIRecord(nino: Nino) : Action[AnyContent] = Action.async {
+    implicit request => errorWrapper(nino, {
+      Metrics.niRecordCounter.inc()
+      niService.getNIResponse(nino).map (niResponse => Ok(Json.toJson(niResponse)))
+    })}
 }

@@ -108,13 +108,14 @@ class CachingMongoService[A <: CachingModel[A, B], B]
               metrics.cacheReadNotFound()
               None
           }
+        } recover {
+          case e: Throwable => Logger.warn(s"[$apiType][findByNino] : { cacheKey : ${cacheKey(nino, apiType)}, exception: ${e.getMessage} }", e); None
         }
       }
-      case Failure(f) => {
+      case Failure(f) =>
         Logger.debug(s"[$apiType][findByNino] : { cacheKey : ${cacheKey(nino, apiType)}, exception: ${f.getMessage} }")
         metrics.cacheReadNotFound()
         Future.successful(None)
-      }
     }
   }
 
@@ -124,8 +125,10 @@ class CachingMongoService[A <: CachingModel[A, B], B]
       Logger.debug(s"[$apiType][insertByNino] : { cacheKey : ${cacheKey(nino, apiType)}, " +
         s"request: $response, result: ${result.ok}, errors: ${result.errmsg} }")
       metrics.cacheWritten()
-      result.errmsg.foreach(msg => Logger.warn(s"[$apiType][insertByNino] : Failed to Write $nino to Mongo : $msg"))
+      result.errmsg.foreach(msg => Logger.warn(s"[$apiType][insertByNino] : { cacheKey : ${cacheKey(nino, apiType)}, results: $msg }"))
       result.ok
+    } recover {
+      case e: Throwable => Logger.warn(s"[$apiType][insertByNino] : cacheKey : ${cacheKey(nino, apiType)}, exception: ${e.getMessage} }", e); false
     }
   }
 
