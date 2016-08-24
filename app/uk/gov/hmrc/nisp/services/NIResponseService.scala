@@ -22,7 +22,7 @@ import org.joda.time.{DateTimeZone, LocalDate}
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.nisp.connectors.NpsConnector
 import uk.gov.hmrc.nisp.metrics.Metrics
-import uk.gov.hmrc.nisp.models.nps.{NpsDate, NpsNITaxYear}
+import uk.gov.hmrc.nisp.models.nps.{NpsLiability, NpsDate, NpsNITaxYear}
 import uk.gov.hmrc.nisp.models._
 import uk.gov.hmrc.nisp.services.reference.QualifyingYearsAmountService
 import uk.gov.hmrc.nisp.utils.{NISPConstants, WithCurrentDate}
@@ -90,7 +90,8 @@ trait NIResponseService extends WithCurrentDate {
           npsSummary.npsStatePensionAmount.nspEntitlement < QualifyingYearsAmountService.maxAmount,
           npsSummary.isAbroad,
           if(npsSummary.yearsUntilPensionAge <= 0) Some(npsSummary.finalRelevantYear) else None,
-          npsSummary.finalRelevantYear
+          npsSummary.finalRelevantYear,
+          homeResponsibilitiesProtection(npsLiabilities)
         )
 
         metrics.niRecord(niSummary.noOfNonQualifyingYears, niSummary.numberOfPayableGaps, niSummary.pre75QualifyingYears.getOrElse(0),
@@ -132,4 +133,7 @@ trait NIResponseService extends WithCurrentDate {
       None
     }
   }
+
+  def homeResponsibilitiesProtection(liabilities: List[NpsLiability]): Boolean =
+    liabilities.exists(liability => NISPConstants.homeResponsibilitiesProtectionTypes.contains(liability.liabilityType))
 }

@@ -31,7 +31,8 @@ case class NISummary(noOfQualifyingYears: Int,
                      canImproveWithGaps: Boolean,
                      isAbroad: Boolean,
                      recordEnd: Option[Int],
-                     finalRelevantYear: Int)
+                     finalRelevantYear: Int,
+                     homeResponsibilitiesProtection: Boolean)
 object NISummary {
   implicit val formats = Json.format[NISummary]
 }

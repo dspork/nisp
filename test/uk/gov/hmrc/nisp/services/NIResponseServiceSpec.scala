@@ -25,7 +25,7 @@ import uk.gov.hmrc.nisp.connectors.NpsConnector
 import uk.gov.hmrc.nisp.helpers.{StubCitizenDetailsService, StubMetrics, StubNpsConnector, TestAccountBuilder}
 import uk.gov.hmrc.nisp.metrics.Metrics
 import uk.gov.hmrc.nisp.models.enums.Exclusion
-import uk.gov.hmrc.nisp.models.nps.NpsDate
+import uk.gov.hmrc.nisp.models.nps.{NpsLiability, NpsDate}
 import uk.gov.hmrc.nisp.models.{ExclusionsModel, NIRecordTaxYear}
 import uk.gov.hmrc.play.http.{HeaderCarrier, NotFoundException}
 import uk.gov.hmrc.play.test.UnitSpec
@@ -93,6 +93,43 @@ class NIResponseServiceSpec  extends UnitSpec with MockitoSugar with BeforeAndAf
     }
     "return 3 when the number of conts in 157 and the date of entry is 06/04/2005 and their date of birth is 06/04/1958" in {
       testNIService.calcPre75QualifyingYears(157, NpsDate(2005, 4, 6), NpsDate(1958, 4, 6)) shouldBe None
+    }
+  }
+
+  "home responsibilities protection" should {
+    "return true when user has liability type 14" in {
+     testNIService.homeResponsibilitiesProtection(List(NpsLiability(14, None, None))) shouldBe true
+    }
+
+    "return true when user has liability type 15" in {
+      testNIService.homeResponsibilitiesProtection(List(NpsLiability(15, None, None))) shouldBe true
+    }
+
+    "return true when user has liability type 16" in {
+      testNIService.homeResponsibilitiesProtection(List(NpsLiability(16, None, None))) shouldBe true
+    }
+
+    "return true when user has liability type 38" in {
+      testNIService.homeResponsibilitiesProtection(List(NpsLiability(38, None, None))) shouldBe true
+    }
+
+    "return true when user has liability type 48" in {
+      testNIService.homeResponsibilitiesProtection(List(NpsLiability(48, None, None))) shouldBe true
+    }
+
+    "return true when user has liability type 80" in {
+      testNIService.homeResponsibilitiesProtection(List(NpsLiability(80, None, None))) shouldBe true
+    }
+
+    "return false when user has no liabilities" in {
+      testNIService.homeResponsibilitiesProtection(List()) shouldBe false
+    }
+
+    "return false for any liabilities which aren't 14, 15, 16, 38, 48, 80" in {
+      val liabilities  = (1 to 100).filterNot(i => i == 14 || i == 15 || i == 16 || i == 38 || i == 48 || i == 80)
+      for(liability <- liabilities) {
+        testNIService.homeResponsibilitiesProtection(List(NpsLiability(liability, None, None))) shouldBe false
+      }
     }
   }
 }

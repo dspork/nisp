@@ -72,4 +72,6 @@ object NISPConstants {
 
   val niRecordStart = 1975
   val niRecordMinAge = 16
+
+  val homeResponsibilitiesProtectionTypes = List(14, 15, 16, 38, 48, 80)
 }
