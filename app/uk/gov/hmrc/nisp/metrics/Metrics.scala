@@ -19,7 +19,6 @@ package uk.gov.hmrc.nisp.metrics
 import com.codahale.metrics.Timer.Context
 import com.codahale.metrics.{Counter, Timer}
 import com.kenshoo.play.metrics.MetricsRegistry
-import uk.gov.hmrc.nisp.models.SPForecastModel
 import uk.gov.hmrc.nisp.models.enums.APITypes.APITypes
 import uk.gov.hmrc.nisp.models.enums.Exclusion._
 import uk.gov.hmrc.nisp.models.enums.MQPScenario._
@@ -102,7 +101,6 @@ object Metrics extends Metrics {
     Exclusion.Abroad -> MetricsRegistry.defaultRegistry.counter("exclusion-abroad"),
     Exclusion.MarriedWomenReducedRateElection -> MetricsRegistry.defaultRegistry.counter("exclusion-mwrre"),
     Exclusion.CustomerTooOld -> MetricsRegistry.defaultRegistry.counter("exclusion-too-old"),
-    Exclusion.ContractedOut -> MetricsRegistry.defaultRegistry.counter("exclusion-contracted-out"),
     Exclusion.Dead -> MetricsRegistry.defaultRegistry.counter("exclusion-dead"),
     Exclusion.IsleOfMan -> MetricsRegistry.defaultRegistry.counter("exclusion-isle-of-man"),
     Exclusion.AmountDissonance -> MetricsRegistry.defaultRegistry.counter("amount-dissonance"),

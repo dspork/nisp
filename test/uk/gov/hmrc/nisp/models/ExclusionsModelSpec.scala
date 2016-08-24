@@ -24,8 +24,8 @@ class ExclusionsModelSpec extends UnitSpec {
 
   "serialised into JSON" should {
     "become a list of JsStrings" in {
-      Json.toJson(List(Exclusion.Abroad, Exclusion.ContractedOut, Exclusion.CustomerTooOld)) shouldBe
-        JsArray(Seq[JsString](JsString("Abroad"), JsString("ContractedOut"), JsString("CustomerTooOld")))
+      Json.toJson(List(Exclusion.Abroad, Exclusion.CustomerTooOld)) shouldBe
+        JsArray(Seq[JsString](JsString("Abroad"), JsString("CustomerTooOld")))
     }
 
     "become a list of JSString with one exclusion" in {
@@ -36,10 +36,10 @@ class ExclusionsModelSpec extends UnitSpec {
 
   "parsed from JSON" should {
     "become a ExclusionModel with list of Enum values" in {
-      val json = Json.parse("{ \"exclusions\" : [\"Abroad\", \"ContractedOut\", \"CustomerTooOld\"] }")
+      val json = Json.parse("{ \"exclusions\" : [\"Abroad\", \"CustomerTooOld\"] }")
 
       Json.fromJson[ExclusionsModel](json).get shouldBe
-        ExclusionsModel(List(Exclusion.Abroad, Exclusion.ContractedOut, Exclusion.CustomerTooOld))
+        ExclusionsModel(List(Exclusion.Abroad, Exclusion.CustomerTooOld))
     }
 
     "become a Exclusion model with one enum value in a list" in {
