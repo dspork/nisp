@@ -126,6 +126,11 @@ class SummaryRepositorySpec extends UnitSpec with OneServerPerSuite with MongoSp
       found shouldBe None
     }
 
+    "multiple calls to insertByNino should be fine (upsert)" in {
+      await(service.insertByNino(TestAccountBuilder.regularNino, testSummaryModel)) shouldBe true
+      await(service.insertByNino(TestAccountBuilder.regularNino, testSummaryModel)) shouldBe true
+    }
+
   }
 
 

@@ -91,6 +91,10 @@ class NationalInsuranceRepositorySpec extends UnitSpec with OneServerPerSuite wi
       found shouldBe None
     }
 
+    "multiple calls to insertByNino should be fine (upsert)" in {
+      await(service.insertByNino(TestAccountBuilder.regularNino, testNIModel)) shouldBe true
+      await(service.insertByNino(TestAccountBuilder.regularNino, testNIModel)) shouldBe true
+    }
   }
 
 
