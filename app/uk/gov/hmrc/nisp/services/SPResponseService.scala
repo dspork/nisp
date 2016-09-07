@@ -23,8 +23,7 @@ import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.nisp.connectors.NpsConnector
 import uk.gov.hmrc.nisp.metrics.Metrics
 import uk.gov.hmrc.nisp.models._
-import uk.gov.hmrc.nisp.models.enums.{MQPScenario, Scenario}
-import uk.gov.hmrc.nisp.models.enums.MQPScenario.MQPScenario
+import uk.gov.hmrc.nisp.models.enums.Scenario
 import uk.gov.hmrc.nisp.models.nps.NpsDate
 import uk.gov.hmrc.nisp.utils.WithCurrentDate
 import uk.gov.hmrc.play.http.HeaderCarrier

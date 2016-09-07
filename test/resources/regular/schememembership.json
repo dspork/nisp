@@ -1,6 +1,21 @@
 {
   "nino": "<NINO>",
-  "npsLcdo022d": [],
+  "npsLcdo022d": [
+    {
+      "scheme_end_date": "1997-06-30",
+      "date_of_election": null,
+      "scheme_mem_start_date": "1978-04-06",
+      "scheme_memb_occ_no": 1,
+      "scheme_membership_seq_no": 1
+    },
+    {
+      "scheme_end_date": "2009-04-05",
+      "date_of_election": null,
+      "scheme_mem_start_date": "1999-04-06",
+      "scheme_memb_occ_no": 1,
+      "scheme_membership_seq_no": 2
+    }
+  ],
   "npsErrlist": {
     "count": 0,
     "mgt_check": 0,

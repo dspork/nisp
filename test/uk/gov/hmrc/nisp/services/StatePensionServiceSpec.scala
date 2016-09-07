@@ -88,7 +88,7 @@ class StatePensionServiceSpec extends UnitSpec with OneAppPerSuite with EitherVa
       verify(stub.metrics, times(1)).summary(
         Matchers.eq[BigDecimal](137.19),
         Matchers.eq[BigDecimal](118.24),
-        Matchers.eq(false),
+        Matchers.eq(true),
         Matchers.eq(false),
         Matchers.eq(63),
         Matchers.eq(Scenario.ContinueWorkingNonMax),
