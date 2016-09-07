@@ -29,8 +29,8 @@ private object AppDependencies {
   import play.core.PlayVersion
 
   val compile = Seq(
-    "uk.gov.hmrc" %% "microservice-bootstrap" % "4.2.1",
-    "uk.gov.hmrc" %% "play-authorisation" % "3.1.0",
+    "uk.gov.hmrc" %% "microservice-bootstrap" % "4.4.0",
+    "uk.gov.hmrc" %% "play-authorisation" % "3.3.0",
     "uk.gov.hmrc" %% "play-config" % "2.0.1",
     "uk.gov.hmrc" %% "play-health" % "1.1.0",
     "com.kenshoo" %% "metrics-play" % "2.3.0_0.1.6",
