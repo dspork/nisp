@@ -399,37 +399,37 @@ class ForecastingServiceSpec extends UnitSpec with OneAppPerSuite {
 
     "not return forecast amount 1234 with scheme membership that has ended" in {
       StubForecastingService.getForecastAmount(List(
-        NpsSchemeMembership(Some(NpsDate(2010,3,5)), Some(NpsDate(2011,3,5)))
+        NpsSchemeMembership(NpsDate(2010,3,5), Some(NpsDate(2011,3,5)))
       ), NpsDate(2013,4,5), 0, npsAmountA2016(), npsAmountB2016, 0, 0, 1234, 0, lastYearQualifying = true, testNino, 0, SPAmountModel(0))(hc).forecastAmount should not be SPAmountModel(1234)
     }
 
     "not return forecast amount 1234 with scheme membership that ends on 2012-04-04, earnings included up to 2013-04-05" in {
       StubForecastingService.getForecastAmount(List(
-        NpsSchemeMembership(Some(NpsDate(2012,3,4)), Some(NpsDate(2012,4,4)))
+        NpsSchemeMembership(NpsDate(2012,3,4), Some(NpsDate(2012,4,4)))
       ), NpsDate(2013,4,5), 0, npsAmountA2016(), npsAmountB2016, 0, 0, 1234, 0, lastYearQualifying = true, testNino, 0, SPAmountModel(0))(hc).forecastAmount should not be SPAmountModel(1234)
     }
 
     "not return forecast amount 1234 with scheme membership that ends on 2013-04-05, earnings included up to 2013-04-05" in {
       StubForecastingService.getForecastAmount(List(
-        NpsSchemeMembership(Some(NpsDate(2013,3,5)), Some(NpsDate(2013,4,5)))
+        NpsSchemeMembership(NpsDate(2013,3,5), Some(NpsDate(2013,4,5)))
       ), NpsDate(2013,4,5), 0, npsAmountA2016(), npsAmountB2016, 0, 0, 1234, 0, lastYearQualifying = true, testNino, 0, SPAmountModel(0))(hc).forecastAmount should not be SPAmountModel(1234)
     }
 
     "not return forecast amount 1234 with scheme membership that ends on 2013-04-06, earnings included up to 2013-04-05" in {
       StubForecastingService.getForecastAmount(List(
-        NpsSchemeMembership(Some(NpsDate(2012,3,5)), Some(NpsDate(2013,4,6)))
+        NpsSchemeMembership(NpsDate(2012,3,5), Some(NpsDate(2013,4,6)))
       ), NpsDate(2013,4,5), 0, npsAmountA2016(), npsAmountB2016, 0, 0, 1234, 0, lastYearQualifying = true, testNino, 0, SPAmountModel(0))(hc).forecastAmount should not be SPAmountModel(1234)
     }
 
     "return 53.31 for scheme membership in last tax year (not at end), 8 QYs" in {
       StubForecastingService.getForecastAmount(List(
-        NpsSchemeMembership(Some(NpsDate(2013,5,5)), Some(NpsDate(2013,8,8)))
+        NpsSchemeMembership(NpsDate(2013,5,5), Some(NpsDate(2013,8,8)))
       ), NpsDate(2014,4,5), 8, npsAmountA2016(10), npsAmountB2016, 0, 2015, 0, 0, lastYearQualifying = true, testNino, 0, SPAmountModel(0))(hc).forecastAmount shouldBe SPAmountModel(53.31)
     }
 
     "return 222.06 for 10000 last year earnings, 2013/14 last year, 35QYs, 2016 FRY, existing AP 100" in {
       StubForecastingService.getForecastAmount(
-        List(NpsSchemeMembership(Some(NpsDate(2012,5,5)),Some(NpsDate(2014,8,8)))),
+        List(NpsSchemeMembership(NpsDate(2012,5,5),Some(NpsDate(2014,8,8)))),
         NpsDate(2014,4,5), 35, npsAmountA2016(100), npsAmountB2016, 10000, 2016, 0, 0, lastYearQualifying = true, testNino,
       0, SPAmountModel(0))(hc).forecastAmount shouldBe SPAmountModel(222.06)
     }
@@ -461,7 +461,7 @@ class ForecastingServiceSpec extends UnitSpec with OneAppPerSuite {
 
     "return Forecast Only Scenario 111.18 Forecast, 120.07 Max  with 5 years when 2013/14 last year, contracted in, *, 2018 FRY" in {
       StubForecastingService.getForecastAmount(
-        List(NpsSchemeMembership(Some(NpsDate(2012,3,5)), Some(NpsDate(2014,4,6)))), NpsDate(2014, 4, 5), 35, npsAmountA2016(0), npsAmountB2016, 10000, 2015, 0, 0, lastYearQualifying = true, testNino,
+        List(NpsSchemeMembership(NpsDate(2012,3,5), Some(NpsDate(2014,4,6)))), NpsDate(2014, 4, 5), 35, npsAmountA2016(0), npsAmountB2016, 10000, 2015, 0, 0, lastYearQualifying = true, testNino,
         0, SPAmountModel(155.65))(hc) shouldBe SPForecastModel(SPAmountModel(154.87), 2, SPAmountModel(154.87), 0, Scenario.ForecastOnly, false)
     }
 

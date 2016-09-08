@@ -19,13 +19,11 @@ package uk.gov.hmrc.nisp.models.nps
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
 
-case class NpsSchemeMembership(startDate: Option[NpsDate], endDate: Option[NpsDate]) {
+case class NpsSchemeMembership(startDate: NpsDate, endDate: Option[NpsDate]) {
   def contains(npsDate: NpsDate): Boolean = {
     (startDate, endDate) match {
-      case (None, None) => true
-      case (None, Some(end)) => npsDate.localDate.isBefore(end.localDate) || npsDate.localDate.isEqual(end.localDate)
-      case (Some(start), None) => npsDate.localDate.isAfter(start.localDate) || npsDate.localDate.isEqual(start.localDate)
-      case (Some(start), Some(end)) =>
+      case (start, None) => npsDate.localDate.isAfter(start.localDate) || npsDate.localDate.isEqual(start.localDate)
+      case (start, Some(end)) =>
         (npsDate.localDate.isBefore(end.localDate) || npsDate.localDate.isEqual(end.localDate)) &&
         (npsDate.localDate.isAfter(start.localDate) || npsDate.localDate.isEqual(start.localDate))
     }
@@ -33,17 +31,15 @@ case class NpsSchemeMembership(startDate: Option[NpsDate], endDate: Option[NpsDa
 
   def existsInTaxYear(taxYear: Int): Boolean = {
     (startDate, endDate) match {
-      case (None, None) => true
-      case (None, Some(end)) => end.taxYear >= taxYear
-      case (Some(start), None) => start.taxYear <= taxYear
-      case (Some(start), Some(end)) => start.taxYear <= taxYear && end.taxYear >= taxYear
+      case (start, None) => start.taxYear <= taxYear
+      case (start, Some(end)) => start.taxYear <= taxYear && end.taxYear >= taxYear
     }
   }
 }
 
 object NpsSchemeMembership {
   implicit val formats: Format[NpsSchemeMembership] = (
-    (__ \ "scheme_mem_start_date").format[Option[NpsDate]] and
+    (__ \ "scheme_mem_start_date").format[NpsDate] and
       (__ \ "scheme_end_date").format[Option[NpsDate]]
     )(NpsSchemeMembership.apply, unlift(NpsSchemeMembership.unapply))
 }

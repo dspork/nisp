@@ -97,7 +97,7 @@ class NpsConnectorSpec extends UnitSpec with ScalaFutures with MockitoSugar {
       "return scheme membership" in {
         val npsSchemeMembershipsF = StubNpsConnector.connectToSchemeMembership(TestAccountBuilder.excludedNino)(HeaderCarrier())
         npsSchemeMembershipsF.length shouldBe 2
-        npsSchemeMembershipsF(0).startDate shouldBe Some(NpsDate(1978, 4, 6))
+        npsSchemeMembershipsF(0).startDate shouldBe NpsDate(1978, 4, 6)
         npsSchemeMembershipsF(0).endDate shouldBe Some(NpsDate(1979, 6, 30))
       }
 

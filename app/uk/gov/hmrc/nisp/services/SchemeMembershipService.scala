@@ -19,6 +19,7 @@ package uk.gov.hmrc.nisp.services
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.nisp.connectors.NpsConnector
 import uk.gov.hmrc.nisp.models.SchemeMembership
+import uk.gov.hmrc.nisp.models.nps.NpsDate
 import uk.gov.hmrc.play.http.HeaderCarrier
 import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 
@@ -33,7 +34,8 @@ trait SchemeMembershipService {
     val futureNpsSchemeMembership = nps.connectToSchemeMembership(nino)
 
     for(npsSchemeMembership <- futureNpsSchemeMembership) yield {
-      val schemeSummary: List[SchemeMembership] = npsSchemeMembership.map(sm => SchemeMembership(sm.startDate, sm.endDate))
+      val schemeSummary: List[SchemeMembership] = npsSchemeMembership.map(sm => SchemeMembership(sm.startDate.localDate,
+        sm.endDate.getOrElse(NpsDate(2016,4,5)).localDate))
       schemeSummary
     }
   }

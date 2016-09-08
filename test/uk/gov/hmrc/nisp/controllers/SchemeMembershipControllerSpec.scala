@@ -16,6 +16,7 @@
 
 package uk.gov.hmrc.nisp.controllers
 
+import org.joda.time.LocalDate
 import org.scalatestplus.play.OneAppPerSuite
 import play.api.http.Status
 import play.api.libs.json.Json
@@ -23,7 +24,6 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.nisp.helpers.{TestAccountBuilder, StubSchemeMembershipService}
 import uk.gov.hmrc.nisp.models.SchemeMembership
-import uk.gov.hmrc.nisp.models.nps.NpsDate
 import uk.gov.hmrc.nisp.services.SchemeMembershipService
 import uk.gov.hmrc.play.test.UnitSpec
 
@@ -46,11 +46,10 @@ class SchemeMembershipControllerSpec  extends UnitSpec with OneAppPerSuite {
     status(result) should be (Status.NOT_FOUND)
   }
 
-  "return JSON containing nino" in {
+  "return JSON list of SchemeMembership details in reverse date order and should return end date as April 2016 when its null" in {
     val result = testSchemeSummaryController.getSchemeSummary(nino)(FakeRequest())
     val rawJson = Json.parse(contentAsString(result))
-    Json.fromJson[List[SchemeMembership]](rawJson).get shouldBe List(SchemeMembership(Some(NpsDate(1978,4,6)),Some(NpsDate(1997,6,30))), SchemeMembership(Some(NpsDate(1999,4,6)),Some(NpsDate(2009,4,5))))
-
+    Json.fromJson[List[SchemeMembership]](rawJson).get shouldBe List( SchemeMembership(new LocalDate(1999,4,6), new LocalDate(2016, 4, 5)), SchemeMembership(new LocalDate(1978,4,6), new LocalDate(1997,6,30)))
   }
 
 }

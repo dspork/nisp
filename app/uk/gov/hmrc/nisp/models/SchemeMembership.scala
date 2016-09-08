@@ -16,13 +16,13 @@
 
 package uk.gov.hmrc.nisp.models
 
+import org.joda.time.LocalDate
 import play.api.libs.json.Json
-import uk.gov.hmrc.nisp.models.nps.NpsDate
 
 case class SchemeMembership (
-                         schemeStartDate: Option[NpsDate],
-                         schemeEndDate: Option[NpsDate]
-                         )
+                         schemeStartDate: LocalDate,
+                         schemeEndDate: LocalDate
+                              )
 
 object SchemeMembership {
   implicit val formats = Json.format[SchemeMembership]
