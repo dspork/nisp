@@ -80,6 +80,11 @@ class SchemeMembershipRepositorySpec extends UnitSpec with OneServerPerSuite wit
       found shouldBe None
     }
 
+    "multiple calls to insertByNino should be fine (upsert)" in {
+      await(service.insertByNino(TestAccountBuilder.regularNino, testSchemeMembershipModel)) shouldBe true
+      await(service.insertByNino(TestAccountBuilder.regularNino, testSchemeMembershipModel)) shouldBe true
+    }
+
   }
 
 

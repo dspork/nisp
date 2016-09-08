@@ -121,7 +121,10 @@ class CachingMongoService[A <: CachingModel[A, B], B]
 
   override def insertByNino(nino: Nino, response: B)
                            (implicit formats: OFormat[A], e: ExecutionContext): Future[Boolean] = {
-    collection.insert(apply(cacheKey(nino, apiType), response, DateTime.now(DateTimeZone.UTC).plusSeconds(timeToLive))).map { result =>
+    val query = Json.obj("key" -> cacheKey(nino, apiType))
+    val doc = apply(cacheKey(nino, apiType), response, DateTime.now(DateTimeZone.UTC).plusSeconds(timeToLive))
+    
+    collection.update(query, doc, upsert = true).map { result =>
       Logger.debug(s"[$apiType][insertByNino] : { cacheKey : ${cacheKey(nino, apiType)}, " +
         s"request: $response, result: ${result.ok}, errors: ${result.errmsg} }")
       metrics.cacheWritten()
