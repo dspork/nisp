@@ -46,10 +46,14 @@ class SchemeMembershipControllerSpec  extends UnitSpec with OneAppPerSuite {
     status(result) should be (Status.NOT_FOUND)
   }
 
-  "return JSON list of SchemeMembership details in reverse date order and should return end date as April 2016 when its null" in {
+  "return JSON list of SchemeMembership details for the contracted out user" in {
     val result = testSchemeSummaryController.getSchemeSummary(nino)(FakeRequest())
     val rawJson = Json.parse(contentAsString(result))
-    Json.fromJson[List[SchemeMembership]](rawJson).get shouldBe List( SchemeMembership(new LocalDate(1999,4,6), new LocalDate(2016, 4, 5)), SchemeMembership(new LocalDate(1978,4,6), new LocalDate(1997,6,30)))
+    Json.fromJson[List[SchemeMembership]](rawJson).get shouldBe
+      List(
+        SchemeMembership(new LocalDate(1999,4,6), new LocalDate(2016, 4, 5)),
+        SchemeMembership(new LocalDate(1978,4,6), new LocalDate(1997,6,30))
+      )
   }
 
 }

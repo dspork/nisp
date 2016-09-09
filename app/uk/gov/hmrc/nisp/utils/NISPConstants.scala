@@ -74,4 +74,6 @@ object NISPConstants {
   val niRecordMinAge = 16
 
   val homeResponsibilitiesProtectionTypes = List(14, 15, 16, 38, 48, 80)
+
+  val contractedOutEndDate: LocalDate = new LocalDate(newStatePensionStartYear, taxYearStartEndMonth, taxYearEndDay)
 }

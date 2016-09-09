@@ -22,6 +22,9 @@ import uk.gov.hmrc.nisp.models.SchemeMembership
 import uk.gov.hmrc.nisp.models.nps.NpsDate
 import uk.gov.hmrc.play.http.HeaderCarrier
 import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
+import com.github.nscala_time.time.OrderingImplicits._
+import org.joda.time.LocalDate
+import uk.gov.hmrc.nisp.utils.NISPConstants
 
 object SchemeMembershipService extends SchemeMembershipService {
   override val nps: NpsConnector = NpsConnector
@@ -34,9 +37,17 @@ trait SchemeMembershipService {
     val futureNpsSchemeMembership = nps.connectToSchemeMembership(nino)
 
     for(npsSchemeMembership <- futureNpsSchemeMembership) yield {
-      val schemeSummary: List[SchemeMembership] = npsSchemeMembership.map(sm => SchemeMembership(sm.startDate.localDate,
-        sm.endDate.getOrElse(NpsDate(2016,4,5)).localDate))
-      schemeSummary
+      npsSchemeMembership
+        .groupBy(_.sequenceNumber)
+        .map {
+          case (seq, list) => list.maxBy(_.occurrenceNumber)
+        }
+        .map(sm => SchemeMembership(
+          sm.startDate.localDate,
+          sm.endDate.map(_.localDate).getOrElse(NISPConstants.contractedOutEndDate)
+        ))
+        .toList
+        .sortBy(_.schemeStartDate).reverse
     }
   }
 }

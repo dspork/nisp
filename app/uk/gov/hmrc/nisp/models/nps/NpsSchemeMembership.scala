@@ -19,7 +19,7 @@ package uk.gov.hmrc.nisp.models.nps
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
 
-case class NpsSchemeMembership(startDate: NpsDate, endDate: Option[NpsDate]) {
+case class NpsSchemeMembership(startDate: NpsDate, endDate: Option[NpsDate], sequenceNumber: Int, occurrenceNumber: Int) {
   def contains(npsDate: NpsDate): Boolean = {
     (startDate, endDate) match {
       case (start, None) => npsDate.localDate.isAfter(start.localDate) || npsDate.localDate.isEqual(start.localDate)
@@ -40,6 +40,8 @@ case class NpsSchemeMembership(startDate: NpsDate, endDate: Option[NpsDate]) {
 object NpsSchemeMembership {
   implicit val formats: Format[NpsSchemeMembership] = (
     (__ \ "scheme_mem_start_date").format[NpsDate] and
-      (__ \ "scheme_end_date").format[Option[NpsDate]]
+    (__ \ "scheme_end_date").format[Option[NpsDate]] and
+    (__ \ "scheme_membership_seq_no").format[Int] and
+    (__ \ "scheme_memb_occ_no").format[Int]
     )(NpsSchemeMembership.apply, unlift(NpsSchemeMembership.unapply))
 }

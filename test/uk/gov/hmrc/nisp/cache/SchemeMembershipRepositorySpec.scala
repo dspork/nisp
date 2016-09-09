@@ -36,8 +36,8 @@ class SchemeMembershipRepositorySpec extends UnitSpec with OneServerPerSuite wit
 
   val testSchemeMembershipModel = NpsSchemeMembershipContainer(
     List(
-      NpsSchemeMembership(NpsDate(1980, 4, 6), None),
-      NpsSchemeMembership(NpsDate(1975, 4, 6), Some(NpsDate(1999, 12, 31)))
+      NpsSchemeMembership(NpsDate(1980, 4, 6), None, 1, 1),
+      NpsSchemeMembership(NpsDate(1975, 4, 6), Some(NpsDate(1999, 12, 31)), 1, 1)
     )
   )
 

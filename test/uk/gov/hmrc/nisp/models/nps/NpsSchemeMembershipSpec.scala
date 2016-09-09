@@ -22,46 +22,46 @@ class NpsSchemeMembershipSpec extends UnitSpec {
   "contains" should {
 
     "return false for Start: 01/01/2016 and End: None and Date is 01/01/2000" in {
-      NpsSchemeMembership(NpsDate(2016, 1, 1), None).contains(NpsDate(2000, 1, 1)) shouldBe false
+      NpsSchemeMembership(NpsDate(2016, 1, 1), None, 1, 1).contains(NpsDate(2000, 1, 1)) shouldBe false
     }
 
     "return true for Start: 01/01/2016 and End: None and Date is 01/01/2013" in {
-      NpsSchemeMembership(NpsDate(2016, 1, 1), None).contains(NpsDate(2013, 1, 1)) shouldBe false
+      NpsSchemeMembership(NpsDate(2016, 1, 1), None, 1, 1).contains(NpsDate(2013, 1, 1)) shouldBe false
     }
 
     "return true for Start: 01/01/2015 and End: 01/01/2016 and Date is 01/01/2016" in {
-      NpsSchemeMembership(NpsDate(2015, 1, 1), Some(NpsDate(2016, 1, 1))).contains(NpsDate(2016, 1, 1)) shouldBe true
+      NpsSchemeMembership(NpsDate(2015, 1, 1), Some(NpsDate(2016, 1, 1)), 1, 1).contains(NpsDate(2016, 1, 1)) shouldBe true
     }
 
     "return false for Start: 01/01/2015 and End: 01/01/2016 and Date is 02/01/2016" in {
-      NpsSchemeMembership(NpsDate(2015, 1, 1), Some(NpsDate(2016, 1, 1))).contains(NpsDate(2016, 1, 2)) shouldBe false
+      NpsSchemeMembership(NpsDate(2015, 1, 1), Some(NpsDate(2016, 1, 1)), 1, 1).contains(NpsDate(2016, 1, 2)) shouldBe false
     }
   }
 
   "exists in tax year" should {
 
     "return true for Start: 2014-4-5 and End: None, taxyear 2013" in {
-      NpsSchemeMembership(NpsDate(2014,4,5), None).existsInTaxYear(2013) shouldBe true
+      NpsSchemeMembership(NpsDate(2014,4,5), None, 1, 1).existsInTaxYear(2013) shouldBe true
     }
 
     "return false for Start: 2014-4-6 and End: None, taxyear 2013" in {
-      NpsSchemeMembership(NpsDate(2014,4,6), None).existsInTaxYear(2013) shouldBe false
+      NpsSchemeMembership(NpsDate(2014,4,6), None, 1, 1).existsInTaxYear(2013) shouldBe false
     }
 
     "return true for Start: 2013-4-5 and End: 2013-4-6, taxyear 2013" in {
-      NpsSchemeMembership(NpsDate(2013,4,5), Some(NpsDate(2013,4,6))).existsInTaxYear(2013) shouldBe true
+      NpsSchemeMembership(NpsDate(2013,4,5), Some(NpsDate(2013,4,6)), 1, 1).existsInTaxYear(2013) shouldBe true
     }
 
     "return false for Start: 2013-4-5 and End: 2013-4-5, taxyear 2013" in {
-      NpsSchemeMembership(NpsDate(2013,4,5), Some(NpsDate(2013,4,5))).existsInTaxYear(2013) shouldBe false
+      NpsSchemeMembership(NpsDate(2013,4,5), Some(NpsDate(2013,4,5)), 1, 1).existsInTaxYear(2013) shouldBe false
     }
 
     "return true for Start: 2013-5-5 and End: 2013-6-5, taxyear 2013" in {
-      NpsSchemeMembership(NpsDate(2013,5,5), Some(NpsDate(2013,6,5))).existsInTaxYear(2013) shouldBe true
+      NpsSchemeMembership(NpsDate(2013,5,5), Some(NpsDate(2013,6,5)), 1, 1).existsInTaxYear(2013) shouldBe true
     }
 
     "return true for Start: 2013-5-5 and End: 2013-6-5, taxyear 2014" in {
-      NpsSchemeMembership(NpsDate(2013,5,5), Some(NpsDate(2013,6,5))).existsInTaxYear(2013) shouldBe true
+      NpsSchemeMembership(NpsDate(2013,5,5), Some(NpsDate(2013,6,5)), 1, 1).existsInTaxYear(2013) shouldBe true
     }
   }
 }
