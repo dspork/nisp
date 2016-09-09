@@ -21,7 +21,6 @@ import play.api.mvc.{Action, AnyContent}
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.nisp.services.SchemeMembershipService
 import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
-import com.github.nscala_time.time.OrderingImplicits._
 import uk.gov.hmrc.play.microservice.controller.BaseController
 
 object SchemeMembershipController extends SchemeMembershipController {
@@ -35,7 +34,7 @@ trait SchemeMembershipController extends BaseController with ErrorHandling {
 
   def getSchemeSummary(nino: Nino): Action[AnyContent] = Action.async {
     implicit request => errorWrapper(nino, {
-      schemeService.getSchemeSummary(nino).map(schemeResponse => Ok(Json.toJson(schemeResponse.sortBy(_.schemeStartDate).reverse)))
+      schemeService.getSchemeSummary(nino).map(schemeResponse => Ok(Json.toJson(schemeResponse)))
     })
   }
 }
