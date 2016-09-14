@@ -32,10 +32,12 @@ object TestAccountBuilder {
   val excludedNino: Nino = randomNino()
   val regularNino: Nino = randomNino()
   val isleOfManNino: Nino = Nino(randomNino().value.replaceFirst("[A-Z]{2}", "MA"))
+  val contractedOutNino = randomNino()
 
   val mappedTestAccounts = Map(
     excludedNino -> "excluded",
-    regularNino -> "regular"
+    regularNino -> "regular",
+    contractedOutNino -> "contracted-out"
   )
 
   def jsonResponse(nino: Nino, api: String): HttpResponse = {
