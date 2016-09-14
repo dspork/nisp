@@ -32,6 +32,7 @@ class SPResponseServiceSpec extends UnitSpec with MockitoSugar with OneAppPerSui
   val nino = TestAccountBuilder.regularNino
   val exclusionNino = TestAccountBuilder.excludedNino
   val nonexistentnino = TestAccountBuilder.nonExistentNino
+  val contractedOutNino = TestAccountBuilder.contractedOutNino
 
   implicit val hc: HeaderCarrier = HeaderCarrier()
 
@@ -83,6 +84,16 @@ class SPResponseServiceSpec extends UnitSpec with MockitoSugar with OneAppPerSui
     val spResponse = StubSPResponseService.getSPResponse(exclusionNino)
     spResponse.spExclusions.get.exclusions shouldBe List(Exclusion.MarriedWomenReducedRateElection, Exclusion.Abroad)
     spResponse.niExclusions.get.exclusions shouldBe List(Exclusion.MarriedWomenReducedRateElection)
+  }
+
+  "return contracted out flag as false when RDA is 0" in {
+    val spResponse = StubSPResponseService.getSPResponse(nino)
+    spResponse.spSummary.get.contractedOutFlag shouldBe false
+  }
+
+  "return contracted out flag as true when RDA is greater than 0" in {
+    val spResponse = StubSPResponseService.getSPResponse(contractedOutNino)
+    spResponse.spSummary.get.contractedOutFlag shouldBe true
   }
 
   "age Calculation" should {

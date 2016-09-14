@@ -33,6 +33,7 @@ object StubNPSHttp extends UnitSpec with MockitoSugar {
   stubFailure(isleOfManNino)
   stubSuccess(regularNino)
   stubSuccess(excludedNino)
+  stubSuccess(contractedOutNino)
 
   private def stubSuccess(urlEndsWith: String, response: Future[HttpResponse]): Unit =
     when(stubHttp.GET[HttpResponse](Matchers.endsWith(urlEndsWith))(Matchers.any(), Matchers.any())).thenReturn(response)
