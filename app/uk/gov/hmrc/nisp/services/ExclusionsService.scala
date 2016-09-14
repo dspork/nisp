@@ -70,14 +70,10 @@ case class ExclusionsService(isAbroad: Boolean, marriedWomenReducedRateElection:
   }
 
   val checkStatePensionAge = (exclusionList: List[Exclusion]) => {
-    if(statePensionAge.localDate.isBefore(NISPConstants.newStatePensionStart)) {
-      List(Exclusion.CustomerTooOld)
+    if(!now.localDate.isBefore(statePensionAge.localDate.minusDays(1))) {
+      Exclusion.PostStatePensionAge :: exclusionList
     } else {
-      if(!now.localDate.isBefore(statePensionAge.localDate.minusDays(1))) {
-        Exclusion.PostStatePensionAge :: exclusionList
-      } else {
-        exclusionList
-      }
+      exclusionList
     }
   }
 

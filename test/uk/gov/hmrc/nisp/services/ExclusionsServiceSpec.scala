@@ -111,10 +111,6 @@ class ExclusionsServiceSpec extends UnitSpec with OneAppPerSuite  {
       "return no exclusions for customer with SPA 07/04/2016" in {
         ExclusionsService(false, false, None, nino, List(), 100, 100, defaultDate, statePensionAge, "F", false).getSPExclusions shouldBe noExclusions
       }
-      "return CustomerTooOld for customer born on 05/04/2016" in {
-        ExclusionsService(false, false, None, nino, List(), 100, 100, defaultDate, NpsDate(2016, 4, 5), "F", false).getSPExclusions shouldBe createModelWithListItems(Exclusion.CustomerTooOld)
-      }
-
     }
 
     "checking for customer that is deceased" should {
@@ -195,17 +191,6 @@ class ExclusionsServiceSpec extends UnitSpec with OneAppPerSuite  {
         "Man, SPA: 09/04/2016, Current Date: 08/04/2016" in {
           ExclusionsService(false, false, None, nino, List(), 201, 201, NpsDate(2016, 4, 8), NpsDate(2016, 4, 9), "F", false).getSPExclusions shouldBe createModelWithListItems(Exclusion.PostStatePensionAge)
         }
-      }
-      "return too old exclusion for post SPa -1 and before 6 April 2016" when {
-        "Man, SPA: 05/04/2016, Current Date: 05/04/2016" in {
-          ExclusionsService(false, false, None, nino, List(), 201, 201, NpsDate(2016, 4, 5), NpsDate(2016, 4, 5), "F", false).getSPExclusions shouldBe createModelWithListItems(Exclusion.CustomerTooOld)
-        }
-      }
-    }
-
-    "checking only TooOld Exclusion appears" when {
-      "customer has TooOld and AmountDissonance" in {
-        ExclusionsService(false, false, None, "", List(), 0, 151.25, NpsDate(2015,1,1), NpsDate(2016,4,5), "F", false).getSPExclusions shouldBe createModelWithListItems(Exclusion.CustomerTooOld)
       }
     }
   }

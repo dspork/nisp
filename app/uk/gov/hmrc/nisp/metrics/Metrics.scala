@@ -100,7 +100,6 @@ object Metrics extends Metrics {
   val exclusionMeters: Map[Exclusion, Counter] = Map(
     Exclusion.Abroad -> MetricsRegistry.defaultRegistry.counter("exclusion-abroad"),
     Exclusion.MarriedWomenReducedRateElection -> MetricsRegistry.defaultRegistry.counter("exclusion-mwrre"),
-    Exclusion.CustomerTooOld -> MetricsRegistry.defaultRegistry.counter("exclusion-too-old"),
     Exclusion.Dead -> MetricsRegistry.defaultRegistry.counter("exclusion-dead"),
     Exclusion.IsleOfMan -> MetricsRegistry.defaultRegistry.counter("exclusion-isle-of-man"),
     Exclusion.AmountDissonance -> MetricsRegistry.defaultRegistry.counter("amount-dissonance"),
