@@ -104,7 +104,7 @@ trait SPResponseService extends WithCurrentDate {
         npsSummary.dateOfBirth,
         forecast,
         npsSummary.pensionForecast.fullNewStatePensionAmount,
-        npsSchemeMembership.nonEmpty,
+        npsSummary.npsStatePensionAmount.npsAmountB2016.rebateDerivedAmount > 0,
         getAge(npsSummary.dateOfBirth),
         SPAmountModel(npsSummary.npsStatePensionAmount.npsAmountB2016.rebateDerivedAmount),
         mqpScenario,
