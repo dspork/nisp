@@ -26,6 +26,7 @@ import uk.gov.hmrc.nisp.models.enums.Scenario
 import uk.gov.hmrc.nisp.models.nps.NpsDate
 import uk.gov.hmrc.nisp.models.{SPAmountModel, StatePension, StatePensionAmount, StatePensionAmounts, StatePensionExclusion}
 import uk.gov.hmrc.nisp.services.reference.QualifyingYearsAmountService
+import uk.gov.hmrc.nisp.utils.NISPConstants
 import uk.gov.hmrc.play.http.HeaderCarrier
 import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 
@@ -83,6 +84,10 @@ trait StatePensionService {
 
           val purgedNationalInsuranceRecord = nationalInsuranceRecord.purge(summary.finalRelevantYear)
 
+          val sanitisedCurrentAmount: BigDecimal =
+            if(summary.nspQualifyingYears < NISPConstants.newStatePensionMinimumQualifyingYears) 0
+            else summary.npsStatePensionAmount.nspEntitlement
+
           val forecast = ForecastingService.getForecastAmount(
             schemeMemberships,
             earningsIncludedUpTo = summary.earningsIncludedUpTo,
@@ -98,10 +103,10 @@ trait StatePensionService {
               find(_.taxYear == summary.earningsIncludedUpTo.taxYear).exists(_.qualifying),
             nino = nino,
             fillableGaps = nationalInsuranceRecord.nonQualifyingYearsPayable,
-            currentAmount = SPAmountModel(summary.npsStatePensionAmount.nspEntitlement)
+            currentAmount = SPAmountModel(sanitisedCurrentAmount)
           )
 
-          metrics.summary(forecast.forecastAmount.week, summary.npsStatePensionAmount.nspEntitlement, schemeMemberships.nonEmpty,
+          metrics.summary(forecast.forecastAmount.week, sanitisedCurrentAmount, schemeMemberships.nonEmpty,
             forecast.scenario.equals(Scenario.ForecastOnly), new Period(summary.dateOfBirth.localDate, now, PeriodType.yearMonthDay()).getYears, forecast.scenario,
             forecast.personalMaximum.week, forecast.yearsLeftToWork, ForecastingService.getMqpScenario(summary.nspQualifyingYears, summary.yearsUntilPensionAge,
               nationalInsuranceRecord.nonQualifyingYearsPayable))
@@ -111,7 +116,7 @@ trait StatePensionService {
             summary.earningsIncludedUpTo.localDate,
             amounts = StatePensionAmounts(
               protectedPayment = forecast.oldRulesCustomer,
-              current = StatePensionAmount(None, None, summary.npsStatePensionAmount.nspEntitlement),
+              current = StatePensionAmount(None, None, sanitisedCurrentAmount),
               forecast = StatePensionAmount(Some(forecast.yearsLeftToWork), None, forecast.forecastAmount.week),
               maximum = StatePensionAmount(Some(forecast.yearsLeftToWork), Some(forecast.minGapsToFillToReachMaximum), forecast.personalMaximum.week),
               cope = StatePensionAmount(None, None, summary.npsStatePensionAmount.npsAmountB2016.rebateDerivedAmount)

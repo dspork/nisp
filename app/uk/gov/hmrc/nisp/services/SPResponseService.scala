@@ -25,7 +25,7 @@ import uk.gov.hmrc.nisp.metrics.Metrics
 import uk.gov.hmrc.nisp.models._
 import uk.gov.hmrc.nisp.models.enums.Scenario
 import uk.gov.hmrc.nisp.models.nps.NpsDate
-import uk.gov.hmrc.nisp.utils.WithCurrentDate
+import uk.gov.hmrc.nisp.utils.{NISPConstants, WithCurrentDate}
 import uk.gov.hmrc.play.http.HeaderCarrier
 import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 
@@ -57,7 +57,8 @@ trait SPResponseService extends WithCurrentDate {
          npsLiabilities <- futureNpsLiabilities;
          npsSchemeMembership <- futureNpsSchemeMembership;
          manualCorrespondenceIndicator <- futureManualCorrespondenceIndicator) yield {
-      val spAmountModel = SPAmountModel(npsSummary.npsStatePensionAmount.nspEntitlement)
+
+      val currentAmountReceived  = npsSummary.npsStatePensionAmount.nspEntitlement
 
       val purgedNIRecord = npsNIRecord.purge(npsSummary.finalRelevantYear)
 
@@ -67,7 +68,7 @@ trait SPResponseService extends WithCurrentDate {
         npsSummary.dateOfDeath,
         npsSummary.nino,
         npsLiabilities,
-        spAmountModel.week,
+        currentAmountReceived,
         SPCurrentAmountService.calculate(npsSummary.npsStatePensionAmount.npsAmountA2016, npsSummary.npsStatePensionAmount.npsAmountB2016),
         NpsDate(now),
         npsSummary.spaDate,
@@ -78,13 +79,18 @@ trait SPResponseService extends WithCurrentDate {
       val spExclusions = exclusionsService.getSPExclusions
       val niExclusions = exclusionsService.getNIExclusions
 
+      val sanitisedCurrentAmount: BigDecimal =
+        if(npsSummary.nspQualifyingYears < NISPConstants.newStatePensionMinimumQualifyingYears) 0
+        else currentAmountReceived
+
+
       val forecast: SPForecastModel = forecastingService.getForecastAmount(
         npsSchemeMembership, npsSummary.earningsIncludedUpTo, npsSummary.nspQualifyingYears, npsSummary.npsStatePensionAmount.npsAmountA2016,
         npsSummary.npsStatePensionAmount.npsAmountB2016,
         purgedNIRecord.niTaxYears.find(_.taxYear == npsSummary.earningsIncludedUpTo.taxYear).map(_.primaryPaidEarnings).getOrElse(0),
         npsSummary.finalRelevantYear, npsSummary.pensionForecast.forecastAmount, npsSummary.pensionForecast.forecastAmount2016,
         purgedNIRecord.niTaxYears.find(_.taxYear == npsSummary.earningsIncludedUpTo.taxYear).exists(_.qualifying), nino,
-        npsNIRecord.nonQualifyingYearsPayable, spAmountModel
+        npsNIRecord.nonQualifyingYearsPayable, SPAmountModel(currentAmountReceived)
       )
 
       val mqpScenario = ForecastingService.getMqpScenario(npsSummary.nspQualifyingYears, npsSummary.yearsUntilPensionAge,
@@ -93,7 +99,7 @@ trait SPResponseService extends WithCurrentDate {
       val spSummary = SPSummaryModel(
         npsSummary.nino,
         npsSummary.earningsIncludedUpTo,
-        spAmountModel,
+        SPAmountModel(sanitisedCurrentAmount),
         SPAgeModel(new Period(npsSummary.dateOfBirth.localDate, npsSummary.spaDate.localDate).getYears, npsSummary.spaDate),
         npsSummary.finalRelevantYear,
         purgedNIRecord.numberOfQualifyingYears,
@@ -112,7 +118,7 @@ trait SPResponseService extends WithCurrentDate {
       )
 
       if (spExclusions.exclusions.isEmpty && niExclusions.exclusions.isEmpty) {
-        metrics.summary(forecast.forecastAmount.week, spAmountModel.week, npsSchemeMembership.nonEmpty,
+        metrics.summary(forecast.forecastAmount.week, sanitisedCurrentAmount, npsSchemeMembership.nonEmpty,
           forecast.scenario.equals(Scenario.ForecastOnly), getAge(npsSummary.dateOfBirth), forecast.scenario,
           forecast.personalMaximum.week, forecast.yearsLeftToWork, mqpScenario)
         SPResponseModel(Some(spSummary), None, None)
