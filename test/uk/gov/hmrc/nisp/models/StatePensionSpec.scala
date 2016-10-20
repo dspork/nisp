@@ -65,7 +65,7 @@ class StatePensionSpec extends UnitSpec {
         ),
         67,
         new LocalDate(2019, 7, 1),
-        2018,
+        "2018-19",
         30,
         pensionSharingOrder = false,
         155.65
@@ -81,7 +81,7 @@ class StatePensionSpec extends UnitSpec {
       (json \ "amounts" \ "maximum" \ "annualAmount").as[BigDecimal] shouldBe 8121.59
       (json \ "pensionAge").as[Int] shouldBe 67
       (json \ "pensionDate").as[NpsDate] shouldBe NpsDate(2019, 7, 1)
-      (json \ "finalRelevantYear").as[Int] shouldBe 2018
+      (json \ "finalRelevantYear").as[String] shouldBe "2018-19"
       (json \ "numberOfQualifyingYears").as[Int] shouldBe 30
       (json \ "pensionSharingOrder").as[Boolean] shouldBe false
       (json \ "currentFullWeeklyPensionAmount").as[BigDecimal] shouldBe 155.65
@@ -113,7 +113,7 @@ class StatePensionSpec extends UnitSpec {
                      |  },
                      |  "pensionAge": 67,
                      |  "pensionDate": "2019-07-01",
-                     |  "finalRelevantYear": 2018,
+                     |  "finalRelevantYear": "2018-19",
                      |  "numberOfQualifyingYears": 30,
                      |  "pensionSharingOrder": false,
                      |  "currentFullWeeklyPensionAmount": 155.65
@@ -133,7 +133,7 @@ class StatePensionSpec extends UnitSpec {
         ),
         67,
         new LocalDate(2019, 7 ,1),
-        2018,
+        "2018-19",
         30,
         pensionSharingOrder = false,
         155.65
