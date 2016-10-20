@@ -39,6 +39,11 @@ trait StatePensionService {
   val citizenDetailsService: CitizenDetailsService
   def now: LocalDate
 
+  def formatTaxYear(taxYearStart: Int): String = {
+    val taxYearEnd = taxYearStart + 1
+    s"$taxYearStart-${taxYearEnd.toString.substring(2,4)}"
+  }
+
   def getStatement(nino: Nino)(implicit request: HeaderCarrier): Future[Either[StatePensionExclusion, StatePension]] = {
 
       val npsSummaryF = npsConnector.connectToSummary(nino)
@@ -123,7 +128,7 @@ trait StatePensionService {
             ),
             pensionAge = new Period(summary.dateOfBirth.localDate, summary.spaDate.localDate).getYears,
             pensionDate = summary.spaDate.localDate,
-            finalRelevantYear = summary.finalRelevantYear,
+            finalRelevantYear = formatTaxYear(summary.finalRelevantYear),
             numberOfQualifyingYears = summary.nspQualifyingYears,
             pensionSharingOrder = summary.pensionShareOrderCOEG != 0,
             currentFullWeeklyPensionAmount = QualifyingYearsAmountService.maxAmount

@@ -48,7 +48,7 @@ class StatePensionServiceSpec extends UnitSpec with OneAppPerSuite with EitherVa
     ),
     pensionAge = 65,
     pensionDate = new LocalDate(2017, 11, 21),
-    finalRelevantYear = 2016,
+    finalRelevantYear = "2016-17",
     numberOfQualifyingYears = 27,
     pensionSharingOrder = false,
     currentFullWeeklyPensionAmount = 155.65
@@ -112,6 +112,18 @@ class StatePensionServiceSpec extends UnitSpec with OneAppPerSuite with EitherVa
       verify(stub.metrics, times(1)).exclusion(
         Matchers.eq(List(Exclusion.MarriedWomenReducedRateElection, Exclusion.Abroad))
       )
+    }
+  }
+
+  "formatTaxYear" should {
+    "display final relevant year as the format '2018-19'" in {
+      StubStatePensionService.formatTaxYear(2018) shouldBe "2018-19"
+    }
+    "display final relevant year as the format '2000-01" in {
+      StubStatePensionService.formatTaxYear(2000) shouldBe "2000-01"
+    }
+    "display final relevant year as the format '1999-00" in {
+      StubStatePensionService.formatTaxYear(1999) shouldBe "1999-00"
     }
   }
 }
