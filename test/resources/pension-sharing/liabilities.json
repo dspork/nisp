@@ -1,0 +1,22 @@
+{
+  "npsErrlist": {
+    "count": 0, 
+    "mgt_check": 0, 
+    "commit_status": 2, 
+    "npsErritem": [], 
+    "bfm_return_code": 0, 
+    "data_not_found": 0
+  }, 
+  "npsLcdo004d": [
+    {
+      "nino": "<NINO>",
+      "award_amount_type": null,
+      "liability_type": 6,
+      "liability_occurrence_no": 1,
+      "liability_type_start_date": "1998-09-09",
+      "liability_type_end_date": "2003-06-30",
+      "liability_type_end_date_reason": "END DATE HELD",
+      "liability_type_end_date_int": null
+    }
+  ]
+}
