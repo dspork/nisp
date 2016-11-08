@@ -130,7 +130,7 @@ trait StatePensionService {
             pensionDate = summary.spaDate.localDate,
             finalRelevantYear = formatTaxYear(summary.finalRelevantYear),
             numberOfQualifyingYears = summary.nspQualifyingYears,
-            pensionSharingOrder = summary.pensionShareOrderCOEG != 0,
+            pensionSharingOrder = summary.pensionShareOrderSERPS != 0,
             currentFullWeeklyPensionAmount = QualifyingYearsAmountService.maxAmount
           ))
         }

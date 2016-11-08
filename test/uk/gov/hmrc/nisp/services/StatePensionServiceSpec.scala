@@ -113,6 +113,12 @@ class StatePensionServiceSpec extends UnitSpec with OneAppPerSuite with EitherVa
         Matchers.eq(List(Exclusion.MarriedWomenReducedRateElection, Exclusion.Abroad))
       )
     }
+
+    "return pensionSharingOrder = true when the pensionSharingOrderSERPS flag is set" in {
+      val statePension: Either[StatePensionExclusion, StatePension] = StubStatePensionService.getStatement(TestAccountBuilder.psodNino)
+      statePension.isLeft shouldBe false
+      statePension.right.value.pensionSharingOrder shouldBe true
+    }
   }
 
   "formatTaxYear" should {
