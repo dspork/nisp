@@ -53,7 +53,6 @@ class SummaryRepositorySpec extends UnitSpec with OneServerPerSuite with MongoSp
     None,
     0,
     "F",
-    0,
     NpsStatePensionAmount(
       Some(155.65),
       None,
@@ -85,7 +84,8 @@ class SummaryRepositorySpec extends UnitSpec with OneServerPerSuite with MongoSp
 
   "SummaryMongoService" should {
 
-    val service = new CachingMongoService[SummaryCacheModel, NpsSummaryModel](SummaryCacheModel.formats, SummaryCacheModel.apply, APITypes.Summary, StubApplicationConfig, StubMetrics) {
+    val service = new CachingMongoService[SummaryCacheModel, NpsSummaryModel](SummaryCacheModel.formats,
+      SummaryCacheModel.apply, APITypes.Summary, StubApplicationConfig, StubMetrics) {
       override val timeToLive = 30
     }
 
@@ -113,7 +113,8 @@ class SummaryRepositorySpec extends UnitSpec with OneServerPerSuite with MongoSp
 
       when(stubCollection.indexesManager).thenReturn(stubIndexesManager)
 
-      class TestSummaryMongoService extends CachingMongoService[SummaryCacheModel, NpsSummaryModel](SummaryCacheModel.formats, SummaryCacheModel.apply, APITypes.Summary, StubApplicationConfig, StubMetrics)  {
+      class TestSummaryMongoService extends CachingMongoService[SummaryCacheModel, NpsSummaryModel](
+        SummaryCacheModel.formats, SummaryCacheModel.apply, APITypes.Summary, StubApplicationConfig, StubMetrics)  {
         override lazy val collection = stubCollection
         override val timeToLive = 30
       }
