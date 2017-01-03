@@ -145,7 +145,6 @@ class NpsConnectorSpec extends UnitSpec with ScalaFutures with MockitoSugar {
       None,
       0,
       "F",
-      0,
       NpsStatePensionAmount(
         Some(155.65),
         None,

@@ -38,7 +38,6 @@ case class NpsSummaryModel( nino: String,
                             accountNotMaintainedFlag: Option[Int],
                             sensitiveCaseFlag: Int,
                             sex: String,
-                            contractedOutFlag: Int,
                             npsStatePensionAmount: NpsStatePensionAmount,
                             pensionForecast: NpsPensionForecast) {
   val pensionShareOrderCOEG = pensionShareOrderCOEGOption.getOrElse(0)
@@ -78,7 +77,6 @@ object NpsSummaryModel {
       (__ \ "account_not_maintained_flag").format[Option[Int]] and
       (__ \ "sensitive_flag").format[Int] and
       (__ \ "sex").format[String] and
-      (__ \ "contracted_out_flag").format[Int] and
       (__ \ "npsSpnam").format[NpsStatePensionAmount] and
       (__ \ "npsPenfor").format[NpsPensionForecast]
     )(NpsSummaryModel.apply, unlift(NpsSummaryModel.unapply))

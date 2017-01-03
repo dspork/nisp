@@ -22,8 +22,9 @@ import uk.gov.hmrc.play.test.UnitSpec
 class NpsSummaryModelSpec extends UnitSpec {
 
   private def summaryModel(countryCode: Int) = NpsSummaryModel("", None, countryCode, NpsDate(), None, NpsDate(), 30,
-    2017, None, None, None, None, None, NpsDate(), None, 0, "F", 0, NpsStatePensionAmount(None, None, None, None,
-      NpsAmountA2016(0, None, None, None, None, None, None, None, 0), NpsAmountB2016(None, None)), NpsPensionForecast(0, 0, 0, 0))
+    2017, None, None, None, None, None, NpsDate(), None, 0, "F", NpsStatePensionAmount(None, None, None, None,
+    NpsAmountA2016(0, None, None, None, None, None, None, None, 0), NpsAmountB2016(None, None)),
+    NpsPensionForecast(0, 0, 0, 0))
 
   "isAbroad" should {
     "return false if the country code is not specified" in {
