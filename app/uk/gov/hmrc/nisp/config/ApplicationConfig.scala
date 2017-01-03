@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 HM Revenue & Customs
+ * Copyright 2017 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,3 @@ trait ApplicationConfig {
 object ApplicationConfig extends ApplicationConfig with ServicesConfig {
   override val responseCacheTTL = configuration.getInt("mongodb.responseTTL").getOrElse(throw new RuntimeException("MongoDB TTL is not configured"))
 }
-
-
-
