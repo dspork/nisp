@@ -38,7 +38,7 @@ object StubMetrics extends Metrics with MockitoSugar {
                        forecastOnly: Boolean, age: Int, forecastScenario: Scenario,
                        personalMaximum: BigDecimal, yearsToContribute: Int, mqpScenario: Option[MQPScenario]): Unit = ()
 
-  override def niRecord(gaps: Int, payableGaps: Int, pre75Years: Int, qualifyingYears: Int, yearsUntilSPA: Int): Unit = ()
+  override def niRecord(gaps: Int, payableGaps: Int, pre75Years: Int, qualifyingYears: Int, yearsUntilSPA: Option[Int]): Unit = ()
   override def exclusion(exclusions: List[Exclusion]): Unit = ()
 
   override def cacheRead(): Unit = ()

@@ -35,7 +35,7 @@ private object AppDependencies {
     "uk.gov.hmrc" %% "play-health" % "1.1.0",
     "com.kenshoo" %% "metrics-play" % "2.3.0_0.1.6",
     "uk.gov.hmrc" %% "play-json-logger" % "2.1.1",
-    "uk.gov.hmrc" %% "domain" % "3.2.0",
+    "uk.gov.hmrc" %% "domain" % "4.0.0",
     "uk.gov.hmrc" %% "play-url-binders" % "1.0.0",
     "uk.gov.hmrc" %% "play-reactivemongo" % "4.8.0"
   )

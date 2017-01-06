@@ -2,4 +2,4 @@
 
 GET             /:nino/spsummary                     uk.gov.hmrc.nisp.controllers.SPSummaryController.getSPSummary(nino: Nino)
 GET             /:nino/nirecord                      uk.gov.hmrc.nisp.controllers.NIRecordController.getNIRecord(nino: Nino)
-GET             /:nino/schememembership                 uk.gov.hmrc.nisp.controllers.SchemeMembershipController.getSchemeSummary(nino: Nino)
+GET             /:nino/schememembership              uk.gov.hmrc.nisp.controllers.SchemeMembershipController.getSchemeSummary(nino: Nino)

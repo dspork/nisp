@@ -1,5 +1,7 @@
 # Add all the application routes to the app.routes file
 ->         /nisp                        app.Routes
 GET        /paye/:nino                  uk.gov.hmrc.nisp.controllers.StatePensionController.get(nino: Nino)
+GET        /ni/:nino/taxyear/:taxYear   uk.gov.hmrc.nisp.controllers.NationalInsuranceRecordController.getTaxYear(nino: Nino, taxYear: uk.gov.hmrc.nisp.domain.TaxYear)
+GET        /ni/:nino                    uk.gov.hmrc.nisp.controllers.NationalInsuranceRecordController.getSummary(nino: Nino)
 ->         /                            health.Routes
 GET        /admin/metrics               com.kenshoo.play.metrics.MetricsController.metrics

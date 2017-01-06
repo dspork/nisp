@@ -32,7 +32,7 @@ trait Metrics {
   
   def summary(forecast: BigDecimal, current: BigDecimal, contractedOut: Boolean, forecastOnly: Boolean, age: Int,
               forecastScenario: Scenario, personalMaximum: BigDecimal, yearsToContribute: Int, mqpScenario: Option[MQPScenario]): Unit
-  def niRecord(gaps: Int, payableGaps: Int, pre75Years: Int, qualifyingYears: Int, yearsUntilSPA: Int): Unit
+  def niRecord(gaps: Int, payableGaps: Int, pre75Years: Int, qualifyingYears: Int, yearsUntilSPA: Option[Int]): Unit
   def exclusion(exclusions: List[Exclusion]): Unit
 
   def cacheRead()
@@ -121,12 +121,12 @@ object Metrics extends Metrics {
     mapToAgeMeter(age)
   }
 
-  override def niRecord(gaps: Int, payableGaps: Int, pre75Years: Int, qualifyingYears: Int, yearsUntilSPA: Int): Unit = {
+  override def niRecord(gaps: Int, payableGaps: Int, pre75Years: Int, qualifyingYears: Int, yearsUntilSPA: Option[Int]): Unit = {
     gapsMeter.update(gaps)
     payableGapsMeter.update(payableGaps)
     pre75YearsMeter.update(pre75Years)
     qualifyingYearsMeter.update(qualifyingYears)
-    yearsUntilSPAMeter.update(yearsUntilSPA)
+    yearsUntilSPA.foreach(yearsUntilSPAMeter.update)
   }
 
   override def exclusion(exclusions: List[Exclusion]): Unit = exclusions.foreach(exclusionMeters(_).inc())

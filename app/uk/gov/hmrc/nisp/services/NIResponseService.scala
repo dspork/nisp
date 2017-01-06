@@ -95,7 +95,7 @@ trait NIResponseService extends WithCurrentDate {
         )
 
         metrics.niRecord(niSummary.noOfNonQualifyingYears, niSummary.numberOfPayableGaps, niSummary.pre75QualifyingYears.getOrElse(0),
-          niSummary.noOfQualifyingYears, niSummary.yearsToContributeUntilPensionAge)
+          niSummary.noOfQualifyingYears, Some(niSummary.yearsToContributeUntilPensionAge))
 
         NIResponse(
           Some(NIRecord(mapNpsTaxYearsToNisp(purgedNIRecord.niTaxYears))),

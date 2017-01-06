@@ -18,8 +18,24 @@ package uk.gov.hmrc.nisp.config
 
 import play.api.mvc.PathBindable
 import uk.gov.hmrc.domain.Nino
+import uk.gov.hmrc.nisp.controllers.ErrorResponses
+import uk.gov.hmrc.nisp.domain.TaxYear
 import uk.gov.hmrc.play.binders.SimpleObjectBinder
+
+import scala.util.{Failure, Success, Try}
 
 object Binders {
   implicit val ninoBinder: PathBindable[Nino] = new SimpleObjectBinder[Nino](Nino.apply, _.nino)
+
+  implicit  val taxYearBinder: PathBindable[TaxYear] = new PathBindable[TaxYear] {
+
+    override def bind(key: String, value: String): Either[String, TaxYear] = {
+      Try[TaxYear](TaxYear.apply(value)) match {
+        case Success(taxYear) => Right(taxYear)
+        case Failure(e) => Left(ErrorResponses.CODE_INVALID_TAXYEAR)
+      }
+    }
+
+    override def unbind(key: String, value: TaxYear): String = value.value
+  }
 }
