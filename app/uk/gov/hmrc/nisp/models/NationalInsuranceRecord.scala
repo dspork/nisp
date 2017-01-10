@@ -26,9 +26,10 @@ case class NationalInsuranceRecord(
                                     numberOfGapsPayable: Int,
                                     dateOfEntry: LocalDate,
                                     homeResponsibilitiesProtection: Boolean,
+                                    earningsIncludedUpTo: LocalDate,
                                     taxYears: List[TaxYearSummary]
                                   )
 
 object NationalInsuranceRecord {
-  implicit val formats = Json.format[NationalInsuranceRecord]
+  implicit val formats: Format[NationalInsuranceRecord] = Json.format[NationalInsuranceRecord]
 }

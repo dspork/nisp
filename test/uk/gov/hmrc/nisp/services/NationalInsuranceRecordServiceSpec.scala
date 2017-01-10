@@ -61,6 +61,7 @@ class NationalInsuranceRecordServiceSpec extends UnitSpec with OneAppPerSuite {
       numberOfGapsPayable =  0,
       dateOfEntry =   new LocalDate(1973,10,1),
       homeResponsibilitiesProtection =  false,
+      earningsIncludedUpTo = new LocalDate(2014, 4, 5),
       List(
         TaxYearSummary("1975-76",true),TaxYearSummary("1976-77",true),TaxYearSummary("1977-78",true),
         TaxYearSummary("1978-79",true),TaxYearSummary("1979-80",true),TaxYearSummary("1980-81",false),

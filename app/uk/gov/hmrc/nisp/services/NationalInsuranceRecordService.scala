@@ -119,6 +119,7 @@ trait NationalInsuranceRecordService extends WithCurrentDate {
           purgedNIRecord.nonQualifyingYearsPayable,
           purgedNIRecord.dateOfEntry.localDate,
           homeResponsibilitiesProtection(npsLiabilities),
+          npsSummary.earningsIncludedUpTo.localDate,
           purgedNIRecord.niTaxYears.map(npsTaxYearToNIRecordTaxYear).map(year => TaxYearSummary(year.taxYear, year.qualifying)).sortBy(_.taxYear)
         )
 

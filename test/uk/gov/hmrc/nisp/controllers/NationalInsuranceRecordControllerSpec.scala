@@ -67,6 +67,42 @@ class NationalInsuranceRecordControllerSpec extends UnitSpec with OneAppPerSuite
       val rawJson = Json.parse(contentAsString(result))
       (rawJson \ "qualifyingYearsPriorTo1975").as[Int] shouldBe 2
     }
+
+    "return JSON with qualifyingYears" in {
+      val result = testNationalInsuranceRecordController().getSummary(nino)(FakeRequest())
+      val rawJson = Json.parse(contentAsString(result))
+      (rawJson \ "qualifyingYears").as[Int] shouldBe 27
+    }
+
+    "return JSON with numberOfGaps" in {
+      val result = testNationalInsuranceRecordController().getSummary(nino)(FakeRequest())
+      val rawJson = Json.parse(contentAsString(result))
+      (rawJson \ "numberOfGaps").as[Int] shouldBe 13
+    }
+
+    "return JSON with numberOfGapsPayable" in {
+      val result = testNationalInsuranceRecordController().getSummary(nino)(FakeRequest())
+      val rawJson = Json.parse(contentAsString(result))
+      (rawJson \ "numberOfGapsPayable").as[Int] shouldBe 0
+    }
+
+    "return JSON with dateOfEntry" in {
+      val result = testNationalInsuranceRecordController().getSummary(nino)(FakeRequest())
+      val rawJson = Json.parse(contentAsString(result))
+      (rawJson \ "dateOfEntry").as[LocalDate] shouldBe new LocalDate(1973, 10, 1)
+    }
+
+    "return JSON with homeResponsibilitiesProtection" in {
+      val result = testNationalInsuranceRecordController().getSummary(nino)(FakeRequest())
+      val rawJson = Json.parse(contentAsString(result))
+      (rawJson \ "homeResponsibilitiesProtection").as[Boolean] shouldBe false
+    }
+
+    "return JSON with earningsIncludedUpTo" in {
+      val result = testNationalInsuranceRecordController().getSummary(nino)(FakeRequest())
+      val rawJson = Json.parse(contentAsString(result))
+      (rawJson \ "earningsIncludedUpTo").as[LocalDate] shouldBe new LocalDate(2014, 4, 5)
+    }
   }
 
   "getTaxYear" should {
@@ -91,7 +127,7 @@ class NationalInsuranceRecordControllerSpec extends UnitSpec with OneAppPerSuite
       charset(result) shouldBe Some("utf-8")
     }
 
-    "return JSON with taxYear, underInvestigation flag and classsThreePayableBy date" in {
+    "return JSON with taxYear, underInvestigation flag and classThreePayableBy date" in {
       val result = testNationalInsuranceRecordController().getTaxYear(nino,taxYear2010)(FakeRequest())
       val rawJson = Json.parse(contentAsString(result))
       (rawJson \ "taxYear").as[String] shouldBe "2010-11"
