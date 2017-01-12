@@ -153,7 +153,7 @@ trait NationalInsuranceRecordService extends WithCurrentDate {
         npsNITaxYear.selfEmployedCredits,
         npsNITaxYear.voluntaryCredits,
         npsNITaxYear.otherCredits.foldRight(0)(_.numberOfCredits + _),
-        npsNITaxYear.classThreePayable,
+        npsNITaxYear.classThreePayable.getOrElse(0),
         npsNITaxYear.classThreePayableBy.map(_.localDate),
         npsNITaxYear.classThreePayableByPenalty.map(_.localDate),
         npsNITaxYear.payable,

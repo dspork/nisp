@@ -23,12 +23,12 @@ import uk.gov.hmrc.nisp.models.nps.NpsDate
 
 case class NationalInsuranceRecordTaxYear(taxYear: String, qualifying: Boolean, classOneContributions: BigDecimal,
                                           classTwoCredits: Int, classThreeCredits: Int, otherCredits: Int,
-                                          classThreePayable: Option[BigDecimal], classThreePayableBy: Option[LocalDate],
+                                          classThreePayable: BigDecimal, classThreePayableBy: Option[LocalDate],
                                           classThreePayableByPenalty: Option[LocalDate], payable: Boolean, underInvestigation: Boolean)
 
 
 object NationalInsuranceRecordTaxYear {
-  implicit val reads = Json.reads[NationalInsuranceRecordTaxYear]
+  implicit val reads: Reads[NationalInsuranceRecordTaxYear] = Json.reads[NationalInsuranceRecordTaxYear]
   implicit val writes: Writes[NationalInsuranceRecordTaxYear] = (
     (JsPath \ "taxYear").write[String] and
       (JsPath \ "qualifying").write[Boolean] and
@@ -36,7 +36,7 @@ object NationalInsuranceRecordTaxYear {
       (JsPath \ "classTwoCredits").write[Int] and
       (JsPath \ "classThreeCredits").write[Int] and
       (JsPath \ "otherCredits").write[Int] and
-      (JsPath \ "classThreePayable").write[Option[BigDecimal]] and
+      (JsPath \ "classThreePayable").write[BigDecimal] and
       (JsPath \ "classThreePayableBy").write[Option[LocalDate]] and
       (JsPath \ 'classThreePayableByPenalty).write[Option[LocalDate]] and
       (JsPath \ "payable").write[Boolean] and

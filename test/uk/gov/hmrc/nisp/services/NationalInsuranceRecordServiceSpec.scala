@@ -47,7 +47,7 @@ class NationalInsuranceRecordServiceSpec extends UnitSpec with OneAppPerSuite {
     classTwoCredits = 52,
     classThreeCredits = 0,
     otherCredits = 0,
-    classThreePayable = None,
+    classThreePayable = 0,
     classThreePayableBy = None,
     classThreePayableByPenalty = None,
     payable = false,
