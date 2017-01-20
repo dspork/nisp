@@ -24,7 +24,8 @@ import org.mockito.Mockito._
 import org.scalatestplus.play.OneAppPerSuite
 import uk.gov.hmrc.nisp.domain.TaxYear
 import uk.gov.hmrc.nisp.helpers.{StubNationalInsuranceRecordService, TestAccountBuilder}
-import uk.gov.hmrc.nisp.models.{NationalInsuranceRecord, NationalInsuranceRecordExclusion, NationalInsuranceRecordTaxYear, TaxYearSummary}
+import uk.gov.hmrc.nisp.models
+import uk.gov.hmrc.nisp.models.{NationalInsuranceRecord, NationalInsuranceRecordExclusion, NationalInsuranceRecordTaxYear}
 import uk.gov.hmrc.nisp.models.enums.Exclusion
 import uk.gov.hmrc.nisp.models.nps.NpsDate
 import uk.gov.hmrc.play.http.{HeaderCarrier, HttpResponse, NotFoundException, Upstream4xxResponse}
@@ -54,31 +55,6 @@ class NationalInsuranceRecordServiceSpec extends UnitSpec with OneAppPerSuite {
     underInvestigation = false
   )
 
-  val niSummary: NationalInsuranceRecord = NationalInsuranceRecord(
-      qualifyingYears =  27,
-      qualifyingYearsPriorTo1975 =  2,
-      numberOfGaps =  13,
-      numberOfGapsPayable =  0,
-      dateOfEntry =   new LocalDate(1973,10,1),
-      homeResponsibilitiesProtection =  false,
-      earningsIncludedUpTo = new LocalDate(2014, 4, 5),
-      List(
-        TaxYearSummary("1975-76",true),TaxYearSummary("1976-77",true),TaxYearSummary("1977-78",true),
-        TaxYearSummary("1978-79",true),TaxYearSummary("1979-80",true),TaxYearSummary("1980-81",false),
-        TaxYearSummary("1981-82",true),TaxYearSummary("1982-83",true), TaxYearSummary("1983-84",true),
-        TaxYearSummary("1984-85",true),TaxYearSummary("1985-86",true),TaxYearSummary("1986-87",true),
-        TaxYearSummary("1987-88",true),TaxYearSummary("1988-89",true),TaxYearSummary("1989-90",true),
-        TaxYearSummary("1990-91",true),TaxYearSummary("1991-92",true),TaxYearSummary("1992-93",true),
-        TaxYearSummary("1993-94",false),TaxYearSummary("1994-95",false),TaxYearSummary("1995-96",false),
-        TaxYearSummary("1996-97",false),TaxYearSummary("1997-98",false),TaxYearSummary("1998-99",false),
-        TaxYearSummary("1999-00",false),TaxYearSummary("2000-01",false),TaxYearSummary("2001-02",false),
-        TaxYearSummary("2002-03",false),TaxYearSummary("2003-04",false),TaxYearSummary("2004-05",false),
-        TaxYearSummary("2005-06",true),TaxYearSummary("2006-07",true),TaxYearSummary("2007-08",true),
-        TaxYearSummary("2008-09",true),TaxYearSummary("2009-10",true),TaxYearSummary("2010-11",true),
-        TaxYearSummary("2011-12",true),TaxYearSummary("2012-13",true),TaxYearSummary("2013-14",true)
-      )
-  )
-
   val exclusionTestData: NationalInsuranceRecordExclusion = NationalInsuranceRecordExclusion(
     exclusionReasons = List(Exclusion.MarriedWomenReducedRateElection)
   )
@@ -101,13 +77,148 @@ class NationalInsuranceRecordServiceSpec extends UnitSpec with OneAppPerSuite {
     }
   }
   
-  "getSummary" should {
+  "getSummary" when {
 
-    "return valid response for regular nino" in {
-      val nationalInsuranceRecord: Either[NationalInsuranceRecordExclusion, NationalInsuranceRecord] =
-        StubNationalInsuranceRecordService.getSummary(nino)
-      nationalInsuranceRecord.isRight shouldBe true
-      nationalInsuranceRecord shouldBe Right(niSummary)
+    "there is a regular nino" should {
+
+      val nationalInsuranceRecordResponse: Either[NationalInsuranceRecordExclusion, NationalInsuranceRecord] =
+                StubNationalInsuranceRecordService.getSummary(nino)
+
+      "return a Right(NationalInsuranceRecord)" in {
+        nationalInsuranceRecordResponse.isRight shouldBe true
+        nationalInsuranceRecordResponse.right.get shouldBe a [NationalInsuranceRecord]
+      }
+
+      val record = nationalInsuranceRecordResponse.right.get
+
+      "return 27 qualifying years" in {
+        record.qualifyingYears shouldBe 27
+      }
+
+      "return 2 qualifyingYearsPriorTo1975" in {
+        record.qualifyingYearsPriorTo1975 shouldBe 2
+      }
+
+      "return 13 numberOfGaps" in {
+        record.numberOfGaps shouldBe 13
+      }
+
+      "return 0 numberOfGapsPayable" in {
+        record.numberOfGapsPayable shouldBe 0
+      }
+
+      "return 01/01/1973 dateOfEntry" in {
+        record.dateOfEntry shouldBe new LocalDate(1973, 10, 1)
+      }
+
+      "return false homeResponsibilitiesProtection" in {
+        record.homeResponsibilitiesProtection shouldBe false
+      }
+
+      "return 05/04/2014 earningsIncludedUpTo" in {
+        record.earningsIncludedUpTo shouldBe new LocalDate(2014, 4, 5)
+      }
+
+      "return 38 tax years" in {
+        record.taxYears.length shouldBe 39
+      }
+
+      "the first tax year" should {
+
+        "be the 2013-14 tax year" in {
+          record.taxYears.head.taxYear shouldBe "2013-14"
+        }
+
+        "be qualifying" in {
+          record.taxYears.head.qualifying shouldBe true
+        }
+
+        "have 0 class one contributions" in {
+          record.taxYears.head.classOneContributions shouldBe 0
+        }
+
+        "have 52 class two credits" in {
+          record.taxYears.head.classTwoCredits shouldBe 52
+        }
+
+        "have 0 class three credits" in {
+          record.taxYears.head.classThreeCredits shouldBe 0
+        }
+
+        "have 0 other credits" in {
+          record.taxYears.head.otherCredits shouldBe 0
+        }
+
+        "have 0 class three payable" in {
+          record.taxYears.head.classThreePayable shouldBe 0
+        }
+
+        "have None class three payable by" in {
+          record.taxYears.head.classThreePayableBy shouldBe None
+        }
+
+        "have None class three payable by penalty" in {
+          record.taxYears.head.classThreePayableByPenalty shouldBe None
+        }
+
+        "have payable is equal to false" in {
+          record.taxYears.head.payable shouldBe false
+        }
+
+        "have under investigation is equal to false" in {
+          record.taxYears.head.underInvestigation shouldBe false
+        }
+
+      }
+
+      "the last tax year" should {
+
+        "be the 1975-76 tax year" in {
+          record.taxYears.last.taxYear shouldBe "1975-76"
+        }
+
+        "be qualifying" in {
+          record.taxYears.last.qualifying shouldBe true
+        }
+
+        "have 109.80 class one contributions" in {
+          record.taxYears.last.classOneContributions shouldBe 109.08
+        }
+
+        "have 0 class two credits" in {
+          record.taxYears.last.classTwoCredits shouldBe 0
+        }
+
+        "have 0 class three credits" in {
+          record.taxYears.last.classThreeCredits shouldBe 0
+        }
+
+        "have 0 other credits" in {
+          record.taxYears.last.otherCredits shouldBe 0
+        }
+
+        "have 0 class three payable" in {
+          record.taxYears.last.classThreePayable shouldBe 0
+        }
+
+        "have None class three payable by" in {
+          record.taxYears.last.classThreePayableBy shouldBe None
+        }
+
+        "have None class three payable by penalty" in {
+          record.taxYears.last.classThreePayableByPenalty shouldBe None
+        }
+
+        "have payable is equal to false" in {
+          record.taxYears.last.payable shouldBe false
+        }
+
+        "have under investigation is equal to false" in {
+          record.taxYears.last.underInvestigation shouldBe false
+        }
+
+      }
+
     }
 
     "return a Exclusion Message and details for the excluded Nino" in {

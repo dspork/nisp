@@ -59,7 +59,7 @@ class NationalInsuranceRecordControllerSpec extends UnitSpec with OneAppPerSuite
     "return JSON with tax years" in {
       val result = testNationalInsuranceRecordController().getSummary(nino)(FakeRequest())
       val rawJson = Json.parse(contentAsString(result))
-      ((rawJson \ "taxYears").as[List[JsValue]].head \ "taxYear").as[String] shouldBe "1975-76"
+      ((rawJson \ "taxYears").as[List[JsValue]].head \ "taxYear").as[String] shouldBe "2013-14"
     }
 
     "return JSON with qualifyingYearsPriorTo1975" in {

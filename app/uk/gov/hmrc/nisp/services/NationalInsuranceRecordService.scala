@@ -24,7 +24,7 @@ import uk.gov.hmrc.nisp.connectors.NpsConnector
 import uk.gov.hmrc.nisp.domain.TaxYear
 import uk.gov.hmrc.nisp.metrics.Metrics
 import uk.gov.hmrc.nisp.models.nps.{NpsDate, NpsLiability, NpsNITaxYear}
-import uk.gov.hmrc.nisp.models.{NationalInsuranceRecord, NationalInsuranceRecordExclusion, NationalInsuranceRecordTaxYear, TaxYearSummary}
+import uk.gov.hmrc.nisp.models.{NationalInsuranceRecord, NationalInsuranceRecordExclusion, NationalInsuranceRecordTaxYear}
 import uk.gov.hmrc.nisp.utils.{NISPConstants, WithCurrentDate}
 import uk.gov.hmrc.play.http.{HeaderCarrier, NotFoundException}
 
@@ -120,7 +120,7 @@ trait NationalInsuranceRecordService extends WithCurrentDate {
           purgedNIRecord.dateOfEntry.localDate,
           homeResponsibilitiesProtection(npsLiabilities),
           npsSummary.earningsIncludedUpTo.localDate,
-          purgedNIRecord.niTaxYears.map(npsTaxYearToNIRecordTaxYear).map(year => TaxYearSummary(year.taxYear, year.qualifying)).sortBy(_.taxYear)
+          purgedNIRecord.niTaxYears.map(npsTaxYearToNIRecordTaxYear).sortBy(_.taxYear)(Ordering[String].reverse)
         )
 
         metrics.niRecord(niRecord.numberOfGaps, niRecord.numberOfGapsPayable, niRecord.qualifyingYearsPriorTo1975,
