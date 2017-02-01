@@ -24,8 +24,8 @@ import uk.gov.hmrc.nisp.models.enums.Exclusion.Exclusion
 import uk.gov.hmrc.nisp.models.nps.{NpsDate, NpsLiability, NpsSchemeMembership}
 import uk.gov.hmrc.nisp.utils.{FunctionHelper, NISPConstants}
 
-case class ExclusionsService(isAbroad: Boolean, marriedWomenReducedRateElection: Boolean, dateOfDeath: Option[NpsDate], nino: String,
-                             liabilities: List[NpsLiability], currentAmountReceived: BigDecimal,
+case class ExclusionsService(isAbroad: Boolean, marriedWomenReducedRateElection: Boolean, dateOfDeath: Option[NpsDate],
+                             liabilities: List[NpsLiability], currentAmountReceived: BigDecimal, startingAmountRecieved: BigDecimal,
                              currentAmountCalculated: BigDecimal, now: NpsDate, statePensionAge: NpsDate, sex: String, manualCorrespondenceIndicator: Boolean) {
 
   def getSPExclusions: ExclusionsModel = calculateExclusions(spExclusions)
@@ -62,7 +62,7 @@ case class ExclusionsService(isAbroad: Boolean, marriedWomenReducedRateElection:
 
   val checkAmountDissonance = (exclusionList: List[Exclusion]) => {
     if(currentAmountCalculated != currentAmountReceived) {
-      Logger.warn(s"Dissonance Found!: nSP Calc - $currentAmountReceived Breakdown - $currentAmountCalculated NINO - $nino")
+      Logger.warn(s"Dissonance Found!: Entitlement - $currentAmountReceived Starting - $startingAmountRecieved Components - $currentAmountCalculated")
       Exclusion.AmountDissonance :: exclusionList
     } else {
       exclusionList
