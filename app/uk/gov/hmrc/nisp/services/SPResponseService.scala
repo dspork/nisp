@@ -59,6 +59,7 @@ trait SPResponseService extends WithCurrentDate {
          manualCorrespondenceIndicator <- futureManualCorrespondenceIndicator) yield {
 
       val currentAmountReceived  = npsSummary.npsStatePensionAmount.nspEntitlement
+      val startingAmountReceived = npsSummary.npsStatePensionAmount.startingAmount2016
 
       val purgedNIRecord = npsNIRecord.purge(npsSummary.finalRelevantYear)
 
@@ -66,9 +67,9 @@ trait SPResponseService extends WithCurrentDate {
         npsSummary.isAbroad,
         npsSummary.rreToConsider == 1,
         npsSummary.dateOfDeath,
-        npsSummary.nino,
         npsLiabilities,
         currentAmountReceived,
+        startingAmountReceived,
         SPCurrentAmountService.calculate(npsSummary.npsStatePensionAmount.npsAmountA2016, npsSummary.npsStatePensionAmount.npsAmountB2016),
         NpsDate(now),
         npsSummary.spaDate,
