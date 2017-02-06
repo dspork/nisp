@@ -45,7 +45,7 @@ class NIResponseServiceSpec  extends UnitSpec with MockitoSugar with BeforeAndAf
     override val citizenDetailsService: CitizenDetailsService = StubCitizenDetailsService
   }
 
-  "customer with NINO regular has date of entry of 01/04/1972" should {
+  "customer with NINO regular has date of entry of 01/10/1973" should {
     "returns NIResponse" in {
       val niResponse = testNIService.getNIResponse(nino)
       niResponse.niRecord.get.taxYears.head shouldBe
@@ -53,6 +53,7 @@ class NIResponseServiceSpec  extends UnitSpec with MockitoSugar with BeforeAndAf
       niResponse.niRecord.get.taxYears.last shouldBe
         NIRecordTaxYear(2013, qualifying = true, 0, 52, 0, 0, None, None, None, payable = false, underInvestigation = false)
       niResponse.niRecord.get.taxYears.size shouldBe 39
+      niResponse.niSummary.get.dateOfEntry shouldBe NpsDate(1973, 10, 1)
     }
   }
 
