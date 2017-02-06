@@ -91,7 +91,8 @@ trait NIResponseService extends WithCurrentDate {
           npsSummary.isAbroad,
           if(npsSummary.yearsUntilPensionAge <= 0) Some(npsSummary.finalRelevantYear) else None,
           npsSummary.finalRelevantYear,
-          homeResponsibilitiesProtection(npsLiabilities)
+          homeResponsibilitiesProtection(npsLiabilities),
+          npsNIRecord.dateOfEntry
         )
 
         metrics.niRecord(niSummary.noOfNonQualifyingYears, niSummary.numberOfPayableGaps, niSummary.pre75QualifyingYears.getOrElse(0),
