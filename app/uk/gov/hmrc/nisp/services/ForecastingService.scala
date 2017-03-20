@@ -151,7 +151,7 @@ trait ForecastingService {
   def forecastPost2016StatePension(finalRelevantYear: Int, startingAmount: BigDecimal, qualifyingYearsAt2016: Int,
                                    pre2016YearsToContribute: Int): Forecast = {
     if(startingAmount >= QualifyingYearsAmountService.maxAmount)
-      Forecast(startingAmount, pre2016YearsToContribute, oldRulesCustomer = true)
+      Forecast(startingAmount, pre2016YearsToContribute, oldRulesCustomer = startingAmount != QualifyingYearsAmountService.maxAmount)
     else if (qualifyingYearsToFRY(finalRelevantYear) + qualifyingYearsAt2016 < NISPConstants.newStatePensionMinimumQualifyingYears)
       Forecast(0, 0, oldRulesCustomer = false)
     else {
