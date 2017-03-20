@@ -333,6 +333,14 @@ class ForecastingServiceSpec extends UnitSpec with OneAppPerSuite {
       StubForecastingService.forecastPost2016StatePension(2099, (155.65/35)*2, 2, 0) shouldBe Forecast(155.65, 33, false)
     }
 
+    "return false for oldRulesCustomer when starting amount is 155.65" in  {
+      StubForecastingService.forecastPost2016StatePension(2099, 155.65, 35, 0) shouldBe Forecast(155.65, 0, false)
+    }
+
+    "return true for oldRulesCustomer when starting amount is 155.66" in  {
+      StubForecastingService.forecastPost2016StatePension(2099, 155.66, 35, 0) shouldBe Forecast(155.66, 0, true)
+    }
+
 
   }
 
@@ -437,13 +445,13 @@ class ForecastingServiceSpec extends UnitSpec with OneAppPerSuite {
     "return Reached Scenario, 155.65 with no years when 2013/14 last year, contracted in, 35, 2018 FRY" in {
       StubForecastingService.getForecastAmount(
         List(), NpsDate(2014, 4, 5), 35, npsAmountA2016(0), npsAmountB2016, 10000, 2018, 0, 0, lastYearQualifying = true, testNino,
-        0, SPAmountModel(155.65))(hc) shouldBe SPForecastModel(SPAmountModel(155.65), 0, SPAmountModel(155.65), 0, Scenario.Reached, true)
+        0, SPAmountModel(155.65))(hc) shouldBe SPForecastModel(SPAmountModel(155.65), 0, SPAmountModel(155.65), 0, Scenario.Reached, false)
     }
 
     "return ContinueWorkingMax Scenario 155.65 with 2 years when 2013/14 last year, contracted in, 33, 2018 FRY" in {
       StubForecastingService.getForecastAmount(
         List(), NpsDate(2014, 4, 5), 33, npsAmountA2016(0), npsAmountB2016, 10000, 2018, 0, 0, lastYearQualifying = true, testNino,
-        0, SPAmountModel(146.76))(hc) shouldBe SPForecastModel(SPAmountModel(155.65), 2, SPAmountModel(155.65), 0, Scenario.ContinueWorkingMax, true)
+        0, SPAmountModel(146.76))(hc) shouldBe SPForecastModel(SPAmountModel(155.65), 2, SPAmountModel(155.65), 0, Scenario.ContinueWorkingMax, false)
     }
 
     "return ContinueWorkingNonMax Scenario 111.18 with 5 years when 2013/14 last year, contracted in, *, 2018 FRY" in {
