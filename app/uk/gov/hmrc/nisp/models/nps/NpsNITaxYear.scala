@@ -18,7 +18,7 @@ package uk.gov.hmrc.nisp.models.nps
 
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
-
+import uk.gov.hmrc.nisp.utils.JsonFormats._
 
 case class NpsNITaxYear(taxYear:Int,
                         qualifyingInt: Int,
@@ -62,19 +62,19 @@ object NpsNITaxYear {
       (__ \ "payable").format[Int] and
       (__ \ "amount_needed").format[Option[BigDecimal]] and
       (__ \ "class_three_payable").format[Option[BigDecimal]] and
-      (__ \ "class_three_payable_by").format[Option[NpsDate]] and
-      (__ \ "class_three_payable_by_penalty").format[Option[NpsDate]] and
+      (__ \ "class_three_payable_by").formatNullable[NpsDate] and
+      (__ \ "class_three_payable_by_penalty").formatNullable[NpsDate] and
       (__ \ "class_two_payable").format[Option[BigDecimal]] and
-      (__ \ "class_two_payable_by").format[Option[NpsDate]] and
-      (__ \ "class_two_payable_by_penalty").format[Option[NpsDate]] and
+      (__ \ "class_two_payable_by").formatNullable[NpsDate] and
+      (__ \ "class_two_payable_by_penalty").formatNullable[NpsDate] and
       (__ \ "class_two_outstanding_weeks").format[Option[Int]] and
-      (__ \ "ni_earnings_employed").format[Option[String]]  and
+      (__ \ "ni_earnings_employed").formatNullable[String]  and
       (__ \ "ni_earnings").format[Option[BigDecimal]] and
       (__ \ "co_class_one_paid").format[Option[BigDecimal]] and
       (__ \ "co_primary_paid_earnings").format[Option[BigDecimal]] and
-      (__ \ "ni_earnings_self_employed").format[Option[String]] and
-      (__ \ "ni_earnings_voluntary").format[Option[String]] and
-      (__ \ "primary_paid_earnings").format[Option[String]] and
-      (__ \ "npsLothcred").format[Option[List[NpsOtherCredits]]]
+      (__ \ "ni_earnings_self_employed").formatNullable[String] and
+      (__ \ "ni_earnings_voluntary").formatNullable[String] and
+      (__ \ "primary_paid_earnings").formatNullable[String] and
+      (__ \ "npsLothcred").formatNullable[List[NpsOtherCredits]]
     )(NpsNITaxYear.apply, unlift(NpsNITaxYear.unapply))
 }

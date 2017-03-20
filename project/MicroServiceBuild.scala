@@ -15,10 +15,9 @@
  */
 
 import sbt._
+import play.sbt.routes.RoutesKeys.routesImport
 
 object MicroServiceBuild extends Build with MicroService {
-  import play.PlayImport.PlayKeys._
-
   val appName = "nisp"
 
   override lazy val appDependencies: Seq[ModuleID] = AppDependencies()
@@ -27,38 +26,53 @@ object MicroServiceBuild extends Build with MicroService {
 
 private object AppDependencies {
   import play.core.PlayVersion
+  import play.sbt.PlayImport._
+
+  private val microserviceBootstrapVersion = "5.11.0"
+  private val playAuthVersion = "4.3.0"
+  private val playConfigVersion = "4.3.0"
+  private val playHealthVersion = "2.1.0"
+  private val logbackJsonLoggerVersion = "3.1.0"
+  private val domainVersion = "4.1.0"
+  private val playUrlBindersVersion = "2.1.0"
+  private val playReactiveMongoVersion = "5.2.0"
+  private val hmrcTestVersion = "2.3.0"
+  private val scalaTestVersion = "2.2.6"
+  private val scalaTestPlusVersion = "1.5.1"
+  private val pegdownVersion = "1.6.0"
+  private val mockitoVersion = "1.9.5"
+  private val playReactiveTestVersion = "2.0.0"
 
   val compile = Seq(
-    "uk.gov.hmrc" %% "microservice-bootstrap" % "4.4.0",
-    "uk.gov.hmrc" %% "play-authorisation" % "3.4.0",
-    "uk.gov.hmrc" %% "play-config" % "2.0.1",
-    "uk.gov.hmrc" %% "play-health" % "1.1.0",
-    "com.kenshoo" %% "metrics-play" % "2.3.0_0.1.6",
-    "uk.gov.hmrc" %% "play-json-logger" % "2.1.1",
-    "uk.gov.hmrc" %% "domain" % "4.0.0",
-    "uk.gov.hmrc" %% "play-url-binders" % "1.0.0",
-    "uk.gov.hmrc" %% "play-reactivemongo" % "4.8.0"
+    ws,
+    "uk.gov.hmrc" %% "microservice-bootstrap" % microserviceBootstrapVersion,
+    "uk.gov.hmrc" %% "play-authorisation" % playAuthVersion,
+    "uk.gov.hmrc" %% "play-config" % playConfigVersion,
+    "uk.gov.hmrc" %% "play-health" % playHealthVersion,
+    "uk.gov.hmrc" %% "logback-json-logger" % logbackJsonLoggerVersion,
+    "uk.gov.hmrc" %% "domain" % domainVersion,
+    "uk.gov.hmrc" %% "play-url-binders" % playUrlBindersVersion,
+    "uk.gov.hmrc" %% "play-reactivemongo" % playReactiveMongoVersion
   )
 
   trait TestDependencies {
     lazy val scope: String = "test"
-    lazy val test : Seq[ModuleID] = ???
+    val test: Seq[ModuleID]
   }
 
   object Test {
     def apply(): Seq[ModuleID] = new TestDependencies {
       override lazy val test = Seq(
-        "uk.gov.hmrc" %% "hmrctest" % "1.4.0" % scope,
-        "org.scalatest" %% "scalatest" % "2.2.2" % scope,
-        "org.scalatestplus" % "play_2.11" % "1.2.0" % scope,
-        "org.pegdown" % "pegdown" % "1.4.2" % scope,
+        "uk.gov.hmrc" %% "hmrctest" % hmrcTestVersion % scope,
+        "org.scalatest" %% "scalatest" % scalaTestVersion % scope,
+        "org.scalatestplus.play" %% "scalatestplus-play" % scalaTestPlusVersion % scope,
+        "org.pegdown" % "pegdown" % pegdownVersion % scope,
         "com.typesafe.play" %% "play-test" % PlayVersion.current % scope,
-        "org.mockito" % "mockito-all" % "1.10.19" % scope,
-        "uk.gov.hmrc" %% "reactivemongo-test" % "1.6.0" % scope
+        "org.mockito" % "mockito-all" % mockitoVersion % scope,
+        "uk.gov.hmrc" %% "reactivemongo-test" % playReactiveTestVersion % scope
       )
     }.test
   }
 
   def apply(): Seq[ModuleID] = compile ++ Test()
 }
-

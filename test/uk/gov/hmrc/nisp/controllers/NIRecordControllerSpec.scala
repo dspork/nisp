@@ -48,7 +48,6 @@ class NIRecordControllerSpec extends UnitSpec with OneAppPerSuite {
   "return JSON for existing NINO" in {
     val result = testNIRecordController().getNIRecord(nino)(FakeRequest())
     contentType(result) shouldBe Some("application/json")
-    charset(result) shouldBe Some("utf-8")
   }
 
   "return JSON with tax years" in {

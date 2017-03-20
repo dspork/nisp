@@ -40,7 +40,7 @@ case class NpsSchemeMembership(startDate: NpsDate, endDate: Option[NpsDate], seq
 object NpsSchemeMembership {
   implicit val formats: Format[NpsSchemeMembership] = (
     (__ \ "scheme_mem_start_date").format[NpsDate] and
-    (__ \ "scheme_end_date").format[Option[NpsDate]] and
+    (__ \ "scheme_end_date").formatNullable[NpsDate] and
     (__ \ "scheme_membership_seq_no").format[Int] and
     (__ \ "scheme_memb_occ_no").format[Int]
     )(NpsSchemeMembership.apply, unlift(NpsSchemeMembership.unapply))

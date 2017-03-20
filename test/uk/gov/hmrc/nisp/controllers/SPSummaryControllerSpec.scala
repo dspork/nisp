@@ -42,7 +42,6 @@ class SPSummaryControllerSpec extends UnitSpec with OneAppPerSuite {
     "return JSON" in {
       val result = testSPSummaryController.getSPSummary(nino)(FakeRequest())
       contentType(result) shouldBe Some("application/json")
-      charset(result) shouldBe Some("utf-8")
     }
 
     "return JSON containing nino" in {

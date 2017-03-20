@@ -14,19 +14,22 @@
  * limitations under the License.
  */
 
+import play.sbt.PlayScala
 import sbt.Keys._
 import sbt.Tests.{SubProcess, Group}
 import sbt._
 import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin
 import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin._
 import uk.gov.hmrc.versioning.SbtGitVersioning
+import play.routes.compiler.StaticRoutesGenerator
+import play.sbt.routes.RoutesKeys.{routesGenerator, routesImport}
 
 trait MicroService {
 
-  import play.PlayImport.PlayKeys._
   import uk.gov.hmrc._
   import DefaultBuildSettings._
   import TestPhases._
+  import scoverage.ScoverageKeys
 
   val appName: String
   val appDependencies : Seq[ModuleID]
@@ -34,8 +37,7 @@ trait MicroService {
   lazy val plugins : Seq[Plugins] = Seq.empty
   lazy val playSettings : Seq[Setting[_]] = Seq.empty
 
-  lazy val scoverageSettings = {
-    import scoverage.ScoverageKeys
+  lazy val scoverageSettings: Seq[Setting[_]] = {
     Seq(
       // Semicolon-separated list of regexs matching classes to exclude
       ScoverageKeys.coverageExcludedPackages := "<empty>;Reverse.*;.*AuthService.*;models/.data/..*;view.*;app.*;prod.*;uk.gov.hmrc.BuildInfo",
@@ -45,18 +47,20 @@ trait MicroService {
     )
   }
 
-  lazy val microservice = Project(appName, file("."))
-    .enablePlugins(Seq(play.PlayScala) ++ plugins : _*)
+  lazy val microservice: Project = Project(appName, file("."))
+    .enablePlugins(Seq(PlayScala) ++ plugins : _*)
     .settings(playSettings ++ scoverageSettings : _*)
     .settings(scalaSettings: _*)
     .settings(publishingSettings: _*)
     .settings(defaultSettings(): _*)
     .settings(
       targetJvm := "jvm-1.8",
+      scalaVersion := "2.11.8",
       libraryDependencies ++= appDependencies,
       parallelExecution in Test := false,
       fork in Test := true,
-      retrieveManaged := true
+      retrieveManaged := true,
+      routesGenerator := StaticRoutesGenerator
     )
     .configs(IntegrationTest)
     .settings(inConfig(IntegrationTest)(Defaults.itSettings): _*)
@@ -69,7 +73,8 @@ trait MicroService {
     .settings(
       resolvers := Seq(
         Resolver.bintrayRepo("hmrc", "releases"),
-        Resolver.typesafeRepo("releases")
+        Resolver.typesafeRepo("releases"),
+        Resolver.jcenterRepo
       )
     )
     .enablePlugins(SbtDistributablesPlugin, SbtAutoBuildPlugin, SbtGitVersioning)
@@ -77,8 +82,8 @@ trait MicroService {
 }
 
 private object TestPhases {
-  def oneForkedJvmPerTest(tests: Seq[TestDefinition]) =
+  def oneForkedJvmPerTest(tests: Seq[TestDefinition]): Seq[Group] =
     tests map {
-      test => new Group(test.name, Seq(test), SubProcess(ForkOptions(runJVMOptions = Seq("-Dtest.name=" + test.name))))
+      test => Group(test.name, Seq(test), SubProcess(ForkOptions(runJVMOptions = Seq("-Dtest.name=" + test.name))))
     }
 }

@@ -17,13 +17,13 @@
 package uk.gov.hmrc.nisp.metrics
 
 import com.codahale.metrics.Timer.Context
-import com.codahale.metrics.{Counter, Timer}
-import com.kenshoo.play.metrics.MetricsRegistry
+import com.codahale.metrics.{Counter, Histogram, Timer}
 import uk.gov.hmrc.nisp.models.enums.APITypes.APITypes
 import uk.gov.hmrc.nisp.models.enums.Exclusion._
 import uk.gov.hmrc.nisp.models.enums.MQPScenario._
 import uk.gov.hmrc.nisp.models.enums.Scenario.Scenario
 import uk.gov.hmrc.nisp.models.enums.{Exclusion, MQPScenario, _}
+import uk.gov.hmrc.play.graphite.MicroserviceMetrics
 
 trait Metrics {
   def startTimer(api: APITypes): Timer.Context
@@ -41,70 +41,70 @@ trait Metrics {
   def cacheWritten()
 }
 
-object Metrics extends Metrics {
-  val spSummaryCounter = MetricsRegistry.defaultRegistry.counter("spsummary-counter")
-  val niRecordCounter = MetricsRegistry.defaultRegistry.counter("nirecord-counter")
+object Metrics extends Metrics with MicroserviceMetrics {
+  val spSummaryCounter: Counter = metrics.defaultRegistry.counter("spsummary-counter")
+  val niRecordCounter: Counter = metrics.defaultRegistry.counter("nirecord-counter")
 
   val timers = Map(
-    APITypes.Summary -> MetricsRegistry.defaultRegistry.timer("summary-response-timer"),
-    APITypes.NIRecord -> MetricsRegistry.defaultRegistry.timer("nirecord-response-timer"),
-    APITypes.Liabilities -> MetricsRegistry.defaultRegistry.timer("liabilities-response-timer"),
-    APITypes.SchemeMembership -> MetricsRegistry.defaultRegistry.timer("schememembership-response-timer")
+    APITypes.Summary -> metrics.defaultRegistry.timer("summary-response-timer"),
+    APITypes.NIRecord -> metrics.defaultRegistry.timer("nirecord-response-timer"),
+    APITypes.Liabilities -> metrics.defaultRegistry.timer("liabilities-response-timer"),
+    APITypes.SchemeMembership -> metrics.defaultRegistry.timer("schememembership-response-timer")
   )
 
   val failedCounters = Map(
-    APITypes.Summary -> MetricsRegistry.defaultRegistry.counter("summary-failed-counter"),
-    APITypes.NIRecord -> MetricsRegistry.defaultRegistry.counter("nirecord-failed-counter"),
-    APITypes.Liabilities -> MetricsRegistry.defaultRegistry.counter("liabilities-failed-counter"),
-    APITypes.SchemeMembership -> MetricsRegistry.defaultRegistry.counter("schememembership-failed-counter")
+    APITypes.Summary -> metrics.defaultRegistry.counter("summary-failed-counter"),
+    APITypes.NIRecord -> metrics.defaultRegistry.counter("nirecord-failed-counter"),
+    APITypes.Liabilities -> metrics.defaultRegistry.counter("liabilities-failed-counter"),
+    APITypes.SchemeMembership -> metrics.defaultRegistry.counter("schememembership-failed-counter")
   )
 
   override def startTimer(api: APITypes): Context = timers(api).time()
   override def incrementFailedCounter(api: APITypes): Unit = failedCounters(api).inc()
 
-  val contractedOutMeter = MetricsRegistry.defaultRegistry.counter("contracted-out")
-  val notContractedOutMeter = MetricsRegistry.defaultRegistry.counter("not-contracted-out")
-  val forecastOnlyMeter = MetricsRegistry.defaultRegistry.counter("forecast-only")
-  val notForecastOnlyMeter = MetricsRegistry.defaultRegistry.counter("not-forecast-only")
-  val ageUpTo30 = MetricsRegistry.defaultRegistry.counter("age-upto-30")
-  val age31To45 = MetricsRegistry.defaultRegistry.counter("age-31-to-45")
-  val age46To55 = MetricsRegistry.defaultRegistry.counter("age-46-to-55")
-  val age56To65 = MetricsRegistry.defaultRegistry.counter("age-56-to-65")
-  val age66AndAbove = MetricsRegistry.defaultRegistry.counter("age-66-and-above")
-  val gapsMeter = MetricsRegistry.defaultRegistry.histogram("gaps")
-  val payableGapsMeter = MetricsRegistry.defaultRegistry.histogram("payable-gaps")
-  val pre75YearsMeter = MetricsRegistry.defaultRegistry.histogram("pre75-years")
-  val qualifyingYearsMeter = MetricsRegistry.defaultRegistry.histogram("qualifying-years")
-  val yearsUntilSPAMeter = MetricsRegistry.defaultRegistry.histogram("years-until-spa")
+  val contractedOutMeter: Counter = metrics.defaultRegistry.counter("contracted-out")
+  val notContractedOutMeter: Counter = metrics.defaultRegistry.counter("not-contracted-out")
+  val forecastOnlyMeter: Counter = metrics.defaultRegistry.counter("forecast-only")
+  val notForecastOnlyMeter: Counter = metrics.defaultRegistry.counter("not-forecast-only")
+  val ageUpTo30: Counter = metrics.defaultRegistry.counter("age-upto-30")
+  val age31To45: Counter = metrics.defaultRegistry.counter("age-31-to-45")
+  val age46To55: Counter = metrics.defaultRegistry.counter("age-46-to-55")
+  val age56To65: Counter = metrics.defaultRegistry.counter("age-56-to-65")
+  val age66AndAbove: Counter = metrics.defaultRegistry.counter("age-66-and-above")
+  val gapsMeter: Histogram = metrics.defaultRegistry.histogram("gaps")
+  val payableGapsMeter: Histogram = metrics.defaultRegistry.histogram("payable-gaps")
+  val pre75YearsMeter: Histogram = metrics.defaultRegistry.histogram("pre75-years")
+  val qualifyingYearsMeter: Histogram = metrics.defaultRegistry.histogram("qualifying-years")
+  val yearsUntilSPAMeter: Histogram = metrics.defaultRegistry.histogram("years-until-spa")
 
-  val currentAmountMeter = MetricsRegistry.defaultRegistry.histogram("current-amount")
-  val forecastAmountMeter = MetricsRegistry.defaultRegistry.histogram("forecast-amount")
-  val personalMaxAmountMeter = MetricsRegistry.defaultRegistry.histogram("personal-maximum-amount")
-  val yearsNeededToContribute = MetricsRegistry.defaultRegistry.histogram("years-needed-to-contribute")
+  val currentAmountMeter: Histogram = metrics.defaultRegistry.histogram("current-amount")
+  val forecastAmountMeter: Histogram = metrics.defaultRegistry.histogram("forecast-amount")
+  val personalMaxAmountMeter: Histogram = metrics.defaultRegistry.histogram("personal-maximum-amount")
+  val yearsNeededToContribute: Histogram = metrics.defaultRegistry.histogram("years-needed-to-contribute")
 
   val forecastScenarioMeters: Map[Scenario, Counter] = Map(
-    Scenario.Reached -> MetricsRegistry.defaultRegistry.counter("forecastscenario-reached"),
-    Scenario.ContinueWorkingMax -> MetricsRegistry.defaultRegistry.counter("forecastscenario-continueworkingmax"),
-    Scenario.ContinueWorkingNonMax -> MetricsRegistry.defaultRegistry.counter("forecastscenario-continueworkingnonmax"),
-    Scenario.FillGaps -> MetricsRegistry.defaultRegistry.counter("forecastscenario-fillgaps"),
-    Scenario.ForecastOnly -> MetricsRegistry.defaultRegistry.counter("forecastscenario-forecastonly"),
-    Scenario.CantGetPension -> MetricsRegistry.defaultRegistry.counter("forecastscenario-cantgetpension")
+    Scenario.Reached -> metrics.defaultRegistry.counter("forecastscenario-reached"),
+    Scenario.ContinueWorkingMax -> metrics.defaultRegistry.counter("forecastscenario-continueworkingmax"),
+    Scenario.ContinueWorkingNonMax -> metrics.defaultRegistry.counter("forecastscenario-continueworkingnonmax"),
+    Scenario.FillGaps -> metrics.defaultRegistry.counter("forecastscenario-fillgaps"),
+    Scenario.ForecastOnly -> metrics.defaultRegistry.counter("forecastscenario-forecastonly"),
+    Scenario.CantGetPension -> metrics.defaultRegistry.counter("forecastscenario-cantgetpension")
   )
 
   val mqpScenarioMeters: Map[MQPScenario, Counter] = Map(
-    MQPScenario.CantGet -> MetricsRegistry.defaultRegistry.counter("mqpscenario-cantget"),
-    MQPScenario.ContinueWorking -> MetricsRegistry.defaultRegistry.counter("mqpscenario-continueworking"),
-    MQPScenario.CanGetWithGaps -> MetricsRegistry.defaultRegistry.counter("mqpscenario-cangetwithgaps")
+    MQPScenario.CantGet -> metrics.defaultRegistry.counter("mqpscenario-cantget"),
+    MQPScenario.ContinueWorking -> metrics.defaultRegistry.counter("mqpscenario-continueworking"),
+    MQPScenario.CanGetWithGaps -> metrics.defaultRegistry.counter("mqpscenario-cangetwithgaps")
   )
 
   val exclusionMeters: Map[Exclusion, Counter] = Map(
-    Exclusion.Abroad -> MetricsRegistry.defaultRegistry.counter("exclusion-abroad"),
-    Exclusion.MarriedWomenReducedRateElection -> MetricsRegistry.defaultRegistry.counter("exclusion-mwrre"),
-    Exclusion.Dead -> MetricsRegistry.defaultRegistry.counter("exclusion-dead"),
-    Exclusion.IsleOfMan -> MetricsRegistry.defaultRegistry.counter("exclusion-isle-of-man"),
-    Exclusion.AmountDissonance -> MetricsRegistry.defaultRegistry.counter("amount-dissonance"),
-    Exclusion.PostStatePensionAge -> MetricsRegistry.defaultRegistry.counter("exclusion-post-spa"),
-    Exclusion.ManualCorrespondenceIndicator -> MetricsRegistry.defaultRegistry.counter("exclusion-manual-correspondence")
+    Exclusion.Abroad -> metrics.defaultRegistry.counter("exclusion-abroad"),
+    Exclusion.MarriedWomenReducedRateElection -> metrics.defaultRegistry.counter("exclusion-mwrre"),
+    Exclusion.Dead -> metrics.defaultRegistry.counter("exclusion-dead"),
+    Exclusion.IsleOfMan -> metrics.defaultRegistry.counter("exclusion-isle-of-man"),
+    Exclusion.AmountDissonance -> metrics.defaultRegistry.counter("amount-dissonance"),
+    Exclusion.PostStatePensionAge -> metrics.defaultRegistry.counter("exclusion-post-spa"),
+    Exclusion.ManualCorrespondenceIndicator -> metrics.defaultRegistry.counter("exclusion-manual-correspondence")
   )
 
   override def summary(forecast: BigDecimal, current: BigDecimal, contractedOut: Boolean,
@@ -144,9 +144,9 @@ object Metrics extends Metrics {
       ageUpTo30.inc()
   }
 
-  override def cacheRead(): Unit = MetricsRegistry.defaultRegistry.meter("cache-read").mark
-  override def cacheReadFound(): Unit = MetricsRegistry.defaultRegistry.meter("cache-read-found").mark
-  override def cacheReadNotFound(): Unit = MetricsRegistry.defaultRegistry.meter("cache-read-not-found").mark
-  override def cacheWritten(): Unit = MetricsRegistry.defaultRegistry.meter("cache-written").mark
-  override def startCitizenDetailsTimer(): Context = MetricsRegistry.defaultRegistry.timer("citizen-details-timer").time()
+  override def cacheRead(): Unit = metrics.defaultRegistry.meter("cache-read").mark()
+  override def cacheReadFound(): Unit = metrics.defaultRegistry.meter("cache-read-found").mark()
+  override def cacheReadNotFound(): Unit = metrics.defaultRegistry.meter("cache-read-not-found").mark()
+  override def cacheWritten(): Unit = metrics.defaultRegistry.meter("cache-written").mark()
+  override def startCitizenDetailsTimer(): Context = metrics.defaultRegistry.timer("citizen-details-timer").time()
 }
