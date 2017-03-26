@@ -18,6 +18,7 @@ package uk.gov.hmrc.nisp.models.nps
 
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
+import uk.gov.hmrc.nisp.utils.JsonFormats._
 
 case class NpsAmountA2016(basicPension: BigDecimal,
                           pre97ApOption: Option[BigDecimal],

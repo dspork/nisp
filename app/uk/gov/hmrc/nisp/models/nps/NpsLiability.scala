@@ -20,6 +20,7 @@ import org.joda.time.{Days, LocalDate, Weeks, Period}
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
 import uk.gov.hmrc.nisp.utils.NISPConstants
+import uk.gov.hmrc.nisp.utils.JsonFormats._
 
 case class NpsLiability(liabilityType: Int, start: Option[NpsDate], end: Option[NpsDate]) {
   def weeksLiableForTaxYear(taxYear: Int): Int =
@@ -42,7 +43,7 @@ case class NpsLiability(liabilityType: Int, start: Option[NpsDate], end: Option[
 object NpsLiability {
   implicit val formats: Format[NpsLiability] = (
       (__ \ "liability_type").format[Int] and
-      (__ \ "liability_type_start_date").format[Option[NpsDate]] and
-      (__ \ "liability_type_end_date").format[Option[NpsDate]]
+      (__ \ "liability_type_start_date").formatNullable[NpsDate] and
+      (__ \ "liability_type_end_date").formatNullable[NpsDate]
     )(NpsLiability.apply, unlift(NpsLiability.unapply))
 }

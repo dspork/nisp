@@ -4,4 +4,4 @@ GET        /paye/:nino                  uk.gov.hmrc.nisp.controllers.StatePensio
 GET        /ni/:nino/taxyear/:taxYear   uk.gov.hmrc.nisp.controllers.NationalInsuranceRecordController.getTaxYear(nino: Nino, taxYear: uk.gov.hmrc.nisp.domain.TaxYear)
 GET        /ni/:nino                    uk.gov.hmrc.nisp.controllers.NationalInsuranceRecordController.getSummary(nino: Nino)
 ->         /                            health.Routes
-GET        /admin/metrics               com.kenshoo.play.metrics.MetricsController.metrics
+GET        /admin/metrics               @com.kenshoo.play.metrics.MetricsController.metrics

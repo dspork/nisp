@@ -20,6 +20,7 @@ import play.api.libs.functional.syntax._
 import play.api.libs.json._
 import uk.gov.hmrc.nisp.models.enums.Exclusion
 import uk.gov.hmrc.nisp.utils.NISPConstants
+import uk.gov.hmrc.nisp.utils.JsonFormats._
 
 case class NpsSummaryModel( nino: String,
                             postcode: Option[String],
@@ -61,10 +62,10 @@ case class NpsSummaryModel( nino: String,
 object NpsSummaryModel {
   implicit val formats: Format[NpsSummaryModel] = (
       (__ \ "nino").format[String] and
-      (__ \ "address_postcode").format[Option[String]] and
+      (__ \ "address_postcode").formatNullable[String] and
       (__ \ "country_code").format[Int] and
       (__ \ "date_of_birth").format[NpsDate] and
-      (__ \ "date_of_death").format[Option[NpsDate]] and
+      (__ \ "date_of_death").formatNullable[NpsDate] and
       (__ \ "spa_date").format[NpsDate] and
       (__ \ "nsp_qualifying_years").format[Int] and
       (__ \ "final_relevant_year").format[Int] and

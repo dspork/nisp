@@ -53,7 +53,6 @@ class NationalInsuranceRecordControllerSpec extends UnitSpec with OneAppPerSuite
     "return JSON for existing NINO" in {
       val result = testNationalInsuranceRecordController().getSummary(nino)(FakeRequest())
       contentType(result) shouldBe Some("application/json")
-      charset(result) shouldBe Some("utf-8")
     }
 
     "return JSON with tax years" in {
@@ -124,7 +123,6 @@ class NationalInsuranceRecordControllerSpec extends UnitSpec with OneAppPerSuite
     "return JSON for existing NINO" in {
       val result = testNationalInsuranceRecordController().getTaxYear(nino, taxYear2010)(FakeRequest())
       contentType(result) shouldBe Some("application/json")
-      charset(result) shouldBe Some("utf-8")
     }
 
     "return JSON with taxYear, underInvestigation flag and classThreePayableBy date" in {
@@ -132,7 +130,7 @@ class NationalInsuranceRecordControllerSpec extends UnitSpec with OneAppPerSuite
       val rawJson = Json.parse(contentAsString(result))
       (rawJson \ "taxYear").as[String] shouldBe "2010-11"
       (rawJson \ "underInvestigation").as[Boolean] shouldBe false
-      (rawJson \ "classThreePayableBy").as[Option[LocalDate]] shouldBe None
+      (rawJson \ "classThreePayableBy").asOpt[LocalDate] shouldBe None
     }
 
   }
